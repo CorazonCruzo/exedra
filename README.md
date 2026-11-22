@@ -7,7 +7,9 @@
 A 3D reading room of the 1900s: a desk on the gallery, a green banker's lamp, a real typewriter,
 your own books on a reading stand, and a film corner under the balcony with a 1920s projector.
 
-[**chestnykh.net**](https://chestnykh.net/) · [Report a problem](https://github.com/CorazonCruzo/exedra/issues) · ⭐ [Star on GitHub](https://github.com/CorazonCruzo/exedra)
+[**Open Exedra → exedra.chestnykh.net**](https://exedra.chestnykh.net/)
+
+[Report a problem](https://github.com/CorazonCruzo/exedra/issues) · ⭐ [Star on GitHub](https://github.com/CorazonCruzo/exedra)
 
 ![The hall seen from the desk on the gallery](media/hall.jpg)
 
