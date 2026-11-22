@@ -1,0 +1,51 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Стул: текстуры без следов подлокотников</title>
+<!-- Green Chair 01 (Poly Haven) — кресло; в зале оно стул (withoutArms в src/room.js). В текстурах 1k подлокотник оставил следы:
+     дерево его стойки нарисовано на боку и на верху подушки сиденья, а на лице стойки спинки под ним пустое место.
+     Страница закрашивает их в трёх текстурах разом (цвет, рельеф, шероховатость): выбрать три исходных файла 1k — получить три PNG;
+     дальше — ffmpeg -i diff.png -pix_fmt yuvj420p -q:v 2 GreenChair_01_diff_1k_armless.jpg (и так же nor_gl, arm).
+     Координаты — точки текстуры 1024 (у другого размера пересчитать). -->
+<p>Цвет (diff) <input type="file" id="diff"> рельеф (nor_gl) <input type="file" id="nor"> шероховатость (arm) <input type="file" id="arm"> <button id="go">закрасить</button></p>
+<p id="out"></p>
+<script>
+// box — что закрашивается [u0, v0, u1, v1]; src — откуда берётся ткань для точки (u, v); feather — мягкий край (слева, сверху, справа, снизу; 0 — резкий);
+// cloth — только там, где в исходном цвете ткань (зелёный выше красного); bridge — плавный переход от строки над полем к строке под ним
+// (столбцы за пределами [от, до] берутся с края).
+const OPS = [
+  // бок подушки, правая и левая сторона стула: стойка подлокотника между подушкой и её передним краем
+  { box: [883, 544, 960, 607], src: (u, v) => [u + Math.max(0, v - 552) / 3, v - 50], feather: [0, 5, 6, 4] },
+  { box: [918, 914, 985, 986], src: (u, v) => [u - Math.max(0, v - 925) * 13 / 60, v - 62], feather: [6, 5, 0, 5] },
+  // передний край подушки был бледнее остального бока — та же ткань, что на боку
+  { box: [883, 600, 945, 660], src: (u, v) => [u + 8, v - 150], feather: [0, 6, 0, 0], cloth: true },
+  { box: [938, 978, 992, 1024], src: (u, v) => [u - 6, v - 150], feather: [0, 6, 0, 0], cloth: true },
+  // верх подушки: стойка сверху и её тень
+  { box: [300, 326, 362, 370], src: (u, v) => [u, v + 44], feather: [5, 0, 5, 5] },
+  { box: [300, 688, 362, 731], src: (u, v) => [u, v - 44], feather: [5, 5, 5, 0] },
+  // лицо стоек спинки: под стыком с подлокотником в текстуре пусто
+  { box: [765, 860, 814, 915], bridge: [770, 807] },
+];
+const $ = id => document.getElementById(id), ss = (a, b, x) => { x = Math.min(1, Math.max(0, (x - a) / (b - a))); return x * x * (3 - 2 * x); };
+const pixels = img => { const cv = document.createElement('canvas'); cv.width = img.width; cv.height = img.height; const cx = cv.getContext('2d'); cx.drawImage(img, 0, 0); return [cv, cx, cx.getImageData(0, 0, cv.width, cv.height)]; };
+function paint(img, diff) {
+  const [cv, cx, im] = pixels(img), W = cv.width, H = cv.height, o = new Uint8ClampedArray(im.data), d = im.data, m = pixels(diff)[2].data;
+  const at = (x, y, c) => o[(Math.min(H - 1, Math.max(0, y)) * W + Math.min(W - 1, Math.max(0, x))) * 4 + c];
+  for (const { box: [u0, v0, u1, v1], src, feather: [fl, ft, fr, fb] = [], cloth, bridge } of OPS) for (let v = v0; v < v1; v++) for (let u = u0; u < u1; u++) {
+    const k = (v * W + u) * 4;
+    if (bridge) { const x = Math.min(bridge[1], Math.max(bridge[0], u)), t = ss(0, 1, (v - v0 + .5) / (v1 - v0)); for (let c = 0; c < 3; c++) d[k + c] = at(x, v0 - 1, c) * (1 - t) + at(x, v1, c) * t; continue; }
+    let s = ss(0, 1, Math.min(1, fl ? (u - u0 + 1) / fl : 1, ft ? (v - v0 + 1) / ft : 1, fr ? (u1 - u) / fr : 1, fb ? (v1 - v) / fb : 1));
+    if (cloth) s *= ss(-2, 4, m[k + 1] - m[k]);
+    const [x, y] = src(u, v), xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi;
+    for (let c = 0; c < 3; c++) { const val = (at(xi, yi, c) * (1 - fx) + at(xi + 1, yi, c) * fx) * (1 - fy) + (at(xi, yi + 1, c) * (1 - fx) + at(xi + 1, yi + 1, c) * fx) * fy; d[k + c] = d[k + c] * (1 - s) + val * s; }
+  }
+  cx.putImageData(im, 0, 0); return cv;
+}
+$('go').onclick = async () => {
+  const load = id => createImageBitmap($(id).files[0], { colorSpaceConversion: 'none', premultiplyAlpha: 'none' }), diff = await load('diff');
+  $('out').textContent = '';
+  for (const id of ['diff', 'nor', 'arm']) {
+    const blob = await new Promise(async r => paint(id === 'diff' ? diff : await load(id), diff).toBlob(r, 'image/png'));
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = id + '.png'; a.textContent = id + '.png '; $('out').append(a);
+  }
+};
+</script>

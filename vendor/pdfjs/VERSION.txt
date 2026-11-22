@@ -1,0 +1,3 @@
+pdfjs-dist 6.5.438 (npm, 2026-11-16), лицензия Apache-2.0 (файл LICENSE рядом).
+Взято из пакета: build/pdf.min.mjs, build/pdf.worker.min.mjs, cmaps/, standard_fonts/, iccs/, wasm/{jbig2,openjpeg,qcms_bg}.wasm и лицензии к ним.
+Не взято: pdf.renderer*, pdf.sandbox*, image_decoders, legacy, web, карты исходников, запасные nowasm-скрипты, quickjs.

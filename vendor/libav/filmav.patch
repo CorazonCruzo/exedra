@@ -1,0 +1,123 @@
+diff -ru a/funcs.json b/funcs.json
+--- a/funcs.json	2026-11-13 21:19:59
++++ b/funcs.json	2026-11-22 12:42:53
+@@ -109,6 +109,8 @@
+                 "ptshi",
+                 "best_effort_timestamp",
+                 "best_effort_timestamphi",
++                "color_range",
++                "colorspace",
+                 {"name": "sample_aspect_ratio", "rational": true},
+                 "sample_rate",
+                 {"name": "time_base", "rational": true},
+@@ -171,6 +173,8 @@
+             ]],
+             ["AVCodecParameters", [
+                 "bit_rate",
++                "channel_layout",
++                "channel_layouthi",
+                 "channel_layoutmask",
+                 "channels",
+                 "ch_layout_nb_channels",
+@@ -188,10 +192,13 @@
+                 "format",
+                 {"name": "framerate", "rational": true},
+                 "height",
++                "field_order",
+                 "level",
+                 "nb_coded_side_data",
+                 "profile",
++                {"name": "sample_aspect_ratio", "rational": true},
+                 "sample_rate",
++                "video_delay",
+                 "width"
+             ]],
+             ["AVPacket", [
+@@ -331,11 +338,15 @@
+                 {"name": "streams", "array": true}
+             ]],
+             ["AVStream", [
++                {"name": "avg_frame_rate", "rational": true},
+                 "codecpar",
+                 "discard",
+                 "duration",
++                "disposition",
+                 "durationhi",
+                 "metadata",
++                {"name": "r_frame_rate", "rational": true},
++                {"name": "sample_aspect_ratio", "rational": true},
+                 {"name": "time_base", "rational": true}
+             ]],
+             ["AVChapter", [
+@@ -427,6 +438,10 @@
+                 "rc_max_ratehi",
+                 "rc_min_rate",
+                 "rc_min_ratehi",
++                "skip_frame",
++                "skip_idct",
++                "skip_loop_filter",
++                "flags2",
+                 {"name": "sample_aspect_ratio", "rational": true},
+                 "sample_fmt",
+                 "sample_rate",
+diff -ru a/src/b-avcodec.c b/src/b-avcodec.c
+--- a/src/b-avcodec.c	2026-11-13 21:19:59
++++ b/src/b-avcodec.c	2026-11-22 12:42:53
+@@ -91,12 +91,17 @@
+ B(int, sample_fmt)
+ B(int, sample_rate)
+ B(int, strict_std_compliance)
++B(int, flags2)
++B(int, skip_frame)
++B(int, skip_idct)
++B(int, skip_loop_filter)
+ B(int, qmax)
+ B(int, qmin)
+ B(int, width)
+ #undef B
+ #undef BL
+ 
++RAT(AVCodecParameters, sample_aspect_ratio)
+ RAT(AVCodecContext, framerate)
+ RAT(AVCodecContext, sample_aspect_ratio)
+ RAT(AVCodecContext, time_base)
+@@ -135,6 +140,8 @@
+ B(enum AVColorSpace, color_space)
+ B(enum AVChromaLocation, chroma_location)
+ B(int, sample_rate)
++B(int, field_order)
++B(int, video_delay)
+ 
+ #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(60, 30, 100)
+ B(AVPacketSideData *, coded_side_data)
+diff -ru a/src/b-avformat.c b/src/b-avformat.c
+--- a/src/b-avformat.c	2026-11-13 21:19:59
++++ b/src/b-avformat.c	2026-11-22 12:42:53
+@@ -36,11 +36,15 @@
+ #define BL(type, field) AL(AVStream, type, field)
+ B(AVCodecParameters *, codecpar)
+ B(enum AVDiscard, discard)
++B(int, disposition)
+ BL(int64_t, duration)
+ B(AVDictionary *, metadata)
+ #undef B
+ #undef BL
+ 
++RAT(AVStream, avg_frame_rate)
++RAT(AVStream, r_frame_rate)
++RAT(AVStream, sample_aspect_ratio)
+ RAT(AVStream, time_base)
+ 
+ /* AVChapter */
+diff -ru a/src/b-avframe.c b/src/b-avframe.c
+--- a/src/b-avframe.c	2026-11-13 21:19:59
++++ b/src/b-avframe.c	2026-11-22 12:42:53
+@@ -33,6 +33,8 @@
+ #endif
+ 
+ B(int, flags)
++B(int, color_range)
++B(int, colorspace)
+ B(int, format)
+ B(int, height)
+ BA(int, linesize)

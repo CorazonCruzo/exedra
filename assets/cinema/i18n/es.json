@@ -1,0 +1,552 @@
+{
+ "groups": {
+  "it": "Italiano",
+  "ru": "Ruso",
+  "en": "En inglés",
+  "fr": "Francés",
+  "es": "Español y latinoamericano",
+  "ja": "Japonés",
+  "de": "Alemán",
+  "pathe": "Pathé-Baby (9,5 mm)",
+  "colour": "Color, danza y ciencia (sin palabras)",
+  "nordic": "Escandinavia (Dinamarca / Suecia)",
+  "in": "India",
+  "br": "Brasil (en portugués)"
+ },
+ "films": {
+  "it-01": {
+   "title": "Una partida de ajedrez",
+   "director": "Luigi Maggi (Ambrosio)",
+   "note": "Un cuento medieval de época sobre una partida de ajedrez"
+  },
+  "it-02": {
+   "title": "Matrimonio interplanetario",
+   "director": "Enrico Novelli",
+   "note": "Ciencia ficción italiana de los inicios: un romance entre un astrónomo terrestre y una marciana, breve y encantador"
+  },
+  "it-03": {
+   "title": "Pinocho",
+   "director": "Giulio Antamoro",
+   "note": "La primera adaptación al cine de «Pinocho»"
+  },
+  "it-04": {
+   "title": "L’Inferno (El infierno de Dante)",
+   "director": "F. Bertolini, A. Padovan, G. de Liguoro",
+   "note": "La célebre versión cinematográfica de Dante, inspirada en los grabados de Gustave Doré, una de las primeras películas de largometraje de Europa"
+  },
+  "it-05": {
+   "title": "La Odisea",
+   "director": "F. Bertolini, A. Padovan (Milano Films)",
+   "note": "La antigua epopeya de Homero en 23 minutos, justo para una sesión breve"
+  },
+  "it-06": {
+   "title": "Cabiria",
+   "director": "Giovanni Pastrone",
+   "note": "La gran epopeya italiana de espada y toga (con intertítulos de Gabriele D’Annunzio), el nacimiento del travelling"
+  },
+  "it-07": {
+   "title": "Rapsodia satánica",
+   "director": "Nino Oxilia",
+   "note": "Un icono de la decadencia italiana y del Art Nouveau, con Lyda Borelli"
+  },
+  "it-08": {
+   "title": "Cenizas",
+   "director": "Febo Mari",
+   "note": "La única película que se conserva de la gran Eleonora Duse"
+  },
+  "it-09": {
+   "title": "El hombre mecánico",
+   "director": "André Deed",
+   "note": "La primera película italiana de ciencia ficción, sobre un robot gigante"
+  },
+  "it-10": {
+   "title": "El fauno",
+   "director": "Febo Mari",
+   "note": "Un drama simbolista sobre un escultor y un fauno que cobra vida"
+  },
+  "it-11": {
+   "title": "Más fuerte que Sherlock Holmes",
+   "director": "Giovanni Pastrone",
+   "note": "Una breve comedia policíaca italiana"
+  },
+  "it-12": {
+   "title": "Sueño de un atardecer de otoño",
+   "director": "Luigi Maggi",
+   "note": "Una adaptación de Gabriele D’Annunzio"
+  },
+  "it-13": {
+   "title": "Cómo la gula arruinó la Navidad de Cretinetti",
+   "director": "André Deed (Itala Film)",
+   "note": "Slapstick italiano clásico"
+  },
+  "it-14": {
+   "title": "La toma de Roma",
+   "director": "Filoteo Alberini",
+   "note": "La primera película de ficción italiana"
+  },
+  "it-15": {
+   "title": "Agripina",
+   "director": "Enrico Guazzoni",
+   "note": "Una miniatura histórica de la Roma antigua"
+  },
+  "it-16": {
+   "title": "El falso tullido",
+   "director": "Italo Pacchioni",
+   "note": "Una de las primeras películas rodadas en Italia"
+  },
+  "ru-17": {
+   "title": "La venganza del camarógrafo",
+   "director": "Wladyslaw Starewicz",
+   "note": "Animación de marionetas de Starewicz: un escarabajo camarógrafo filma una historia y la proyecta"
+  },
+  "ru-18": {
+   "title": "La Navidad de los insectos",
+   "director": "Wladyslaw Starewicz",
+   "note": "Un cuento de hadas con marionetas de Starewicz"
+  },
+  "ru-19": {
+   "title": "Fiebre del ajedrez",
+   "director": "Vsevolod Pudovkin, Nikolai Shpikovsky",
+   "note": "Una breve comedia sobre la manía del ajedrez, con José Raúl Capablanca interpretándose a sí mismo"
+  },
+  "ru-20": {
+   "title": "La dama de picas",
+   "director": "Yakov Protazanov",
+   "note": "Una obra maestra del cine ruso prerrevolucionario, con Ivan Mozzhukhin",
+   "attribution": "película prerrevolucionaria"
+  },
+  "ru-21": {
+   "title": "Testigos mudos",
+   "director": "Yevgeni Bauer",
+   "note": "Psicología refinada e interiores Art Nouveau, la Edad de Plata"
+  },
+  "ru-22": {
+   "title": "La partida del gran anciano",
+   "director": "Yakov Protazanov, Elizaveta Thiemann",
+   "note": "Una película prerrevolucionaria sobre León Tolstói",
+   "attribution": "imágenes prerrevolucionarias"
+  },
+  "ru-23": {
+   "title": "El piso del tío",
+   "director": "Pyotr Chardynin",
+   "note": "Una comedia prerrevolucionaria con Ivan Mozzhukhin",
+   "attribution": "película prerrevolucionaria"
+  },
+  "ru-24": {
+   "title": "Drama en un campamento gitano cerca de Moscú",
+   "director": "Vladimir Siversen",
+   "note": "Una rareza del estudio Khanzhonkov"
+  },
+  "ru-25": {
+   "title": "Aelita, la reina de Marte",
+   "director": "Yakov Protazanov",
+   "note": "Ciencia ficción marciana constructivista, a partir de Aleksey Tolstói"
+  },
+  "ru-26": {
+   "title": "El hombre de la cámara",
+   "director": "Dziga Vertov",
+   "note": "El manifiesto del «cine sin intertítulos ni guion», vanguardia"
+  },
+  "ru-27": {
+   "title": "El acorazado Potemkin",
+   "director": "Sergei Eisenstein",
+   "note": "Un clásico del montaje"
+  },
+  "ru-28": {
+   "title": "La huelga",
+   "director": "Sergei Eisenstein",
+   "note": "El debut de Eisenstein"
+  },
+  "ru-29": {
+   "title": "Tempestad sobre Asia",
+   "director": "Vsevolod Pudovkin",
+   "note": "Una épica soviética poética"
+  },
+  "ru-30": {
+   "title": "Zvenigora",
+   "director": "Alexander Dovzhenko",
+   "note": "Un poema-parábola surrealista"
+  },
+  "ru-31": {
+   "title": "Primavera",
+   "director": "Mikhail Kaufman",
+   "note": "Una poética sinfonía urbana del despertar de la primavera",
+   "attribution": "Producción: VUFKU. Fotografía: Mikhail Kaufman"
+  },
+  "ru-32": {
+   "title": "Kino-Pravda n.º 15",
+   "director": "Dziga Vertov",
+   "note": "Un noticiario con sus intertítulos rusos originales"
+  },
+  "en-33": {
+   "title": "El automovilista «?»",
+   "director": "Walter R. Booth (Reino Unido)",
+   "note": "Una traviesa película de trucos británica sobre un coche que sube por las paredes y rodea los anillos de Saturno"
+  },
+  "en-34": {
+   "title": "Alicia en el país de las maravillas",
+   "director": "Cecil Hepworth, Percy Stow (Reino Unido)",
+   "note": "La primera adaptación al cine de «Alicia en el país de las maravillas»"
+  },
+  "en-35": {
+   "title": "Una semana",
+   "director": "Buster Keaton, Edward F. Cline",
+   "note": "La comedia modelo de 24 minutos sobre una casa prefabricada"
+  },
+  "en-36": {
+   "title": "El maquinista de la General",
+   "director": "Buster Keaton, Clyde Bruckman",
+   "note": "La mayor comedia de aventuras de la era muda"
+  },
+  "en-37": {
+   "title": "El héroe del río",
+   "director": "Charles Reisner, Buster Keaton",
+   "note": "La famosa escena de la fachada que se derrumba"
+  },
+  "en-38": {
+   "title": "El chico",
+   "director": "Charlie Chaplin",
+   "note": "El clásico lírico de Chaplin"
+  },
+  "en-39": {
+   "title": "La quimera del oro",
+   "director": "Charlie Chaplin",
+   "note": "Un clásico de Chaplin"
+  },
+  "en-40": {
+   "title": "El hombre mosca",
+   "director": "Fred C. Newmeyer, Sam Taylor",
+   "note": "Harold Lloyd colgado de las agujas de un reloj de torre"
+  },
+  "en-41": {
+   "title": "El fantasma de la ópera",
+   "director": "Rupert Julian",
+   "note": "Un éxito gótico con Lon Chaney"
+  },
+  "en-42": {
+   "title": "El mundo perdido",
+   "director": "Harry O. Hoyt",
+   "note": "Los dinosaurios de stop motion de Willis O’Brien, a partir de Conan Doyle"
+  },
+  "en-43": {
+   "title": "Frankenstein",
+   "director": "J. Searle Dawley (Edison)",
+   "note": "La primera adaptación al cine de Mary Shelley"
+  },
+  "en-44": {
+   "title": "Asalto y robo de un tren",
+   "director": "Edwin S. Porter",
+   "note": "El primer wéstern y un clásico del montaje"
+  },
+  "en-45": {
+   "title": "Cómo opera un mosquito",
+   "director": "Winsor McCay",
+   "note": "Una obra maestra de la primera animación dibujada a mano"
+  },
+  "en-46": {
+   "title": "La princesa Nicotina, o el hada del humo",
+   "director": "J. Stuart Blackton",
+   "note": "Un ingenioso cortometraje de trucos en miniatura sobre una mesa"
+  },
+  "en-47": {
+   "title": "El gran silencio blanco",
+   "director": "Herbert Ponting (Reino Unido)",
+   "note": "Imágenes auténticas de la expedición antártica de Robert Scott"
+  },
+  "fr-48": {
+   "title": "Viaje a la Luna (coloreado a mano)",
+   "director": "Georges Méliès",
+   "note": "La versión coloreada a mano de la película más conocida de Méliès"
+  },
+  "fr-49": {
+   "title": "Viaje a la Luna (en blanco y negro)",
+   "director": "Georges Méliès",
+   "note": "La versión clásica en blanco y negro"
+  },
+  "fr-50": {
+   "title": "La dama que desaparece en el Teatro Robert-Houdin",
+   "director": "Georges Méliès",
+   "note": "La primera película de trucos de Méliès, con un corte por sustitución"
+  },
+  "fr-51": {
+   "title": "El reino de las hadas",
+   "director": "Georges Méliès",
+   "note": "Una fantasía de cuento de hadas con decorados submarinos"
+  },
+  "fr-52": {
+   "title": "El dirigible fantástico",
+   "director": "Georges Méliès",
+   "note": "La pesadilla de un inventor de dirigibles"
+  },
+  "fr-53": {
+   "title": "La salida de los obreros de la fábrica Lumière",
+   "director": "Los hermanos Lumière",
+   "note": "Una de las primeras películas de la historia del cine"
+  },
+  "fr-54": {
+   "title": "La llegada de un tren a La Ciotat",
+   "director": "Los hermanos Lumière",
+   "note": "Una miniatura legendaria de 50 segundos"
+  },
+  "fr-55": {
+   "title": "Les Vampires",
+   "director": "Louis Feuillade",
+   "note": "Un serial parisino de culto, con sus intertítulos franceses originales"
+  },
+  "fr-56": {
+   "title": "El corazón y el dinero",
+   "director": "Louis Feuillade, Léonce Perret",
+   "note": "Un breve drama de Gaumont"
+  },
+  "fr-57": {
+   "title": "Las hazañas de Feu Follet",
+   "director": "Émile Cohl",
+   "note": "Un pionero de la animación francesa"
+  },
+  "fr-58": {
+   "title": "Escena del jardín de Roundhay",
+   "director": "Louis Le Prince",
+   "note": "El fragmento de película más antiguo que se conserva en la historia de la humanidad"
+  },
+  "de-59": {
+   "title": "El gabinete del doctor Caligari",
+   "director": "Robert Wiene",
+   "note": "La versión con sus intertítulos alemanes expresionistas originales"
+  },
+  "de-60": {
+   "title": "Nosferatu, una sinfonía del horror",
+   "director": "F. W. Murnau",
+   "note": "Un clásico gótico"
+  },
+  "de-61": {
+   "title": "Fausto",
+   "director": "F. W. Murnau",
+   "note": "Una obra maestra pintada con luz y sombra"
+  },
+  "de-62": {
+   "title": "El Golem (fragmentos de 1915)",
+   "director": "Paul Wegener, Henrik Galeen",
+   "note": "Los fragmentos que se conservan del primer «Golem»"
+  },
+  "de-63": {
+   "title": "El palacio del calzado Pinkus",
+   "director": "Ernst Lubitsch",
+   "note": "Una de las primeras comedias berlinesas de Lubitsch"
+  },
+  "de-64": {
+   "title": "Los amores del faraón",
+   "director": "Ernst Lubitsch",
+   "note": "Un monumental drama histórico de la República de Weimar"
+  },
+  "de-65": {
+   "title": "El gato y el canario",
+   "director": "Paul Leni",
+   "note": "Un misterio expresionista en una vieja mansión (rodado en Hollywood por el alemán Leni)"
+  },
+  "es-66": {
+   "title": "Pajaritas de papel (origami)",
+   "director": "Segundo de Chomón (España / Pathé)",
+   "note": "Figuras de papel que cobran vida, del estudio Pathé"
+  },
+  "es-67": {
+   "title": "El hotel eléctrico",
+   "director": "Segundo de Chomón (España / Pathé)",
+   "note": "Una famosa película de trucos en la que las cosas de una habitación de hotel lo hacen todo solas"
+  },
+  "es-68": {
+   "title": "Sinfonía extravagante",
+   "director": "Segundo de Chomón",
+   "note": "Una miniatura musical de trucos"
+  },
+  "es-69": {
+   "title": "Superstición andaluza",
+   "director": "Segundo de Chomón",
+   "note": "Color español y trucos visuales"
+  },
+  "es-70": {
+   "title": "Pasionaria",
+   "director": "Joan Maria Codina (España)",
+   "note": "Un drama mudo español"
+  },
+  "es-71": {
+   "title": "Lo más sublime",
+   "director": "Enric Ponsà (España)",
+   "note": "El cine mudo español tardío, con intertítulos en español"
+  },
+  "es-72": {
+   "title": "El automóvil gris",
+   "director": "Enrique Rosas (México)",
+   "note": "Una legendaria película criminal muda mexicana, con sus intertítulos originales en español"
+  },
+  "es-73": {
+   "title": "Nobleza gaucha",
+   "director": "Humberto Cairo y otros (Argentina)",
+   "note": "Un clásico del cine argentino, con intertítulos en español"
+  },
+  "es-74": {
+   "title": "Amalia",
+   "director": "Enrique García Velloso (Argentina)",
+   "note": "El primer largometraje de Argentina"
+  },
+  "es-75": {
+   "title": "La bandera argentina",
+   "director": "Eugenio Py (Argentina)",
+   "note": "La primerísima película de Argentina"
+  },
+  "es-76": {
+   "title": "Paseo a caballo en el bosque de Chapultepec",
+   "director": "Gabriel Veyre (México)",
+   "note": "Una de las primeras vistas de México en el cine"
+  },
+  "ja-77": {
+   "title": "Namakura Gatana (La espada sin filo)",
+   "director": "Jun’ichi Kōuchi",
+   "note": "El anime más antiguo que se conserva, en restauración"
+  },
+  "ja-78": {
+   "title": "Una página de locura",
+   "director": "Teinosuke Kinugasa",
+   "note": "Vanguardia japonesa sin ningún intertítulo"
+  },
+  "ja-79": {
+   "title": "Goketsu Jiraiya",
+   "director": "Shōzō Makino",
+   "note": "La primera película japonesa con efectos especiales, sobre un mago ninja"
+  },
+  "ja-80": {
+   "title": "Chokon (Un rencor inolvidable)",
+   "director": "Daisuke Itō",
+   "note": "Un clásico del jidaigeki de samuráis"
+  },
+  "ja-81": {
+   "title": "Una historia de tabaco",
+   "director": "Noburō Ōfuji",
+   "note": "Un temprano dibujo animado japonés de siluetas"
+  },
+  "ja-82": {
+   "title": "La historia del Rey Mono",
+   "director": "Noburō Ōfuji",
+   "note": "Un temprano dibujo animado japonés en papel chiyogami de colores"
+  },
+  "ja-83": {
+   "title": "Los ladrones del castillo de Bagdad",
+   "director": "Noburō Ōfuji",
+   "note": "Un cuento oriental con recortes de papel chiyogami"
+  },
+  "ja-84": {
+   "title": "Kobu-tori Jiisan (El viejo y el bulto)",
+   "director": "Yasuji Murata",
+   "note": "Un cuento popular japonés en animación"
+  },
+  "ja-85": {
+   "title": "Días de juventud (Un romance estudiantil)",
+   "director": "Yasujirō Ozu",
+   "note": "El largometraje más antiguo que se conserva de Ozu"
+  },
+  "ja-86": {
+   "title": "Tokkan kozō (Un chico impetuoso)",
+   "director": "Yasujirō Ozu",
+   "note": "Una breve comedia muda de Ozu"
+  },
+  "fr-87": {
+   "title": "Fabricación de cintas para máquinas de escribir",
+   "director": "Pathé-Baby",
+   "note": "Un auténtico carrete Pathé-Baby: cómo se hacían las cintas de tinta para máquinas de escribir"
+  },
+  "fr-88": {
+   "title": "Fabricación de minas de lápiz",
+   "director": "Pathé-Baby",
+   "note": "Cómo se hacían las minas de los lápices, un carrete Pathé-Baby"
+  },
+  "fr-89": {
+   "title": "Acrópolis",
+   "director": "Pathé-Baby",
+   "note": "La Acrópolis de Atenas en película doméstica de 9,5 mm"
+  },
+  "es-90": {
+   "title": "La Alhambra de Granada",
+   "director": "Pathé-Baby",
+   "note": "Un paseo arquitectónico por Granada"
+  },
+  "it-91": {
+   "title": "Fabricación de sombreros de paja en Fiésole",
+   "director": "Pathé-Baby",
+   "note": "Un oficio cerca de Florencia, en Italia"
+  },
+  "fr-92": {
+   "title": "La ciudad fulminada",
+   "director": "Luitz-Morat (Pathé-Baby)",
+   "note": "Ciencia ficción francesa en carretes Pathé-Baby"
+  },
+  "none-93": {
+   "title": "La danza de Loïe Fuller (coloreada a mano)",
+   "director": "Pathé / Segundo de Chomón",
+   "note": "Una danza con velos, coloreada a mano"
+  },
+  "none-94": {
+   "title": "El espectro rojo (Pathécolor)",
+   "director": "Segundo de Chomón, Ferdinand Zecca",
+   "note": "Pathécolor coloreado con plantillas, una fantasía mística"
+  },
+  "none-95": {
+   "title": "Los huevos de Pascua (Pathécolor)",
+   "director": "Segundo de Chomón",
+   "note": "Un breve truco en color de 1907"
+  },
+  "none-96": {
+   "title": "La mosca acróbata",
+   "director": "F. Percy Smith (Reino Unido)",
+   "note": "Famosas imágenes macro de una mosca haciendo malabares con objetos"
+  },
+  "none-97": {
+   "title": "El tránsito de Venus",
+   "director": "Pierre Jules César Janssen",
+   "note": "Cronofotografía astronómica de 1874"
+  },
+  "nl-98": {
+   "title": "Bits & Pieces n.º 26 (Eye Filmmuseum)",
+   "director": "Eye Filmmuseum (Países Bajos)",
+   "note": "Una de las más de 600 digitalizaciones del Eye Filmmuseum de Ámsterdam"
+  },
+  "da-99": {
+   "title": "El abismo (Afgrunden)",
+   "director": "Urban Gad (Dinamarca)",
+   "note": "El debut triunfal de Asta Nielsen, la edad de oro del cine danés"
+  },
+  "sv-100": {
+   "title": "Los proscritos",
+   "director": "Victor Sjöström (Suecia)",
+   "note": "Una obra maestra escandinava y poética sobre la naturaleza y el destino"
+  },
+  "sv-101": {
+   "title": "La saga de Gunnar Hede",
+   "director": "Mauritz Stiller (Suecia)",
+   "note": "Basada en la novela de Selma Lagerlöf"
+  },
+  "pt-102": {
+   "title": "Limite",
+   "director": "Mário Peixoto (Brasil)",
+   "note": "A menudo considerada la mejor película brasileña; una vanguardia hipnótica"
+  },
+  "pt-103": {
+   "title": "Los anteojos del abuelo",
+   "director": "Francisco Santos (Brasil)",
+   "note": "La película de ficción brasileña más antigua que se conserva"
+  },
+  "hi-104": {
+   "title": "Raja Harishchandra",
+   "director": "Dadasaheb Phalke",
+   "note": "El primer largometraje de la India"
+  },
+  "hi-105": {
+   "title": "El nacimiento de Shri Krishna",
+   "director": "Dadasaheb Phalke",
+   "note": "Un clásico mitológico del primer cine indio"
+  },
+  "hi-106": {
+   "title": "Shiraz: un romance de la India",
+   "director": "Franz Osten",
+   "note": "Una suntuosa historia muda sobre la construcción del Taj Mahal"
+  }
+ }
+}

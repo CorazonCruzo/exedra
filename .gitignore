@@ -1,0 +1,11 @@
+.DS_Store
+node_modules/
+*.blend1
+originals/
+__pycache__/
+docs/filmaudio-test/media/
+docs/filmaudio-test/scripts/node_modules/
+# Рабочие материалы и заметки — только локально (решение автора 2026-11-22): эскизы, замеры, сравнения, заметки для агентов.
+docs/
+CLAUDE.md
+AGENTS.md

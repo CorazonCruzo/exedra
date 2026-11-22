@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="app.title">Exedra</title>
+<meta name="description" content="Exedra — a quiet 3D hall: read your own books, type on a vintage typewriter, keep pages in folders and watch silent films.">
+<meta property="og:title" content="Exedra">
+<meta property="og:description" content="Exedra — a quiet 3D hall: read your own books, type on a vintage typewriter, keep pages in folders and watch silent films.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Old+Standard+TT:ital@0;1&family=PT+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/room.css">
+<script type="importmap">{ "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }</script>
+</head>
+<body>
+<!-- Пиктограммы кнопок: кнопки — как клавиши машинки, подписи всплывают при наведении. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-seat" viewBox="0 0 24 24"><path d="M2.5 10.5h12M4 10.5V20M13 10.5V20M7.5 10.5V6.6M6 10.5h3M5 6.6h5a2.5 2.2 0 0 0-5 0zM20.5 5v15M20.5 13.5H16M16.5 13.5V20"/></symbol>
+  <symbol id="i-hall" viewBox="0 0 24 24"><path d="M2 12c3.5-5.5 16.5-5.5 20 0-3.5 5.5-16.5 5.5-20 0z"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-nook" viewBox="0 0 24 24"><circle cx="6.5" cy="6" r="3"/><circle cx="13.5" cy="6" r="3"/><rect x="3" y="10" width="13" height="8.5" rx="1.5"/><path d="M16 12.6l5-2.4v8.1l-5-2.4"/></symbol>
+  <symbol id="i-type" viewBox="0 0 24 24"><path d="M8 8.5V3.5h8v5M5 11.5 3 19.5h18l-2-8"/><rect x="3.5" y="8.5" width="17" height="3" rx="1.5"/><g fill="currentColor" stroke="none"><circle cx="7" cy="14.4" r=".8"/><circle cx="9.5" cy="14.4" r=".8"/><circle cx="12" cy="14.4" r=".8"/><circle cx="14.5" cy="14.4" r=".8"/><circle cx="17" cy="14.4" r=".8"/><circle cx="8.2" cy="17" r=".8"/><circle cx="10.7" cy="17" r=".8"/><circle cx="13.2" cy="17" r=".8"/><circle cx="15.7" cy="17" r=".8"/></g></symbol>
+  <symbol id="i-read" viewBox="0 0 24 24"><path d="M2.5 5.5c3.2-1.5 6.5-1.5 9.5.2v14.3c-3-1.7-6.3-1.7-9.5-.2zM12 5.7c3-1.7 6.3-1.7 9.5-.2v14.3c-3.2-1.5-6.5-1.5-9.5.2zM5 9c1.6-.4 3.2-.4 4.5.1M5 12.2c1.6-.4 3.2-.4 4.5.1M14.5 9.1c1.3-.5 2.9-.5 4.5-.1M14.5 12.3c1.3-.5 2.9-.5 4.5-.1"/></symbol>
+  <symbol id="i-stand" viewBox="0 0 24 24"><path d="M2.5 21.5h19M5.5 19.2 11 3.8l5 1.9-5.5 15.4zM14 12.5l5 9"/></symbol>
+  <symbol id="i-steeper" viewBox="0 0 24 24"><path d="M12 20V5M6 10.8 12 5l6 5.8"/><path d="M5 21h6" stroke-width="1.2" opacity=".6"/></symbol>
+  <symbol id="i-flatter" viewBox="0 0 24 24"><path d="M12 4v15M6 13.2l6 5.8 6-5.8"/><path d="M13 3h6" stroke-width="1.2" opacity=".6"/></symbol>
+  <!-- Во весь экран: четыре угла; когда экран уже полный — уголки внутрь. -->
+  <symbol id="i-fs" viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></symbol>
+  <symbol id="i-fs-off" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5"/></symbol>
+  <symbol id="i-exit" viewBox="0 0 24 24"><path d="M14 4h6v16h-6M4 12h11M11 8l4 4-4 4"/></symbol>
+  <!-- Читать книгу, перечёркнуто: клавиша выхода из чтения (раскрытая книга и косая черта; под чертой — «подушка» цвета клавиши, чтобы линии книги не сливались с ней). -->
+  <symbol id="i-bookclose" viewBox="0 0 24 24"><path d="M6.5 3.5h11v17h-11A1.8 1.8 0 0 1 4.7 18.7V5.3A1.8 1.8 0 0 1 6.5 3.5zM4.7 18.7a1.8 1.8 0 0 1 1.8-1.8h11M9.5 3.5v6.2l1.5-1.1 1.5 1.1V3.5"/></symbol>
+  <symbol id="i-read-off" viewBox="0 0 24 24"><path d="M2.5 5.5c3.2-1.5 6.5-1.5 9.5.2v14.3c-3-1.7-6.3-1.7-9.5-.2zM12 5.7c3-1.7 6.3-1.7 9.5-.2v14.3c-3.2-1.5-6.5-1.5-9.5.2zM5 9c1.6-.4 3.2-.4 4.5.1M5 12.2c1.6-.4 3.2-.4 4.5.1M14.5 9.1c1.3-.5 2.9-.5 4.5-.1M14.5 12.3c1.3-.5 2.9-.5 4.5-.1"/><path d="M4 3.2l16 17.6" stroke="#e8dabb" stroke-width="4.6"/><path d="M4 3.2l16 17.6"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><rect x="3" y="3" width="12.5" height="18" rx="1.2"/><path d="M6.2 3v18M9 7.5h4v3H9zM19.5 14.5v7M16 18h7"/></symbol>
+  <symbol id="i-light" viewBox="0 0 24 24"><path d="M12 2v4M6.5 12c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6zM10.3 12a1.7 1.7 0 0 0 3.4 0M12 16v3.5M7.2 14.8l-2 2.6M16.8 14.8l2 2.6"/></symbol>
+  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M3.5 9.5H7l5-4v13l-5-4H3.5zM15.5 9.2a4 4 0 0 1 0 5.6M18.2 6.6a7.6 7.6 0 0 1 0 10.8"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M3.5 9.5H7l5-4v13l-5-4H3.5zM16 9.5l5 5M21 9.5l-5 5"/></symbol>
+  <symbol id="i-decor" viewBox="0 0 24 24"><path d="M5 21V10a7 7 0 0 1 14 0v11zM12 3v18M5 13h14M12 10 8.2 6.3M12 10l3.8-3.7"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><path d="M9 9a3 3 0 1 1 4.2 2.75c-.9.4-1.2 1-1.2 1.9v.6"/><circle cx="12" cy="17.6" r=".9" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-done" viewBox="0 0 24 24"><path d="M5 12.5 9.5 17 19 7.5"/></symbol>
+  <symbol id="i-label" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="1.2"/><path d="M6 9.5h12M6 12h8.5M6 14.5h5"/></symbol>
+  <symbol id="i-pdf" viewBox="0 0 24 24"><path d="M12 3.5V15M7.5 10.5 12 15l4.5-4.5M4.5 15.5v4h15v-4"/></symbol>
+  <symbol id="i-bookput" viewBox="0 0 24 24"><path d="M12 2.5v7M8.8 6.8 12 10l3.2-3.2M3 12.5c3-1.4 6-1.4 9 0v8.5c-3-1.4-6-1.4-9 0zM12 12.5c3-1.4 6-1.4 9 0v8.5c-3-1.4-6-1.4-9 0z"/></symbol>
+  <symbol id="i-bookout" viewBox="0 0 24 24"><path d="M12 10V3M8.8 6.2 12 3l3.2 3.2M3 12.5c3-1.4 6-1.4 9 0v8.5c-3-1.4-6-1.4-9 0zM12 12.5c3-1.4 6-1.4 9 0v8.5c-3-1.4-6-1.4-9 0z"/></symbol>
+  <symbol id="i-deskout" viewBox="0 0 24 24"><path d="M12 2.5v7M8.8 6.8 12 10l3.2-3.2M3.5 12.5h17v3h-17zM5 15.5v5.5h14v-5.5M10 18.2h4"/></symbol>
+  <symbol id="i-deskin" viewBox="0 0 24 24"><path d="M12 10V3M8.8 6.2 12 3l3.2 3.2M3.5 12.5h17v3h-17zM5 15.5v5.5h14v-5.5M10 18.2h4"/></symbol>
+  <symbol id="i-bookswap" viewBox="0 0 24 24"><path d="M4 3.5h11M12.3 1.2 15 3.5l-2.7 2.3M20 9H9M11.7 6.7 9 9l2.7 2.3M3 14.5c3-1.4 6-1.4 9 0V21c-3-1.4-6-1.4-9 0zM12 14.5c3-1.4 6-1.4 9 0V21c-3-1.4-6-1.4-9 0z"/></symbol>
+  <symbol id="i-mark" viewBox="0 0 24 24"><path d="M8.5 2.5h7v19l-3.5-3.8-3.5 3.8z"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M9.5 5 4 10.5 9.5 16M4.5 10.5H14a5.5 5.5 0 0 1 0 11h-3"/></symbol>
+  <symbol id="i-pad" viewBox="0 0 24 24"><path d="M3 20.6h18M12 20.6h9v-5.2zM3.2 14.6l13.6-5.8 1.1 2.3-13.6 5.8zM3.2 14.6v3.3"/></symbol>
+  <symbol id="i-bin" viewBox="0 0 24 24"><path d="M4 6.5h16M9.5 6.5V4h5v2.5M6 6.5l1 13.5h10l1-13.5M10 10.5v6M14 10.5v6"/></symbol>
+  <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M3 7h3.5c3.5 0 5.5 10 9 10H20M3 17h3.5c1.3 0 2.4-.8 3.3-2M14.2 9c.9-1.2 1.9-2 3.3-2H20M17.5 4l3 3-3 3M17.5 14l3 3-3 3"/></symbol>
+  <symbol id="i-ink" viewBox="0 0 24 24"><path d="M12 3.5c3 4 6 7.3 6 10.5a6 6 0 0 1-12 0c0-3.2 3-6.5 6-10.5z"/><path d="M6.4 15h11.2a5.6 5.6 0 0 1-11.2 0z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3.5c3 4 6 7.3 6 10.5a6 6 0 0 1-12 0c0-3.2 3-6.5 6-10.5z"/></symbol>
+  <symbol id="i-drop-full" viewBox="0 0 24 24"><path d="M12 3.5c3 4 6 7.3 6 10.5a6 6 0 0 1-12 0c0-3.2 3-6.5 6-10.5z" fill="currentColor"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M15 4.5a7.5 7.5 0 1 0 4.5 12.8A6.2 6.2 0 0 1 15 4.5z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M5.6 18.4l1.7-1.7M16.7 7.3l1.7-1.7"/></symbol>
+</svg>
+<!-- Шторка: на миг затемняет кадр, пока вход в режим чтения и выход из него меняют набор рисуемого (без z-index — полоски клавиш остаются поверх). -->
+<div id="curtain" class="ui"></div>
+<div id="views" class="ui bar">
+  <button data-v="seat" class="key on" data-tip="at the desk" aria-label="at the desk" data-i18n-attr="data-tip:views.seat; aria-label:views.seat"><svg><use href="#i-seat"/></svg></button>
+  <button data-v="type" class="key" data-tip="to the typewriter" aria-label="to the typewriter" data-i18n-attr="data-tip:views.type; aria-label:views.type"><svg><use href="#i-type"/></svg></button>
+  <button data-v="read" class="key" data-tip="read a book" aria-label="read a book" data-i18n-attr="data-tip:views.read; aria-label:views.read"><svg><use href="#i-read"/></svg></button>
+  <button data-v="nook" class="key" data-tip="to the film corner" aria-label="to the film corner" data-i18n-attr="data-tip:views.nook; aria-label:views.nook"><svg><use href="#i-nook"/></svg></button>
+  <button id="fsHallBtn" class="key" data-tip="fullscreen" aria-label="fullscreen" data-i18n-attr="data-tip:tools.fullscreen; aria-label:tools.fullscreen"><svg><use href="#i-fs"/></svg></button>
+</div>
+<div id="fsKey" class="ui bar"><button id="fsBtn" class="key" data-tip="fullscreen" aria-label="fullscreen" data-i18n-attr="data-tip:tools.fullscreen; aria-label:tools.fullscreen"><svg><use href="#i-fs"/></svg></button><button id="lightReadBtn" class="key" data-tip="light" aria-label="light" data-i18n-attr="data-tip:tools.lightRead; aria-label:tools.lightRead" aria-expanded="false"><svg><use href="#i-light"/></svg></button></div>
+<div id="tools" class="ui bar">
+  <button id="folderBtn" class="key" data-tip="new folder" aria-label="new folder" data-i18n-attr="data-tip:tools.folderNew; aria-label:tools.folderNew"><svg><use href="#i-folder"/></svg></button>
+  <button id="deskSaveBtn" class="key" data-tip="save the desk to a file" aria-label="save the desk to a file" data-i18n-attr="data-tip:tools.deskSave; aria-label:tools.deskSave"><svg><use href="#i-deskout"/></svg></button>
+  <button id="deskOpenBtn" class="key" data-tip="open a desk from a file" aria-label="open a desk from a file" data-i18n-attr="data-tip:tools.deskOpen; aria-label:tools.deskOpen"><svg><use href="#i-deskin"/></svg></button>
+  <input id="deskFile" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden>
+  <button id="lightBtn" class="key" data-tip="room light" aria-label="room light" data-i18n-attr="data-tip:tools.roomLight; aria-label:tools.roomLight" aria-expanded="false"><svg><use href="#i-light"/></svg></button>
+  <button id="soundRoomBtn" class="key" data-tip="sound on" aria-label="sound on" data-i18n-attr="data-tip:tools.soundOn; aria-label:tools.soundOn"><svg><use href="#i-sound"/></svg></button>
+  <button id="decorBtn" class="key" data-tip="room decor" aria-label="room decor" data-i18n-attr="data-tip:tools.decor; aria-label:tools.decor"><svg><use href="#i-decor"/></svg></button>
+  <button id="helpBtn" class="key" data-tip="how to use" aria-label="how to use" data-i18n-attr="data-tip:tools.help; aria-label:tools.help"><svg><use href="#i-help"/></svg></button>
+</div>
+<div id="lightPanel" class="ui slider" hidden><svg><use href="#i-moon"/></svg><input type="range" min="0" max="160" step="1" aria-label="room light" data-i18n-attr="aria-label:tools.roomLight"><svg><use href="#i-sun"/></svg></div>
+<div id="inkPanel" class="ui slider" hidden><svg><use href="#i-drop"/></svg><input type="range" min="0" max="100" step="1" aria-label="ink strength" data-i18n-attr="aria-label:type.ink"><svg><use href="#i-drop-full"/></svg></div>
+<div id="typeTools" class="ui bar">
+  <button id="faceBtn" class="key" data-tip="typewriter font" aria-label="typewriter font" data-i18n-attr="data-tip:type.faceTypewriter; aria-label:type.faceTypewriter"><span class="glyph" data-i18n="type.glyph">Aa</span></button>
+  <button id="inkBtn" class="key" data-tip="ink strength" aria-label="ink strength" data-i18n-attr="data-tip:type.ink; aria-label:type.ink" aria-expanded="false"><svg><use href="#i-ink"/></svg></button>
+  <button id="soundBtn" class="key" data-tip="sound on" aria-label="sound on" data-i18n-attr="data-tip:tools.soundOn; aria-label:tools.soundOn"><svg><use href="#i-sound"/></svg></button>
+  <button id="doneBtn" class="key" data-tip="take out the sheet — it will lie on the desk" aria-label="take out the sheet — it will lie on the desk" data-i18n-attr="data-tip:type.eject; aria-label:type.eject"><svg><use href="#i-done"/></svg></button>
+</div>
+<input id="labelEdit" type="text" maxlength="60" autocomplete="off" spellcheck="false" aria-label="folder name — Enter to save, Esc to cancel" data-i18n-attr="aria-label:folder.nameEdit" hidden>
+<div id="readTools" class="ui bar"><span id="readCount" class="label"></span>
+  <button id="labelBtn" class="key" data-tip="label the folder" aria-label="label the folder" data-i18n-attr="data-tip:folder.label; aria-label:folder.label"><svg><use href="#i-label"/></svg></button><input id="folderName" type="text" maxlength="60" autocomplete="off" spellcheck="false" aria-label="folder name — Enter to save" data-i18n-attr="aria-label:folder.nameBar" hidden>
+  <button id="shuffleBtn" class="key" data-tip="shuffle the sheets" aria-label="shuffle the sheets" data-i18n-attr="data-tip:folder.shuffle; aria-label:folder.shuffle" hidden><svg><use href="#i-shuffle"/></svg></button>
+  <button id="pdfBtn" class="key" data-tip="download PDF" aria-label="download PDF" data-i18n-attr="data-tip:folder.pdf; aria-label:folder.pdf"><svg><use href="#i-pdf"/></svg></button>
+  <button id="folderOut" class="key" data-tip="remove the folder from the room" aria-label="remove the folder from the room" data-i18n-attr="data-tip:folder.remove; aria-label:folder.remove"><svg><use href="#i-bin"/></svg></button>
+</div>
+<div id="bookBar" class="ui bar"><span id="bookTitle" class="label title" hidden></span>
+  <button id="bookPut" class="key" data-tip="put a PDF in the book" aria-label="put a PDF in the book" data-i18n-attr="data-tip:book.put; aria-label:book.put"><svg><use href="#i-bookput"/></svg></button>
+  <span id="bookCount" class="label"></span><input id="bookNo" type="text" inputmode="numeric" autocomplete="off" aria-label="page number — Enter to go" title="page number — Enter to go" data-i18n-attr="aria-label:book.pageNo; title:book.pageNo">
+  <button id="bookMark" class="key" data-tip="bookmark this page" aria-label="bookmark this page" data-i18n-attr="data-tip:book.markAdd; aria-label:book.markAdd" hidden><svg><use href="#i-mark"/></svg></button>
+  <button id="bookBack" class="key" data-tip="back" aria-label="back" data-i18n-attr="data-tip:book.back; aria-label:book.back" hidden><svg><use href="#i-back"/></svg></button>
+  <button id="bookClose" class="key" data-tip="close the book" aria-label="close the book" data-i18n-attr="data-tip:book.close; aria-label:book.close"><svg><use href="#i-bookclose"/></svg></button>
+  <button id="bookPad" class="key" data-tip="remove the pad" aria-label="remove the pad" data-i18n-attr="data-tip:book.padOff; aria-label:book.padOff"><svg><use href="#i-pad"/></svg></button>
+  <button id="bookOut" class="key" data-tip="take the PDF out" aria-label="take the PDF out" data-i18n-attr="data-tip:book.out; aria-label:book.out" hidden><svg><use href="#i-bookout"/></svg></button>
+  <input id="bookFile" type="file" accept="application/pdf,.pdf" hidden>
+</div>
+<div id="standKeys" class="ui bar">
+  <button id="tiltUp" class="key" data-tip="steeper (↑ while reading)" aria-label="steeper" data-i18n-attr="data-tip:stand.steeperTip; aria-label:stand.steeper"><svg><use href="#i-steeper"/></svg></button>
+  <span id="tiltAng" class="label">49°</span>
+  <button id="tiltDown" class="key" data-tip="flatter (↓ while reading)" aria-label="flatter" data-i18n-attr="data-tip:stand.flatterTip; aria-label:stand.flatter"><svg><use href="#i-flatter"/></svg></button>
+  <button id="bookStand" class="key" data-tip="onto the stand" aria-label="onto the stand" data-i18n-attr="data-tip:stand.on; aria-label:stand.on"><svg><use href="#i-stand"/></svg></button>
+</div>
+<div id="readDim" class="ui" hidden></div>
+<div id="readOffer" class="ui" hidden role="dialog" aria-label="Read this book?" data-i18n-attr="aria-label:read.offer.q">
+  <span class="q" data-i18n="read.offer.q">Read this book?</span>
+  <span class="sub" data-i18n="read.offer.sub">full screen: just the book and the desk</span>
+  <div class="row"><button id="offerRead" data-i18n="read.offer.go">read</button><button id="offerStay" data-i18n="read.offer.stay">stay here</button></div>
+  <button id="offerClose" class="quiet" data-i18n="book.close">close the book</button>
+</div>
+<div id="bookAsk" class="ui" hidden><div class="plate" role="dialog" aria-label="Where should the PDF go?" data-i18n-attr="aria-label:bookAsk.title">
+  <h3 data-i18n="bookAsk.title">Where should the PDF go?</h3>
+  <button id="askNew" class="opt"><b data-i18n="bookAsk.new">into a new book</b><span data-i18n="bookAsk.newSub">another will lie beside it, in its own binding</span></button>
+  <button id="askRep" class="opt"><b data-i18n="bookAsk.rep">instead of this one</b><span id="askRepSub"></span></button>
+</div></div>
+<div id="folderAsk" class="ui" hidden><div class="plate" role="dialog" aria-labelledby="folderAskTitle">
+  <h3 id="folderAskTitle" data-i18n="folderAsk.title">Remove the folder?</h3>
+  <button id="foAsk1" class="opt"><b id="foAsk1b" data-i18n="folderAsk.toDesk">sheets — onto the desk</b><span id="foAsk1s"></span></button>
+  <button id="foAsk2" class="opt danger"><b id="foAsk2b" data-i18n="folderAsk.withSheets">together with its sheets</b><span id="foAsk2s"></span></button>
+</div></div>
+<div id="deskAsk" class="ui" hidden><div class="plate" role="dialog" aria-labelledby="deskAskTitle">
+  <h3 id="deskAskTitle" data-i18n="deskAsk.title">Open a desk from a file?</h3>
+  <p id="deskAskNow"></p>
+  <button id="deskAskGo" class="opt danger"><b data-i18n="deskAsk.go">replace the desk</b><span id="deskAskGoS"></span></button>
+  <button id="deskAskKeep" class="opt"><b data-i18n="deskAsk.keep">keep it as it is</b><span data-i18n="deskAsk.keepSub">the file will close and the desk will stay as it is now</span></button>
+</div></div>
+<div id="filmLib" class="ui"></div>
+<div id="cinemaAsk" class="ui" hidden><div class="plate" role="dialog" aria-labelledby="cinemaTitle">
+  <h3 id="cinemaTitle" data-i18n="cinema.title">Projector</h3>
+  <p id="cinemaNow" hidden></p>
+  <p id="cinemaCredit" class="small" hidden></p>
+  <div id="cinemaSeekRow" class="seek" hidden><button id="cinemaBack" class="jump" type="button" title="back 10 seconds" aria-label="back 10 seconds" data-i18n-attr="title:cinema.back10; aria-label:cinema.back10"><svg viewBox="0 0 24 24"><path d="M5.5 8.5A8 8 0 1 1 4 13"/><path d="M5.5 3.8v4.7h4.7"/></svg><i>10</i></button><span id="cinemaPos">0:00</span><input id="cinemaSeek" type="range" min="0" max="1000" step="1" value="0" aria-label="seek" data-i18n-attr="aria-label:cinema.seek"><span id="cinemaDur">0:00</span><button id="cinemaFwd" class="jump" type="button" title="forward 10 seconds" aria-label="forward 10 seconds" data-i18n-attr="title:cinema.fwd10; aria-label:cinema.fwd10"><svg viewBox="0 0 24 24"><path d="M18.5 8.5A8 8 0 1 0 20 13"/><path d="M18.5 3.8v4.7h-4.7"/></svg><i>10</i></button></div>
+  <label id="cinemaTrackRow" class="row" hidden><span data-i18n="cinema.track">audio track</span><select id="cinemaTrack" aria-label="audio track" data-i18n-attr="aria-label:cinema.track"></select></label>
+  <label id="cinemaSubRow" class="row" hidden><span data-i18n="cinema.subs">subtitles</span><select id="cinemaSub" aria-label="subtitles" data-i18n-attr="aria-label:cinema.subs"></select></label>
+  <button id="cinemaPause" class="opt" hidden><b id="cinemaPauseB" data-i18n="cinema.pause">pause</b><span data-i18n="cinema.pauseSub">same as pressing the screen</span></button>
+  <form id="cinemaForm" autocomplete="off"><input id="cinemaUrl" type="text" inputmode="url" placeholder="video link: YouTube, Rutube, VK, Vimeo or a file" aria-label="video link" data-i18n-attr="placeholder:cinema.linkPlaceholder; aria-label:cinema.linkLabel" spellcheck="false"><button id="cinemaGo" class="opt" type="submit"><b data-i18n="cinema.go">play</b></button></form>
+  <p id="cinemaBad" class="bad" hidden></p>
+  <button id="cinemaLibBtn" class="opt" type="button"><b data-i18n="cinema.libBtn">silent film library…</b><span data-i18n="cinema.libSub">a hand-picked shelf and the whole Wikimedia Commons archive</span></button>
+  <button id="cinemaFileBtn" class="opt" type="button"><b data-i18n="cinema.fileBtn">video from your computer…</b><span data-i18n="cinema.fileSub">the file will play on the wall; you can pick a subtitle file along with it</span></button>
+  <input id="cinemaFile" type="file" accept="video/*,.mkv,.avi,.vob,.mpg,.mpeg,.ts,.m2ts,.dv,.wmv,.flv,.srt,.vtt,.ass,.ssa" multiple hidden>
+  <button id="cinemaSubBtn" class="opt" type="button" hidden><b data-i18n="cinema.subBtn">subtitle file…</b><span data-i18n="cinema.subSub">.srt, .vtt or .ass for this video</span></button>
+  <input id="cinemaSubFile" type="file" accept=".srt,.vtt,.ass,.ssa" hidden>
+  <button id="cinemaOff" class="opt danger" hidden><b data-i18n="cinema.off">switch off</b><span data-i18n="cinema.offSub">stop the show and bring the light back</span></button>
+  <p class="small" data-i18n="cinema.note"></p>
+</div></div>
+<div id="bookTip" class="ui"></div>
+<div id="weightPick" class="ui" role="group" aria-label="paperweight figure" data-i18n-attr="aria-label:weight.pick" hidden></div>
+<div id="hint" class="ui"></div>
+<div id="decor" class="ui sheet" hidden>
+  <div class="card">
+    <h2 data-i18n="decor.title">Room decor</h2>
+    <h3 data-i18n="decor.art">Dome paintings</h3><div id="decorArt" class="choices"></div>
+    <h3 data-i18n="decor.sculpt">Sculpture on the catalog</h3><div id="decorSculpt" class="choices"></div>
+    <h3 data-i18n="decor.weight">Paperweight on the desk</h3><div id="decorWeight" class="choices"></div>
+    <h3 data-i18n="decor.paper">Book paper</h3><div id="decorPaper" class="choices"></div>
+    <h3 data-i18n="decor.chairs">Chairs in the room</h3><div class="choices"><button id="chairsBack" data-i18n="decor.chairsBack">put them back</button></div>
+    <h3 data-i18n="decor.lang">Language</h3><div id="decorLang" class="choices"></div>
+    <h3 data-i18n="tour.title">Tour</h3><div class="choices"><button id="decorTour" data-i18n="tour.btn">interactive tour</button></div>
+    <button id="decorClose" data-i18n="common.close">close</button>
+  </div>
+</div>
+<div id="help" class="ui sheet" hidden>
+  <div class="card">
+    <h2 data-i18n="help.title">How everything works here</h2>
+    <p class="intro" data-i18n-html="help.intro"></p>
+    <dl>
+      <dt data-i18n="help.look.t">Look around</dt><dd data-mouse="" data-touch="" data-i18n-attr="data-mouse:help.look.mouse; data-touch:help.look.touch"></dd>
+      <dt data-i18n="help.walk.t">Walk around</dt><dd data-mouse="" data-touch="" data-i18n-attr="data-mouse:help.walk.mouse; data-touch:help.walk.touch"></dd>
+      <dt data-i18n="help.pan.t">Shift sideways</dt><dd data-mouse="" data-touch="" data-i18n-attr="data-mouse:help.pan.mouse; data-touch:help.pan.touch"></dd>
+      <dt data-i18n="help.type.t">Type</dt><dd data-i18n="help.type.d"></dd>
+      <dt data-i18n="help.move.t">Move things</dt><dd data-mouse="" data-touch="" data-i18n-attr="data-mouse:help.move.mouse; data-touch:help.move.touch"></dd>
+      <dt data-i18n="help.globes.t">Globes</dt><dd data-mouse="" data-touch="" data-i18n-attr="data-mouse:help.globes.mouse; data-touch:help.globes.touch"></dd>
+      <dt data-i18n="help.clock.t">Clock</dt><dd data-mouse="" data-touch="" data-i18n-attr="data-mouse:help.clock.mouse; data-touch:help.clock.touch"></dd>
+      <dt data-i18n="help.door.t">Door</dt><dd data-i18n="help.door.d"></dd>
+      <dt data-i18n="help.lamp.t">Lamp and drawers</dt><dd data-i18n="help.lamp.d"></dd>
+      <dt data-i18n="help.folders.t">Folders and sheets</dt><dd data-i18n="help.folders.d"></dd>
+      <dt data-i18n="help.book.t">Book</dt><dd data-i18n="help.book.d"></dd>
+      <dt data-i18n="help.read.t">Read</dt><dd data-i18n="help.read.d"></dd>
+      <dt data-i18n="help.projector.t">Projector</dt><dd data-i18n="help.projector.d"></dd>
+      <dt data-i18n="help.back.t">Go back</dt><dd data-i18n="help.back.d"></dd>
+    </dl>
+    <h3 data-i18n="help.buttons">Buttons</h3>
+    <p class="note" data-mouse="" data-touch="" data-i18n-attr="data-mouse:help.note.mouse; data-touch:help.note.touch"></p>
+    <div class="legend">
+      <h4 data-i18n="help.g.room"></h4>
+      <ul>
+        <li><span class="key"><svg><use href="#i-seat"/></svg></span><span data-i18n="views.seat">at the desk</span></li>
+        <li><span class="key"><svg><use href="#i-nook"/></svg></span><span data-i18n="views.nook">to the film corner</span></li>
+        <li><span class="key"><svg><use href="#i-type"/></svg></span><span data-i18n="views.type">to the typewriter</span></li>
+        <li><span class="key"><svg><use href="#i-folder"/></svg></span><span data-i18n="tools.folderNew">new folder</span></li>
+        <li><span class="key"><svg><use href="#i-light"/></svg></span><span data-i18n="tools.roomLight">room light</span></li>
+        <li><span class="key"><svg><use href="#i-decor"/></svg></span><span data-i18n="help.k.decor"></span></li>
+        <li><span class="key"><svg><use href="#i-sound"/></svg></span><span data-i18n="help.k.sound">sound</span></li>
+        <li><span class="key"><svg><use href="#i-deskout"/></svg></span><span data-i18n="help.k.deskSave"></span></li>
+        <li><span class="key"><svg><use href="#i-deskin"/></svg></span><span data-i18n="help.k.deskOpen"></span></li>
+      </ul>
+      <h4 data-i18n="help.g.type"></h4>
+      <ul>
+        <li><span class="key"><svg><use href="#i-done"/></svg></span><span data-i18n="help.k.eject">take the sheet out of the typewriter</span></li>
+        <li><span class="key"><svg><use href="#i-ink"/></svg></span><span data-i18n="help.k.ink"></span></li>
+        <li><span class="key"><span class="glyph" data-i18n="type.glyph">Aa</span></span><span data-i18n="help.k.face">typewriter font</span></li>
+      </ul>
+      <h4 data-i18n="help.g.folder"></h4>
+      <ul>
+        <li><span class="key"><svg><use href="#i-pdf"/></svg></span><span data-i18n="help.k.pdf"></span></li>
+        <li><span class="key"><svg><use href="#i-shuffle"/></svg></span><span data-i18n="help.k.shuffle"></span></li>
+      </ul>
+      <h4 data-i18n="help.g.book"></h4>
+      <ul>
+        <li><span class="key"><svg><use href="#i-bookput"/></svg></span><span data-i18n="help.k.bookPut"></span></li>
+        <li><span class="key"><svg><use href="#i-bookswap"/></svg></span><span data-i18n="help.k.bookSwap"></span></li>
+        <li><span class="key"><svg><use href="#i-mark"/></svg></span><span data-i18n="help.k.mark"></span></li>
+        <li><span class="key"><svg><use href="#i-back"/></svg></span><span data-i18n="help.k.back"></span></li>
+        <li><span class="key"><svg><use href="#i-pad"/></svg></span><span data-i18n="help.k.pad"></span></li>
+        <li><span class="key"><svg><use href="#i-stand"/></svg></span><span data-i18n="help.k.stand"></span></li>
+        <li><span class="key"><svg><use href="#i-bookclose"/></svg></span><span data-i18n="help.k.bookClose"></span></li>
+        <li><span class="key"><svg><use href="#i-bookout"/></svg></span><span data-i18n="help.k.bookOut"></span></li>
+        <li><span class="key"><svg><use href="#i-bin"/></svg></span><span data-i18n="help.k.bin"></span></li>
+      </ul>
+      <h4 data-i18n="help.g.read"></h4>
+      <ul>
+        <li><span class="key"><svg><use href="#i-read"/></svg></span><span data-i18n="help.k.read"></span></li>
+        <li><span class="key"><svg><use href="#i-read"/></svg></span><span data-i18n="help.k.readAsk"></span></li>
+        <li><span class="key"><svg><use href="#i-fs"/></svg></span><span data-i18n="help.k.fs"></span></li>
+        <li><span class="key"><svg><use href="#i-light"/></svg></span><span data-i18n="help.k.light"></span></li>
+        <li><span class="key"><svg><use href="#i-read-off"/></svg></span><span data-i18n="help.k.readOff"></span></li>
+      </ul>
+    </div>
+    <p class="author" id="helpAuthor"></p>
+    <div class="help-actions"><button id="helpTour" data-i18n="tour.btn">interactive tour</button><button id="helpClose" data-i18n="help.close">got it</button></div>
+  </div>
+</div>
+<div id="credits" class="ui" data-i18n-html="credits.line"></div>
+<div id="door" class="ui sheet" hidden>
+  <div class="card">
+    <h2 data-i18n="door.title">Leave the room?</h2>
+    <p data-i18n="door.text">Behind this door are the author’s other works.</p>
+    <p class="note" data-i18n="door.note">Your sheets and folders will stay on the desk: the room will wait.</p>
+    <p class="star"><a id="doorStar" href="https://github.com/CorazonCruzo" target="_blank" rel="noopener"></a></p>
+    <div class="choice"><a id="doorGo" href="https://chestnykh.net/" data-i18n="door.go">go to the other works</a><button id="doorStay" data-i18n="door.stay">stay in the room</button></div>
+  </div>
+</div>
+<div id="about" class="ui sheet" hidden><div class="card"><p class="author" id="aboutAuthor"></p><div id="aboutText">…</div><button id="aboutClose" data-i18n="common.close">close</button></div></div>
+<div id="grain"></div>
+<!-- Заставка рисуется сама и сразу (src/loader.js), не дожидаясь three.js и зала; подпись «зажигаю лампу…» — на её холсте. -->
+<div id="loading" class="ui"></div>
+<!-- Телефон: зал рассчитан на планшет и компьютер — предупреждение до загрузки (room.js, phoneGate). -->
+<div id="phoneGate" class="ui" hidden><div class="card"><h2 data-i18n="phone.title">Exedra needs a bigger screen</h2><p data-i18n="phone.text"></p></div></div>
+<script type="module" src="src/loader.js"></script>
+<script type="module" src="src/room.js"></script>
+</body>
+</html>

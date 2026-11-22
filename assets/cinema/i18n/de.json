@@ -1,0 +1,552 @@
+{
+ "groups": {
+  "it": "Italienisch",
+  "ru": "Russisch",
+  "en": "Englischsprachig",
+  "fr": "Französisch",
+  "es": "Spanisch und lateinamerikanisch",
+  "ja": "Japanisch",
+  "de": "Deutsch",
+  "pathe": "Pathé-Baby (9,5 mm)",
+  "colour": "Farbe, Tanz und Wissenschaft (ohne Worte)",
+  "nordic": "Skandinavien (Dänemark / Schweden)",
+  "in": "Indien",
+  "br": "Brasilien (auf Portugiesisch)"
+ },
+ "films": {
+  "it-01": {
+   "title": "Eine Schachpartie",
+   "director": "Luigi Maggi (Ambrosio)",
+   "note": "Ein mittelalterliches Kostümmärchen um eine Schachpartie"
+  },
+  "it-02": {
+   "title": "Interplanetare Hochzeit",
+   "director": "Enrico Novelli",
+   "note": "Frühe italienische Science-Fiction: eine Romanze zwischen einem irdischen Astronomen und einer Marsbewohnerin, kurz und bezaubernd"
+  },
+  "it-03": {
+   "title": "Pinocchio",
+   "director": "Giulio Antamoro",
+   "note": "Die allererste Verfilmung von „Pinocchio“"
+  },
+  "it-04": {
+   "title": "L’Inferno (Dantes Inferno)",
+   "director": "F. Bertolini, A. Padovan, G. de Liguoro",
+   "note": "Die berühmte Verfilmung Dantes im Stil der Stiche von Gustave Doré, einer der ersten Spielfilme Europas"
+  },
+  "it-05": {
+   "title": "Die Odyssee",
+   "director": "F. Bertolini, A. Padovan (Milano Films)",
+   "note": "Homers antikes Epos in 23 Minuten – genau richtig für eine kurze Sitzung"
+  },
+  "it-06": {
+   "title": "Cabiria",
+   "director": "Giovanni Pastrone",
+   "note": "Das große italienische Monumentalepos (Zwischentitel von Gabriele D’Annunzio), die Geburt der Kamerafahrt"
+  },
+  "it-07": {
+   "title": "Satanische Rhapsodie",
+   "director": "Nino Oxilia",
+   "note": "Eine Ikone der italienischen Dekadenz und des Jugendstils, mit Lyda Borelli"
+  },
+  "it-08": {
+   "title": "Asche",
+   "director": "Febo Mari",
+   "note": "Der einzige erhaltene Film der großen Eleonora Duse"
+  },
+  "it-09": {
+   "title": "Der mechanische Mensch",
+   "director": "André Deed",
+   "note": "Der erste italienische Science-Fiction-Film, mit einem riesigen Roboter"
+  },
+  "it-10": {
+   "title": "Der Faun",
+   "director": "Febo Mari",
+   "note": "Ein symbolistisches Drama über einen Bildhauer und einen zum Leben erwachten Faun"
+  },
+  "it-11": {
+   "title": "Stärker als Sherlock Holmes",
+   "director": "Giovanni Pastrone",
+   "note": "Eine kurze italienische Detektivkomödie"
+  },
+  "it-12": {
+   "title": "Traum eines Sonnenuntergangs im Herbst",
+   "director": "Luigi Maggi",
+   "note": "Eine Adaption nach Gabriele D’Annunzio"
+  },
+  "it-13": {
+   "title": "Wie die Gefräßigkeit Cretinettis Weihnachten verdarb",
+   "director": "André Deed (Itala Film)",
+   "note": "Klassischer italienischer Slapstick"
+  },
+  "it-14": {
+   "title": "Die Einnahme Roms",
+   "director": "Filoteo Alberini",
+   "note": "Der erste italienische Spielfilm"
+  },
+  "it-15": {
+   "title": "Agrippina",
+   "director": "Enrico Guazzoni",
+   "note": "Eine historische Miniatur aus dem antiken Rom"
+  },
+  "it-16": {
+   "title": "Der falsche Lahme",
+   "director": "Italo Pacchioni",
+   "note": "Einer der ersten in Italien gedrehten Filme"
+  },
+  "ru-17": {
+   "title": "Die Rache des Kameramanns",
+   "director": "Wladyslaw Starewicz",
+   "note": "Starewicz’ Puppenanimation: Ein Käfer-Kameramann filmt eine Geschichte und zeigt sie mit einem Projektor"
+  },
+  "ru-18": {
+   "title": "Das Weihnachtsfest der Insekten",
+   "director": "Wladyslaw Starewicz",
+   "note": "Ein Puppenmärchen von Starewicz"
+  },
+  "ru-19": {
+   "title": "Schachfieber",
+   "director": "Vsevolod Pudovkin, Nikolai Shpikovsky",
+   "note": "Eine kurze Komödie über die Schachmanie, mit José Raúl Capablanca, der sich selbst spielt"
+  },
+  "ru-20": {
+   "title": "Pique Dame",
+   "director": "Yakov Protazanov",
+   "note": "Ein Meisterwerk des vorrevolutionären russischen Kinos, mit Iwan Mosschuchin",
+   "attribution": "vorrevolutionärer Film"
+  },
+  "ru-21": {
+   "title": "Stumme Zeugen",
+   "director": "Yevgeni Bauer",
+   "note": "Feine Psychologie und Jugendstil-Interieurs, das Silberne Zeitalter"
+  },
+  "ru-22": {
+   "title": "Der Auszug des großen Alten",
+   "director": "Yakov Protazanov, Elizaveta Thiemann",
+   "note": "Ein vorrevolutionärer Film über Leo Tolstoi",
+   "attribution": "vorrevolutionäre Aufnahmen"
+  },
+  "ru-23": {
+   "title": "Onkels Wohnung",
+   "director": "Pyotr Chardynin",
+   "note": "Eine vorrevolutionäre Komödie mit Iwan Mosschuchin",
+   "attribution": "vorrevolutionärer Film"
+  },
+  "ru-24": {
+   "title": "Drama in einem Roma-Lager bei Moskau",
+   "director": "Vladimir Siversen",
+   "note": "Eine Rarität aus dem Chanschonkow-Studio"
+  },
+  "ru-25": {
+   "title": "Aelita",
+   "director": "Yakov Protazanov",
+   "note": "Konstruktivistische Mars-Science-Fiction nach Alexei Tolstoi"
+  },
+  "ru-26": {
+   "title": "Der Mann mit der Kamera",
+   "director": "Dziga Vertov",
+   "note": "Das Manifest des „Kinos ohne Zwischentitel und ohne Drehbuch“, Avantgarde"
+  },
+  "ru-27": {
+   "title": "Panzerkreuzer Potemkin",
+   "director": "Sergei Eisenstein",
+   "note": "Ein Klassiker der Montage"
+  },
+  "ru-28": {
+   "title": "Streik",
+   "director": "Sergei Eisenstein",
+   "note": "Eisensteins Debüt"
+  },
+  "ru-29": {
+   "title": "Sturm über Asien",
+   "director": "Vsevolod Pudovkin",
+   "note": "Ein poetisches sowjetisches Epos"
+  },
+  "ru-30": {
+   "title": "Zvenigora",
+   "director": "Alexander Dovzhenko",
+   "note": "Ein surrealistisches Gedicht-Gleichnis"
+  },
+  "ru-31": {
+   "title": "Frühling",
+   "director": "Mikhail Kaufman",
+   "note": "Eine poetische Städtesinfonie über das Erwachen des Frühlings",
+   "attribution": "Produktion: VUFKU. Kamera: Mikhail Kaufman"
+  },
+  "ru-32": {
+   "title": "Kino-Prawda Nr. 15",
+   "director": "Dziga Vertov",
+   "note": "Eine Wochenschau mit ihren russischen Original-Zwischentiteln"
+  },
+  "en-33": {
+   "title": "Der Autofahrer „?“",
+   "director": "Walter R. Booth (Vereinigtes Königreich)",
+   "note": "Ein schelmischer britischer Trickfilm über ein Auto, das Wände hinauffährt und um die Ringe des Saturn kurvt"
+  },
+  "en-34": {
+   "title": "Alice im Wunderland",
+   "director": "Cecil Hepworth, Percy Stow (Vereinigtes Königreich)",
+   "note": "Die erste Verfilmung von „Alice im Wunderland“"
+  },
+  "en-35": {
+   "title": "Eine Woche",
+   "director": "Buster Keaton, Edward F. Cline",
+   "note": "Die mustergültige 24-Minuten-Komödie über ein Fertighaus"
+  },
+  "en-36": {
+   "title": "Der General",
+   "director": "Buster Keaton, Clyde Bruckman",
+   "note": "Die größte Abenteuerkomödie der Stummfilmzeit"
+  },
+  "en-37": {
+   "title": "Steamboat Bill, Jr.",
+   "director": "Charles Reisner, Buster Keaton",
+   "note": "Die berühmte Szene mit der einstürzenden Hausfassade"
+  },
+  "en-38": {
+   "title": "Der Vagabund und das Kind (The Kid)",
+   "director": "Charlie Chaplin",
+   "note": "Chaplins lyrischer Klassiker"
+  },
+  "en-39": {
+   "title": "Goldrausch",
+   "director": "Charlie Chaplin",
+   "note": "Ein Chaplin-Klassiker"
+  },
+  "en-40": {
+   "title": "Ausgerechnet Wolkenkratzer!",
+   "director": "Fred C. Newmeyer, Sam Taylor",
+   "note": "Harold Lloyd an den Zeigern einer Turmuhr"
+  },
+  "en-41": {
+   "title": "Das Phantom der Oper",
+   "director": "Rupert Julian",
+   "note": "Ein gotischer Publikumserfolg mit Lon Chaney"
+  },
+  "en-42": {
+   "title": "Die verlorene Welt",
+   "director": "Harry O. Hoyt",
+   "note": "Willis O’Briens Stop-Motion-Dinosaurier, nach Conan Doyle"
+  },
+  "en-43": {
+   "title": "Frankenstein",
+   "director": "J. Searle Dawley (Edison)",
+   "note": "Die allererste Verfilmung von Mary Shelley"
+  },
+  "en-44": {
+   "title": "Der große Eisenbahnraub",
+   "director": "Edwin S. Porter",
+   "note": "Der erste Western und ein Klassiker der Montage"
+  },
+  "en-45": {
+   "title": "Wie ein Moskito arbeitet",
+   "director": "Winsor McCay",
+   "note": "Ein Meisterwerk der frühen handgezeichneten Animation"
+  },
+  "en-46": {
+   "title": "Prinzessin Nikotin oder Die Rauchfee",
+   "director": "J. Stuart Blackton",
+   "note": "Ein einfallsreicher Miniatur-Trickfilm auf einer Tischplatte"
+  },
+  "en-47": {
+   "title": "Die große weiße Stille",
+   "director": "Herbert Ponting (Vereinigtes Königreich)",
+   "note": "Authentische Aufnahmen von Robert Scotts Antarktis-Expedition"
+  },
+  "fr-48": {
+   "title": "Die Reise zum Mond (handkoloriert)",
+   "director": "Georges Méliès",
+   "note": "Die handkolorierte Fassung von Méliès’ bekanntestem Film"
+  },
+  "fr-49": {
+   "title": "Die Reise zum Mond (Schwarzweiß)",
+   "director": "Georges Méliès",
+   "note": "Die klassische Schwarzweiß-Fassung"
+  },
+  "fr-50": {
+   "title": "Die verschwindende Dame im Théâtre Robert-Houdin",
+   "director": "Georges Méliès",
+   "note": "Méliès’ erster Trickfilm, mit einem Stopptrick-Schnitt"
+  },
+  "fr-51": {
+   "title": "Das Reich der Feen",
+   "director": "Georges Méliès",
+   "note": "Eine märchenhafte Ausstattungsrevue mit Unterwasserkulissen"
+  },
+  "fr-52": {
+   "title": "Das fantastische Luftschiff",
+   "director": "Georges Méliès",
+   "note": "Der Albtraum eines Luftschiff-Erfinders"
+  },
+  "fr-53": {
+   "title": "Arbeiter verlassen die Lumière-Werke",
+   "director": "Die Brüder Lumière",
+   "note": "Einer der ersten Filme der Filmgeschichte"
+  },
+  "fr-54": {
+   "title": "Die Ankunft eines Zuges in La Ciotat",
+   "director": "Die Brüder Lumière",
+   "note": "Eine legendäre Miniatur von 50 Sekunden"
+  },
+  "fr-55": {
+   "title": "Les Vampires",
+   "director": "Louis Feuillade",
+   "note": "Ein Pariser Kult-Serial, mit seinen französischen Original-Zwischentiteln"
+  },
+  "fr-56": {
+   "title": "Das Herz und das Geld",
+   "director": "Louis Feuillade, Léonce Perret",
+   "note": "Ein kurzes Gaumont-Drama"
+  },
+  "fr-57": {
+   "title": "Die Heldentaten von Feu Follet",
+   "director": "Émile Cohl",
+   "note": "Ein Pionier der französischen Animation"
+  },
+  "fr-58": {
+   "title": "Szene im Garten von Roundhay",
+   "director": "Louis Le Prince",
+   "note": "Das älteste erhaltene Stück Film der Menschheitsgeschichte"
+  },
+  "de-59": {
+   "title": "Das Cabinet des Dr. Caligari",
+   "director": "Robert Wiene",
+   "note": "Die Fassung mit den deutschen expressionistischen Original-Zwischentiteln"
+  },
+  "de-60": {
+   "title": "Nosferatu – Eine Symphonie des Grauens",
+   "director": "F. W. Murnau",
+   "note": "Ein gotischer Klassiker"
+  },
+  "de-61": {
+   "title": "Faust",
+   "director": "F. W. Murnau",
+   "note": "Ein mit Licht und Schatten gemaltes Meisterwerk"
+  },
+  "de-62": {
+   "title": "Der Golem (Fragmente von 1915)",
+   "director": "Paul Wegener, Henrik Galeen",
+   "note": "Die erhaltenen Fragmente des ersten „Golem“"
+  },
+  "de-63": {
+   "title": "Schuhpalast Pinkus",
+   "director": "Ernst Lubitsch",
+   "note": "Eine frühe Berliner Komödie von Lubitsch"
+  },
+  "de-64": {
+   "title": "Das Weib des Pharao",
+   "director": "Ernst Lubitsch",
+   "note": "Ein monumentales historisches Drama der Weimarer Zeit"
+  },
+  "de-65": {
+   "title": "Die Katze und der Kanarienvogel",
+   "director": "Paul Leni",
+   "note": "Ein expressionistischer Krimi in einem alten Herrenhaus (in Hollywood vom Deutschen Leni gedreht)"
+  },
+  "es-66": {
+   "title": "Papiervögel (Origami)",
+   "director": "Segundo de Chomón (Spanien / Pathé)",
+   "note": "Papierfiguren, die zum Leben erwachen, aus dem Pathé-Studio"
+  },
+  "es-67": {
+   "title": "Das elektrische Hotel",
+   "director": "Segundo de Chomón (Spanien / Pathé)",
+   "note": "Ein berühmter Trickfilm, in dem die Dinge in einem Hotelzimmer alles von selbst tun"
+  },
+  "es-68": {
+   "title": "Bizarre Symphonie",
+   "director": "Segundo de Chomón",
+   "note": "Eine musikalische Trick-Miniatur"
+  },
+  "es-69": {
+   "title": "Andalusischer Aberglaube",
+   "director": "Segundo de Chomón",
+   "note": "Spanische Farben und optische Tricks"
+  },
+  "es-70": {
+   "title": "Pasionaria",
+   "director": "Joan Maria Codina (Spanien)",
+   "note": "Ein spanisches Stummfilmdrama"
+  },
+  "es-71": {
+   "title": "Das Erhabenste",
+   "director": "Enric Ponsà (Spanien)",
+   "note": "Spätes spanisches Stummfilmkino, mit spanischen Zwischentiteln"
+  },
+  "es-72": {
+   "title": "Das graue Auto",
+   "director": "Enrique Rosas (Mexiko)",
+   "note": "Ein legendärer mexikanischer Stummfilm-Krimi mit seinen spanischen Original-Zwischentiteln"
+  },
+  "es-73": {
+   "title": "Gaucho-Adel",
+   "director": "Humberto Cairo und andere (Argentinien)",
+   "note": "Ein Klassiker des argentinischen Kinos, mit spanischen Zwischentiteln"
+  },
+  "es-74": {
+   "title": "Amalia",
+   "director": "Enrique García Velloso (Argentinien)",
+   "note": "Der erste Langfilm Argentiniens"
+  },
+  "es-75": {
+   "title": "Die argentinische Flagge",
+   "director": "Eugenio Py (Argentinien)",
+   "note": "Der allererste Film Argentiniens"
+  },
+  "es-76": {
+   "title": "Ausritt im Chapultepec-Park",
+   "director": "Gabriel Veyre (Mexiko)",
+   "note": "Eine der ersten Ansichten Mexikos auf Film"
+  },
+  "ja-77": {
+   "title": "Namakura Gatana (Das stumpfe Schwert)",
+   "director": "Jun’ichi Kōuchi",
+   "note": "Der älteste erhaltene Anime, in Restaurierung"
+  },
+  "ja-78": {
+   "title": "Eine Seite des Wahnsinns",
+   "director": "Teinosuke Kinugasa",
+   "note": "Japanische Avantgarde ganz ohne Zwischentitel"
+  },
+  "ja-79": {
+   "title": "Goketsu Jiraiya",
+   "director": "Shōzō Makino",
+   "note": "Der erste japanische Film mit Spezialeffekten, über einen Ninja-Zauberer"
+  },
+  "ja-80": {
+   "title": "Chokon (Ein unvergesslicher Groll)",
+   "director": "Daisuke Itō",
+   "note": "Ein Klassiker des Samurai-Jidaigeki"
+  },
+  "ja-81": {
+   "title": "Eine Geschichte vom Tabak",
+   "director": "Noburō Ōfuji",
+   "note": "Ein früher japanischer Scherenschnitt-Zeichentrickfilm"
+  },
+  "ja-82": {
+   "title": "Die Geschichte vom Affenkönig",
+   "director": "Noburō Ōfuji",
+   "note": "Ein früher japanischer Zeichentrickfilm in farbigem Chiyogami-Papier"
+  },
+  "ja-83": {
+   "title": "Die Einbrecher von Schloss Bagdad",
+   "director": "Noburō Ōfuji",
+   "note": "Ein orientalisches Märchen in Chiyogami-Papierschnitten"
+  },
+  "ja-84": {
+   "title": "Kobu-tori Jiisan (Der alte Mann und die Beule)",
+   "director": "Yasuji Murata",
+   "note": "Ein japanisches Volksmärchen als Animation"
+  },
+  "ja-85": {
+   "title": "Tage der Jugend (Eine Studentenromanze)",
+   "director": "Yasujirō Ozu",
+   "note": "Der früheste erhaltene Langfilm von Ozu"
+  },
+  "ja-86": {
+   "title": "Tokkan kozō (Ein ungestümer Junge)",
+   "director": "Yasujirō Ozu",
+   "note": "Eine kurze Stummfilmkomödie von Ozu"
+  },
+  "fr-87": {
+   "title": "Herstellung von Schreibmaschinenbändern",
+   "director": "Pathé-Baby",
+   "note": "Eine echte Pathé-Baby-Rolle: wie Farbbänder für Schreibmaschinen hergestellt wurden"
+  },
+  "fr-88": {
+   "title": "Herstellung von Bleistiftminen",
+   "director": "Pathé-Baby",
+   "note": "Wie Bleistiftminen hergestellt wurden, eine Pathé-Baby-Rolle"
+  },
+  "fr-89": {
+   "title": "Akropolis",
+   "director": "Pathé-Baby",
+   "note": "Die Akropolis von Athen auf 9,5-mm-Heimfilm"
+  },
+  "es-90": {
+   "title": "Die Alhambra von Granada",
+   "director": "Pathé-Baby",
+   "note": "Ein architektonischer Spaziergang durch Granada"
+  },
+  "it-91": {
+   "title": "Strohhutherstellung in Fiesole",
+   "director": "Pathé-Baby",
+   "note": "Ein Handwerk bei Florenz in Italien"
+  },
+  "fr-92": {
+   "title": "Die vom Blitz getroffene Stadt",
+   "director": "Luitz-Morat (Pathé-Baby)",
+   "note": "Französische Science-Fiction auf Pathé-Baby-Rollen"
+  },
+  "none-93": {
+   "title": "Loïe Fullers Tanz (handkoloriert)",
+   "director": "Pathé / Segundo de Chomón",
+   "note": "Ein Tanz mit Schleiern, von Hand koloriert"
+  },
+  "none-94": {
+   "title": "Das rote Gespenst (Pathécolor)",
+   "director": "Segundo de Chomón, Ferdinand Zecca",
+   "note": "Schablonenkoloriertes Pathécolor, eine mystische Ausstattungsrevue"
+  },
+  "none-95": {
+   "title": "Die Ostereier (Pathécolor)",
+   "director": "Segundo de Chomón",
+   "note": "Ein kurzer Farbtrick von 1907"
+  },
+  "none-96": {
+   "title": "Die akrobatische Fliege",
+   "director": "F. Percy Smith (Vereinigtes Königreich)",
+   "note": "Berühmte Makroaufnahmen einer Fliege, die mit Gegenständen jongliert"
+  },
+  "none-97": {
+   "title": "Der Venustransit",
+   "director": "Pierre Jules César Janssen",
+   "note": "Astronomische Chronofotografie von 1874"
+  },
+  "nl-98": {
+   "title": "Bits & Pieces Nr. 26 (Eye Filmmuseum)",
+   "director": "Eye Filmmuseum (Niederlande)",
+   "note": "Eine von mehr als 600 Digitalisierungen des Eye Filmmuseum in Amsterdam"
+  },
+  "da-99": {
+   "title": "Der Abgrund (Afgrunden)",
+   "director": "Urban Gad (Dänemark)",
+   "note": "Asta Nielsens triumphales Debüt, das goldene Zeitalter des dänischen Kinos"
+  },
+  "sv-100": {
+   "title": "Berg-Ejvind und sein Weib",
+   "director": "Victor Sjöström (Schweden)",
+   "note": "Ein poetisches skandinavisches Meisterwerk über Natur und Schicksal"
+  },
+  "sv-101": {
+   "title": "Gunnar Hedes Saga",
+   "director": "Mauritz Stiller (Schweden)",
+   "note": "Nach dem Roman von Selma Lagerlöf"
+  },
+  "pt-102": {
+   "title": "Limite",
+   "director": "Mário Peixoto (Brasilien)",
+   "note": "Oft als bester brasilianischer Film genannt; hypnotische Avantgarde"
+  },
+  "pt-103": {
+   "title": "Opas Brille",
+   "director": "Francisco Santos (Brasilien)",
+   "note": "Der älteste erhaltene brasilianische Spielfilm"
+  },
+  "hi-104": {
+   "title": "Raja Harishchandra",
+   "director": "Dadasaheb Phalke",
+   "note": "Der erste Langfilm Indiens"
+  },
+  "hi-105": {
+   "title": "Die Geburt von Shri Krishna",
+   "director": "Dadasaheb Phalke",
+   "note": "Ein mythologischer Klassiker des frühen indischen Kinos"
+  },
+  "hi-106": {
+   "title": "Shiraz: Eine Liebesgeschichte aus Indien",
+   "director": "Franz Osten",
+   "note": "Eine prachtvolle Stummfilmgeschichte vom Bau des Taj Mahal"
+  }
+ }
+}
