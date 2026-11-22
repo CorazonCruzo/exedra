@@ -2359,7 +2359,7 @@ const stored = (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}
 const storedBooks = (Array.isArray(stored.books) ? stored.books : stored.book ? [stored.book] : []).filter(b => b && typeof b === 'object').slice(0, BOOK_MAX);
 // В первой версии слой листа был высотой над столом — такие слои не годятся, раскладываем заново.
 if (stored.v !== 2) for (const s of stored.sheets || []) delete s.layer;
-const LIGHT = .45;
+const LIGHT = .8;   // свет зала по умолчанию — середина ползунка (её просьба 2026-11-22; было .45)
 // Убранство зала — росписи куполков, скульптура на каталоге, фигурка на пресс-папье и бумага книги: выбирается кнопкой «убранство», хранится вместе со столом;
 // ?art=, ?sculpt=, ?weight= — на этот раз другое. Остальное (дерево, шкафы, паркет, окна, глобусы, часы, вещи задней стены) выбрано раз и навсегда;
 // ключи этого в старых сохранениях игнорируются.
@@ -2374,13 +2374,15 @@ const BOOK_PAPER = { old: { title: t('decor.paper.old') }, file: { title: t('dec
 const decor = { bookPaper: choice(BOOK_PAPER, stored.decor?.bookPaper, 'old'), sculpt: choice(SCULPTS, Q.get('sculpt'), savedSculpt), weight: choice(FIGURES, Q.get('weight'), savedWeight), art: choice(ART_SETS, Q.get('art'), savedArt) };
 // Свет зала — 0…1,6: выше единицы — «ещё светлее» (её просьба 2026-11-22: «возможность ещё больше света добавить»).
 const LIGHT_MAX = 1.6;
-let lightLevel = clamp(stored.light ?? LIGHT, 0, LIGHT_MAX), inkLevel = clamp(stored.ink ?? .35, 0, 1);
+// Свет хранится всегда, даже нетронутый: прежнее значение по умолчанию (.45) без отметки «трогали» — не выбор, а старый дефолт, его сменяет новый.
+let lightTouched = !!stored.lightSet || (stored.light != null && stored.light !== .45);
+let lightLevel = clamp(lightTouched ? stored.light : LIGHT, 0, LIGHT_MAX), inkLevel = clamp(stored.ink ?? .35, 0, 1);
 let stale = false, nextId = stored.nextId || 1, saveT, ready = false, typeFace = stored.face === 'book' ? 'book' : 'mono', draft = stored.draft || null, warned = false;
 const saveNow = () => {
   clearTimeout(saveT); if (!ready || stale) return;
   if (tw) draft = tw.draft;
   try {
-    localStorage.setItem(KEY, JSON.stringify({ v: 2, nextId, face: typeFace, light: lightLevel, ink: inkLevel, decor: { ...decor, sculpt: savedSculpt, weight: savedWeight, art: savedArt }, draft, tw: twM ? twM.data : stored.tw, lamp: lampM ? { ...lampM.data, on: lamp.on } : stored.lamp, weight: weightM ? weightM.data : stored.weight, books: books.length ? books.map(b => b.data) : storedBooks, hallLamps: tableLamps?.touched ? tableLamps.bits() : stored.hallLamps, hallChairs: chairs?.touched ? chairs.data() : stored.hallChairs, sheets: sheets.map(s => s.data), binders: folders.filter(f => !f.gone).map(f => f.data) }));
+    localStorage.setItem(KEY, JSON.stringify({ v: 2, nextId, face: typeFace, light: lightLevel, lightSet: lightTouched || undefined, ink: inkLevel, decor: { ...decor, sculpt: savedSculpt, weight: savedWeight, art: savedArt }, draft, tw: twM ? twM.data : stored.tw, lamp: lampM ? { ...lampM.data, on: lamp.on } : stored.lamp, weight: weightM ? weightM.data : stored.weight, books: books.length ? books.map(b => b.data) : storedBooks, hallLamps: tableLamps?.touched ? tableLamps.bits() : stored.hallLamps, hallChairs: chairs?.touched ? chairs.data() : stored.hallChairs, sheets: sheets.map(s => s.data), binders: folders.filter(f => !f.gone).map(f => f.data) }));
   } catch { if (!warned) { warned = true; hint(t('hint.save.noSpace'), 9000); } }
 };
 const save = () => { clearTimeout(saveT); saveT = setTimeout(saveNow, 400); };
@@ -2765,7 +2767,7 @@ function slider(panel, keys, get, set) {
   range.oninput = () => { set(range.value / 100); save(); };
   sliders.push(s); return s;
 }
-slider('lightPanel', ['lightBtn', 'lightReadBtn'], () => lightLevel, v => { lightLevel = v; setLight(v); });
+slider('lightPanel', ['lightBtn', 'lightReadBtn'], () => lightLevel, v => { lightLevel = v; lightTouched = true; setLight(v); });
 // Густота краски — только у машинки, в режиме печати (пользователь 2026-11-21); в ряду клавиш зала её нет.
 slider('inkPanel', ['inkBtn'], () => inkLevel, v => { inkLevel = v; setInk(v); });
 const openSlider = () => sliders.find(s => s.open());
@@ -5218,7 +5220,7 @@ async function init() {
   const art = await artLoad; shownArt = art ? decor.art : null; shownSaved = art ? savedArt : null;
   // Не успели за 6 с — зал строится с нарисованным небом, а картины встанут, когда догрузятся.
   if (!art) { const k = decor.art; loadSet(k, 0).then(set => { if (set && decor.art === k && shownArt === null && ceiling) { ceiling.setArt(set); shownArt = k; shownSaved = savedArt; shadowDirty = true; } }); }
-  buildHall(art, await castsLoad, await muralLoad); setLight(LIGHT); setInk(inkLevel); applyGlass(); tintWood();
+  buildHall(art, await castsLoad, await muralLoad); setLight(lightLevel); setInk(inkLevel); applyGlass(); tintWood();
   const desk = await deskLoad;
   deskTop = desk.deskTop; DESK = { hw: desk.hw, hd: desk.hd }; drawers = desk.drawers; lamp = desk.lamp; deskBody = desk.desk;
   lamp.group.userData.lamp = true; lamp.proxy.userData.proxy = true;
@@ -5234,7 +5236,7 @@ async function init() {
   const chandelier = await chandelierLoad;
   if (chandelier && ceiling) {
     hangChandeliers(chandelier, ceiling.hooks);
-    setLight(LIGHT);
+    setLight(lightLevel);
   }
   const frames = await framesLoad; placeBackWall(frames, await wallArtLoad);
   if (NOOK) placeNook(await loungeLoad, frames.sconce);
