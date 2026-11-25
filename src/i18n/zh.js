@@ -164,6 +164,9 @@ export default {
   "decor.art": "穹顶壁画",
   "decor.sculpt": "目录柜上的雕塑",
   "decor.weight": "书桌上的镇纸",
+  "decor.bin": "废纸篓",
+  "decor.bin.wicker": "皮革包边藤编",
+  "decor.bin.twisted": "扭转编织",
   "decor.paper": "书页纸张",
   "decor.chairs": "房间里的椅子",
   "decor.chairsBack": "放回原位",
@@ -262,7 +265,7 @@ export default {
   "phone.title": "Exedra 需要更大的屏幕",
   "phone.text": "这个房间是为平板或电脑设计的：在手机上，阅读和操作都太小了。请在平板或电脑上打开。",
   // credits
-  "credits.line": "打字机：Tijerín Art Studio · 台灯：Noah · 书桌：Matthew Collings · 柜子：Lorenzo Drago · 灰泥装饰：Dikart、gussbronze · 时钟：Crea · 雅典娜的猫头鹰：Danzer · 壁灯：Javier Carceller · 门环：Fernando Closs · 书架：Francesco Coldesina · 扶手椅：Ashe · 沙发：Oleksandr Tserkovniy · 地毯：mfb64 · 落地灯：Mad_Lobster_Workshop · 百代宝贝放映机：timvanderheijden · 棕榈：AllQuad · 花盆：Emily Rink · 国际象棋：igi — CC BY 4.0 · 镇纸：老鼠 — Emm，梗犬 — oxlade-3d，CC BY 4.0；驴子 — The Hunt Museum，孔雀石（照片）— Kalamansi123，CC0 · 文件夹：Georg Hulbe，1902 年 — 大都会艺术博物馆，CC0 · 多佩尔迈尔地球仪、石膏野猪、树枝上的渡鸦：Muzea Małopolski — CC0；地球仪上的地图：C. de Jode、A. Cellarius — 公有领域 · 椅子、吊灯、画框、木材、拼花地板、锦缎、咖啡桌与边桌：Poly Haven — CC0；皮革：ambientCG — CC0 · 绘画与图片：L. von Hofmann、P. Puvis de Chavannes、A. Böcklin、A. Rylov、A. Kuindzhi、I. Levitan；海报：A. Mauzan — 百代宝贝，1928 年，“Teatro Ópera”，布宜诺斯艾利斯，1930 年；M. Kalmanson —“Tormented Souls”，1917 年 — 公有领域；绘画照片：Belvedere、Johannes Stoll — CC BY-SA 4.0，Allie Caulfield — CC BY 2.0 · 窗玻璃：Wolfgang Sauber 摄 — CC BY-SA 4.0 · 声音：lonemonk — CC BY 3.0，Work With Sounds — CC BY 4.0，_stubb — CC0；抽屉、书页和开关的声音 — 公有领域 · 纸张：布宁，巴黎，1920 年；纸上的字迹：契诃夫，柏林，1920 年 — 公有领域 · <a id=\"aboutLink\" href=\"CREDITS.md\" style=\"color:inherit;pointer-events:auto\">详情</a>",
+  "credits.line": "打字机：Tijerín Art Studio · 台灯：Noah · 书桌：Matthew Collings · 柜子：Lorenzo Drago · 灰泥装饰：Dikart、gussbronze · 时钟：Crea · 雅典娜的猫头鹰：Danzer · 壁灯：Javier Carceller · 门环：Fernando Closs · 书架：Francesco Coldesina · 扶手椅：Ashe · 沙发：Oleksandr Tserkovniy · 地毯：mfb64 · 落地灯：Mad_Lobster_Workshop · 百代宝贝放映机：timvanderheijden · 棕榈：AllQuad · 花盆：Emily Rink · 国际象棋：igi — CC BY 4.0 · 镇纸：老鼠 — Emm，梗犬 — oxlade-3d，CC BY 4.0；驴子 — The Hunt Museum，孔雀石（照片）— Kalamansi123，CC0 · 废纸篓：Dudzy, eeelabvisual, CC BY 4.0 · 文件夹：Georg Hulbe，1902 年 — 大都会艺术博物馆，CC0 · 多佩尔迈尔地球仪、石膏野猪、树枝上的渡鸦：Muzea Małopolski — CC0；地球仪上的地图：C. de Jode、A. Cellarius — 公有领域 · 椅子、吊灯、画框、木材、拼花地板、锦缎、咖啡桌与边桌：Poly Haven — CC0；皮革：ambientCG — CC0 · 绘画与图片：L. von Hofmann、P. Puvis de Chavannes、A. Böcklin、A. Rylov、A. Kuindzhi、I. Levitan；海报：A. Mauzan — 百代宝贝，1928 年，“Teatro Ópera”，布宜诺斯艾利斯，1930 年；M. Kalmanson —“Tormented Souls”，1917 年 — 公有领域；绘画照片：Belvedere、Johannes Stoll — CC BY-SA 4.0，Allie Caulfield — CC BY 2.0 · 窗玻璃：Wolfgang Sauber 摄 — CC BY-SA 4.0 · 声音：lonemonk — CC BY 3.0，Work With Sounds — CC BY 4.0，_stubb — CC0；抽屉、书页和开关的声音 — 公有领域 · 纸张：布宁，巴黎，1920 年；纸上的字迹：契诃夫，柏林，1920 年 — 公有领域 · <a id=\"aboutLink\" href=\"CREDITS.md\" style=\"color:inherit;pointer-events:auto\">详情</a>",
   // app
   "app.title": "Exedra",
   // hint

@@ -2374,7 +2374,10 @@ let savedSculpt = choice(SCULPTS, stored.decor?.sculpt, 'boar');
 // savedWeight — фигурка на пресс-папье, выбранная в карточке; ?weight= — другая на этот раз.
 let savedWeight = choice(FIGURES, stored.decor?.weight, 'mouse');
 const BOOK_PAPER = { old: { title: t('decor.paper.old') }, file: { title: t('decor.paper.file') } };
-const decor = { bookPaper: choice(BOOK_PAPER, stored.decor?.bookPaper, 'old'), sculpt: choice(SCULPTS, Q.get('sculpt'), savedSculpt), weight: choice(FIGURES, Q.get('weight'), savedWeight), art: choice(ART_SETS, Q.get('art'), savedArt) };
+// Корзина для бумаг у стола (пользователь 2026-11-25: «интерактивную корзину… стильную»; две на выбор — «хочу глазами сверить»). Пока она только стоит; выбрасывать в неё — следующим шагом.
+// Wicker Basket — Dudzy, CC BY 4.0; News Paper Basket — eeelabvisual, CC BY 4.0 (оригиналы — originals/bin, подготовка — tools/models/basket.py). rot — поворот, чтобы к читателю смотрела лучшая сторона.
+const BINS = { wicker: { title: t('decor.bin.wicker'), url: 'assets/models/bin/wicker.glb', rot: .5 }, twisted: { title: t('decor.bin.twisted'), url: 'assets/models/bin/twisted.glb', rot: 0 } };
+const decor = { bookPaper: choice(BOOK_PAPER, stored.decor?.bookPaper, 'old'), bin: choice(BINS, Q.get('bin') ?? stored.decor?.bin, 'wicker'), sculpt: choice(SCULPTS, Q.get('sculpt'), savedSculpt), weight: choice(FIGURES, Q.get('weight'), savedWeight), art: choice(ART_SETS, Q.get('art'), savedArt) };
 // Свет зала — 0…1,6: выше единицы — «ещё светлее» (её просьба 2026-11-22: «возможность ещё больше света добавить»).
 const LIGHT_MAX = 1.6;
 // Свет хранится всегда, даже нетронутый: прежнее значение по умолчанию (.45) без отметки «трогали» — не выбор, а старый дефолт, его сменяет новый.
@@ -2815,7 +2818,7 @@ $('help').addEventListener('pointerdown', e => { if (e.target === $('help')) sho
 const applyGlass = () => { ceiling?.setGlass({ side: glassOf(false), fan: glassOf(true), sideGain: GLASS.sideGain, fanGain: GLASS.fanGain }); sunThroughGlass(); };
 const decorOpen = () => !$('decor').hidden;
 // Кнопки вариантов заводятся один раз; выбор только переставляет ободок — фокус остаётся на нажатой.
-const DECOR_ROWS = [['decorArt', ART_SETS, 'art'], ['decorSculpt', SCULPTS, 'sculpt'], ['decorWeight', FIGURES, 'weight'], ['decorPaper', BOOK_PAPER, 'bookPaper']];
+const DECOR_ROWS = [['decorArt', ART_SETS, 'art'], ['decorSculpt', SCULPTS, 'sculpt'], ['decorWeight', FIGURES, 'weight'], ['decorBin', BINS, 'bin'], ['decorPaper', BOOK_PAPER, 'bookPaper']];
 const markDecor = () => { for (const [id, , key] of DECOR_ROWS) for (const b of $(id).children) b.classList.toggle('on', b.dataset.k === decor[key]); };
 let shownArt = null, shownSaved = null;
 async function chooseArt(k) {
@@ -2828,6 +2831,17 @@ async function chooseArt(k) {
   // Не загрузились — назад к тому, что сейчас в куполках (а если там ещё небо — к прежнему выбору).
   if (!set) { decor.art = shownArt ?? was; savedArt = shownSaved ?? wasSaved; markDecor(); save(); hint(t('hint.art.fail'), 5000); return; }
   ceiling.setArt(set); shownArt = k; shownSaved = savedArt; shadowDirty = true;
+}
+// Корзина: модель грузится, когда её выбрали (и при входе — выбранная), и встаёт на пол справа от стола, у передней ножки, где её достаёт рука сидящего.
+const BIN_AT = { x: .2, z: .1 };   // от правого края стола наружу и от середины его глубины к читателю, м
+let bin = null; const binModels = {};
+async function chooseBin(k) {
+  decor.bin = k; markDecor(); save();
+  const B = BINS[k]; binModels[k] ??= loadModel(B.url).catch(e => { console.warn('bin', e); return null; });
+  const m = await binModels[k]; if (!m || decor.bin !== k) return;
+  if (bin) station.remove(bin);
+  m.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.userData.bin = true; } });
+  m.position.set(DESK.hw + BIN_AT.x, 0, BIN_AT.z); m.rotation.y = B.rot; station.add(m); bin = m; lightMasks(); shadowDirty = true;
 }
 // Бумага книги: «старая» — страница печатается на нашей бумаге, «как в файле» — цвета файла как есть (белое остаётся белым).
 const chooseBookPaper = k => { decor.bookPaper = k; markDecor(); for (const b of books) b.book.setPaperMode(k === 'file'); shadowDirty = true; save(); };
@@ -2842,7 +2856,7 @@ function showDecor(on) {
   if (on) {
     closeSliders();
     for (const [id, list, key] of DECOR_ROWS) if (!$(id).children.length) $(id).append(...Object.entries(list).map(([k, v]) => {
-      const b = document.createElement('button'); b.textContent = v.title; b.dataset.k = k; b.onclick = () => (key === 'art' ? chooseArt(k) : key === 'sculpt' ? chooseSculpt(k) : key === 'weight' ? chooseWeight(k) : chooseBookPaper(k)); return b;
+      const b = document.createElement('button'); b.textContent = v.title; b.dataset.k = k; b.onclick = () => (key === 'art' ? chooseArt(k) : key === 'sculpt' ? chooseSculpt(k) : key === 'weight' ? chooseWeight(k) : key === 'bin' ? chooseBin(k) : chooseBookPaper(k)); return b;
     }));
     if (!$('decorLang').children.length) $('decorLang').append(...LANGS.map(([code, name]) => { const b = document.createElement('button'); b.textContent = name; b.dataset.k = code; b.classList.toggle('on', code === lang); b.onclick = () => setLang(code); return b; }));
     markDecor(); $('chairsBack').disabled = !(chairs && (chairs.touched || stored.hallChairs));
@@ -5367,6 +5381,7 @@ async function init() {
   weight = buildPaperweight({ map: photo('assets/textures/malachite.jpg', true) }); weight.group.userData.weight = true; station.add(weight.group);
   weightM = new Mover(weight.group, stored.weight || { x: -.34, z: .2, rot: .4 }, .07); weightM.rest(underAt);
   { const k = decor.weight; loadWeight(k).then(m => { if (m && decor.weight === k) { weight.setFigure(k, m); shadowDirty = true; } }); }
+  chooseBin(decor.bin);
   goView(Q.get('view') === 'wall' ? 'wall' : 'seat', true);
   tableLamps = buildTableLamps({ scene, model: desk.lampModel, copies: await lampLoad, spots: lampSpots, y: -HALL.depth + TABLE_H + .028, light: tableLit, dress: below });
   const chair = await chairLoad; if (chair) placeChairs(chair);

@@ -27,6 +27,13 @@
 
 Лицензия CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
 
+## Корзина для бумаг
+
+- Плетёная в коже: «Wicker Basket», Dudzy, CC BY 4.0 — https://sketchfab.com/3d-models/wicker-basket-8f1a56956f5d454fa67c637a707fc9b0
+- Витая: «NEWS PAPER BASKET», eeelabvisual, CC BY 4.0 — https://sketchfab.com/3d-models/news-paper-basket-56a2d527b6c34dd2a9f002a4a5a3bb5f
+
+Текстуры уменьшены до 2048 точек, размеры приведены к настоящим (высота 36 и 30 см).
+
 ## Пресс-папье
 
 - Мышь: «Bronze mouse sculpture (1) – LdM», Emm (edemaistre), CC BY 4.0 — https://sketchfab.com/3d-models/bronze-mouse-sculpture-1-ldm-117e0039568c4a1cbca64ee2fa56eb5a. Упрощена до 16 тыс. треугольников, цвет и рельеф запечены; сине-серая текстура скана обесцвечена и тонирована под бронзу.
