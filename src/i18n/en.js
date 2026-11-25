@@ -31,6 +31,13 @@ export default {
   "type.faceBook": "book font",
   "type.glyph": "Aa",
   "type.ink": "ink strength",
+  "type.paste": "paste text (⌘V)",
+  "hint.paste.folder": "Printed {n} pp. — they are in the new folder “{name}”.",
+  "hint.paste.desk": "Printed {n} pp. — they lie on the desk with the others, in order; the rest is in the typewriter.",
+  "hint.paste.cut": "The text is longer than {max} pages; the rest was not printed — paste it again.",
+  "hint.paste.noName": "untitled",
+  "hint.paste.empty": "The clipboard has no text.",
+  "hint.paste.denied": "No access to the clipboard here: press ⌘V (Ctrl+V).",
   "type.eject": "take out the sheet — it will lie on the desk",
   // folder
   "folder.nameEdit": "folder name — Enter to save, Esc to cancel",

@@ -31,6 +31,13 @@ export default {
   "type.faceBook": "police de livre",
   "type.glyph": "Aa",
   "type.ink": "intensité de l’encre",
+  "type.paste": "coller du texte (⌘V)",
+  "hint.paste.folder": "Feuilles tapées : {n} — elles sont dans la nouvelle chemise « {name} ».",
+  "hint.paste.desk": "Feuilles tapées : {n} — elles sont sur la table avec les autres, dans l’ordre ; la suite est dans la machine.",
+  "hint.paste.cut": "Le texte dépasse {max} feuilles ; la suite n’a pas été tapée : collez-la à nouveau.",
+  "hint.paste.noName": "sans titre",
+  "hint.paste.empty": "Le presse-papiers ne contient pas de texte.",
+  "hint.paste.denied": "Pas d’accès au presse-papiers : appuyez sur ⌘V (Ctrl+V).",
   "type.eject": "sortir la feuille — elle restera sur le bureau",
   // folder
   "folder.nameEdit": "nom de la chemise — Entrée pour enregistrer, Échap pour annuler",

@@ -31,6 +31,13 @@ export default {
   "type.faceBook": "letra de libro",
   "type.glyph": "Aa",
   "type.ink": "intensidad de la tinta",
+  "type.paste": "pegar texto (⌘V)",
+  "hint.paste.folder": "Hojas impresas: {n}; están en la carpeta nueva «{name}».",
+  "hint.paste.desk": "Hojas impresas: {n}; están en la mesa con las demás, en orden; la continuación está en la máquina.",
+  "hint.paste.cut": "El texto supera las {max} hojas; el resto no se imprimió: pégalo de nuevo.",
+  "hint.paste.noName": "sin título",
+  "hint.paste.empty": "El portapapeles no tiene texto.",
+  "hint.paste.denied": "Sin acceso al portapapeles: pulsa ⌘V (Ctrl+V).",
   "type.eject": "sacar la hoja: quedará sobre el escritorio",
   // folder
   "folder.nameEdit": "nombre de la carpeta: Enter para guardar, Esc para cancelar",

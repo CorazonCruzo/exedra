@@ -61,6 +61,7 @@
   <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M16.2 3.3l4.5 4.5L8.3 20.2H3.8v-4.5zM13.7 5.8l4.5 4.5M3.8 15.7l4.5 4.5"/></symbol>
   <symbol id="i-eraser" viewBox="0 0 24 24"><path d="M10.5 20.5h10M4.2 14.3l9.1-9.1a1.4 1.4 0 0 1 2 0l4.5 4.5a1.4 1.4 0 0 1 0 2l-8.8 8.8H9.4l-5.2-5.2a.7.7 0 0 1 0-1zM8.6 9.9l6.5 6.5"/></symbol>
   <symbol id="i-undo" viewBox="0 0 24 24"><path d="M8.5 4.5 4 9l4.5 4.5M4.5 9H14a5.5 5.5 0 0 1 0 11h-3.5"/></symbol>
+  <symbol id="i-paste" viewBox="0 0 24 24"><path d="M9 4.5H6.5A1.5 1.5 0 0 0 5 6v13.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H15M9 3h6v3H9zM8.5 11h7M8.5 14.5h7M8.5 18h4.5"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M5.6 18.4l1.7-1.7M16.7 7.3l1.7-1.7"/></symbol>
 </svg>
 <!-- Шторка: на миг затемняет кадр, пока вход в режим чтения и выход из него меняют набор рисуемого (без z-index — полоски клавиш остаются поверх). -->
@@ -101,6 +102,7 @@
   <button id="faceBtn" class="key" data-tip="typewriter font" aria-label="typewriter font" data-i18n-attr="data-tip:type.faceTypewriter; aria-label:type.faceTypewriter"><span class="glyph" data-i18n="type.glyph">Aa</span></button>
   <button id="inkBtn" class="key" data-tip="ink strength" aria-label="ink strength" data-i18n-attr="data-tip:type.ink; aria-label:type.ink" aria-expanded="false"><svg><use href="#i-ink"/></svg></button>
   <button id="soundBtn" class="key" data-tip="sound on" aria-label="sound on" data-i18n-attr="data-tip:tools.soundOn; aria-label:tools.soundOn"><svg><use href="#i-sound"/></svg></button>
+  <button id="pasteBtn" class="key" data-tip="paste text (⌘V)" aria-label="paste text (⌘V)" data-i18n-attr="data-tip:type.paste; aria-label:type.paste"><svg><use href="#i-paste"/></svg></button>
   <button id="doneBtn" class="key" data-tip="take out the sheet — it will lie on the desk" aria-label="take out the sheet — it will lie on the desk" data-i18n-attr="data-tip:type.eject; aria-label:type.eject"><svg><use href="#i-done"/></svg></button>
 </div>
 <input id="labelEdit" type="text" maxlength="60" autocomplete="off" spellcheck="false" aria-label="folder name — Enter to save, Esc to cancel" data-i18n-attr="aria-label:folder.nameEdit" hidden>

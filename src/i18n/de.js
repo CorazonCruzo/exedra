@@ -31,6 +31,13 @@ export default {
   "type.faceBook": "Buchschrift",
   "type.glyph": "Aa",
   "type.ink": "Farbstärke",
+  "type.paste": "Text einfügen (⌘V)",
+  "hint.paste.folder": "Gedruckte Blätter: {n} – sie liegen in der neuen Mappe „{name}“.",
+  "hint.paste.desk": "Gedruckte Blätter: {n} – sie liegen der Reihe nach bei den anderen auf dem Tisch; der Rest steckt in der Maschine.",
+  "hint.paste.cut": "Der Text ist länger als {max} Blätter; der Rest wurde nicht gedruckt – füge ihn noch einmal ein.",
+  "hint.paste.noName": "ohne Titel",
+  "hint.paste.empty": "In der Zwischenablage ist kein Text.",
+  "hint.paste.denied": "Kein Zugriff auf die Zwischenablage: drücke ⌘V (Strg+V).",
   "type.eject": "Blatt herausnehmen – es bleibt auf dem Schreibtisch liegen",
   // folder
   "folder.nameEdit": "Name der Mappe – Enter zum Speichern, Esc zum Abbrechen",

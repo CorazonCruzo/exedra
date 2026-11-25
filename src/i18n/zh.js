@@ -31,6 +31,13 @@ export default {
   "type.faceBook": "书籍字体",
   "type.glyph": "Aa",
   "type.ink": "墨色深浅",
+  "type.paste": "粘贴文本（⌘V）",
+  "hint.paste.folder": "已打印 {n} 页，放在新文件夹「{name}」里。",
+  "hint.paste.desk": "已打印 {n} 页，按顺序和之前的纸一起放在桌上；后续在打字机里。",
+  "hint.paste.cut": "文本超过 {max} 页，其余部分未打印——请再粘贴一次。",
+  "hint.paste.noName": "无标题",
+  "hint.paste.empty": "剪贴板里没有文本。",
+  "hint.paste.denied": "无法访问剪贴板：请按 ⌘V（Ctrl+V）。",
   "type.eject": "取出这张纸 — 它会放在书桌上",
   // folder
   "folder.nameEdit": "文件夹名称 — 按 Enter 保存，按 Esc 取消",

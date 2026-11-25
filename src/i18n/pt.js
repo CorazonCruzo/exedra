@@ -31,6 +31,13 @@ export default {
   "type.faceBook": "letra de livro",
   "type.glyph": "Aa",
   "type.ink": "intensidade da tinta",
+  "type.paste": "colar texto (⌘V)",
+  "hint.paste.folder": "Folhas datilografadas: {n} — estão na nova pasta “{name}”.",
+  "hint.paste.desk": "Folhas datilografadas: {n} — estão na mesa com as outras, em ordem; a continuação está na máquina.",
+  "hint.paste.cut": "O texto passa de {max} folhas; o resto não foi impresso — cole-o de novo.",
+  "hint.paste.noName": "sem título",
+  "hint.paste.empty": "A área de transferência não tem texto.",
+  "hint.paste.denied": "Sem acesso à área de transferência: pressione ⌘V (Ctrl+V).",
   "type.eject": "tirar a folha — ela ficará sobre a mesa",
   // folder
   "folder.nameEdit": "nome da pasta — Enter para salvar, Esc para cancelar",

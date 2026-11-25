@@ -31,6 +31,13 @@ export default {
   "type.faceBook": "本の書体",
   "type.glyph": "Aa",
   "type.ink": "インクの濃さ",
+  "type.paste": "テキストを貼り付け（⌘V）",
+  "hint.paste.folder": "{n}枚を打ちました。新しいファイル「{name}」に綴じてあります。",
+  "hint.paste.desk": "{n}枚を打ちました。ほかの紙と一緒に順番どおり机の上にあります。続きはタイプライターに入っています。",
+  "hint.paste.cut": "テキストが{max}枚を超えたため、残りは打っていません。もう一度貼り付けてください。",
+  "hint.paste.noName": "無題",
+  "hint.paste.empty": "クリップボードにテキストがありません。",
+  "hint.paste.denied": "クリップボードにアクセスできません。⌘V（Ctrl+V）を押してください。",
   "type.eject": "用紙を取り出す — 机の上に置かれます",
   // folder
   "folder.nameEdit": "フォルダーの名前 — Enterで保存、Escで取り消し",

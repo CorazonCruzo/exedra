@@ -2889,15 +2889,53 @@ $('about').addEventListener('pointerdown', e => { if (e.target === $('about')) s
 $('folderBtn').onclick = () => {
   $('folderBtn').blur();
   if (state !== 'idle') return;
+  newFolder(); hint(t('hint.folder.new'), 5000);
+};
+// Новая папка на столе (name — надпись на ярлыке или null).
+function newFolder(name = null) {
   const n = folders.filter(f => f.drawer === null).length;
   const [x, z] = keepOnDesk(.6 - n * .03, .02 + n * .04, .14, .18);
-  const f = addFolder({ id: nextId++, x, z, rot: -.08 });
+  const f = addFolder({ id: nextId++, x, z, rot: -.08, name });
   // Новая папка — на свободное место (не под другую папку или книгу: там она мерцала и лежала снизу); листы под ней — она ложится поверх них.
   const spot = freeSpotFor(f); if (spot) { f.px.set(spot.x); f.pz.set(spot.z); }
   const F = framedAt(f, f.px.t, f.pz.t, f.pr.t, f.pose), under = sheets.filter(x => x.binder === null && x.drawer === null && hitsSolid({ x: x.px.t, z: x.pz.t, r: x.pr.t, hw: A4.w / 2, hd: A4.h / 2 }, F, -.004));
   if (under.length) f.floor = Math.max(...under.map(x => x.floor)) + .0012;
   f.lift.set(.2); f.lift.t = 0; save();
-  hint(t('hint.folder.new'), 5000);
+  return f;
+}
+// ——— Вставка в машинку: «самиздат» ———
+// Пользователь 2026-11-25: вставить текст и сразу получить распечатку с правильным порядком в подшивке. У машинки ⌘V (или клавиша «вставить» — на планшете) печатает текст
+// мгновенно тем же шрифтом и переносом, что и набор (typewriter.js, `paste`). Помещается на лист в каретке — всё как обычно, текст на нём. Не помещается:
+// — лист в каретке первый за этот подход к машинке (чистый или уже начатый) — все листы по порядку, с последним недопечатанным, ложатся в новую папку с надписью
+//   по первой строке текста, в каретке — чистый лист;
+// — до него за этот подход уже выходили листы — заполненные ложатся на стол туда же и так же, как выходившие до вставки (по порядку, новые сверху), последний недопечатанный
+//   остаётся в каретке, как при наборе («листы укладываются не в подшивку, а на стол… с сохранением порядка»).
+// Больше PASTE_MAX листов за раз не печатается (папка толще не бывает): остальное — следующей вставкой.
+const PASTE_MAX = 200;
+function pasteTyped(text) {
+  if (state !== 'typing' || !tw?.active) return;
+  const bind = tw.firstSheet, r = tw.paste(text, PASTE_MAX, { keepLast: !bind }); if (!r) return hint(t('hint.paste.empty'), 3000);
+  twBusyUntil = performance.now() + 1800;
+  if (!r.pages.length) { saveNow(); return; }
+  const cut = r.cut ? ' ' + t('hint.paste.cut', { max: PASTE_MAX }) : '';
+  if (!bind) {
+    for (const p of r.pages) dropSheet(null, p.lines, p.fmt, p.seed);
+    saveNow(); return hint(t('hint.paste.desk', { n: r.pages.length }) + cut, 8000);
+  }
+  const first = text.split(/\r?\n/).map(l => l.replace(/\s+/g, ' ').trim()).find(Boolean) ?? '';
+  const name = first.length > 60 ? first.slice(0, 59).replace(/\s+\S*$/, '') + '…' : first;
+  const f = newFolder(name || null);
+  r.pages.forEach((p, k) => addSheet({ id: nextId++, lines: p.lines, fmt: p.fmt, seed: p.seed, binder: f.id, order: k + 1, x: f.px.t, z: f.pz.t, rot: f.pr.t }));
+  typedCount += r.pages.length; f.b.refresh(); sfx.play('page', { gain: .5, rate: .9 }); saveNow();
+  hint(t('hint.paste.folder', { n: r.pages.length, name: name || t('hint.paste.noName') }) + cut, 9000);
+}
+addEventListener('paste', e => {
+  if (state !== 'typing' || !tw?.active || e.target.closest?.('input, textarea, [contenteditable]')) return;
+  e.preventDefault(); pasteTyped(e.clipboardData?.getData('text/plain') ?? '');
+});
+$('pasteBtn').onclick = async () => {
+  $('pasteBtn').blur(); if (state !== 'typing' || !tw?.active) return;
+  try { pasteTyped(await navigator.clipboard.readText()); } catch { hint(t('hint.paste.denied'), 5000); }
 };
 const wait = ms => new Promise(ok => setTimeout(ok, ms));
 // Середина стопки на половине раскрытой папки (side = 1 — справа, −1 — слева) в осях самой папки и точка в осях стола на расстоянии x вдоль неё.
