@@ -2701,9 +2701,10 @@ function leaveTyping() {
   if (draft) hint(t('hint.typing.left'), 6000);
 }
 // Клавиша с галочкой: лист вынимается и ложится на стол справа, взгляд остаётся у машинки, в каретке — чистый лист.
+// На листе ничего нет (например, только что заправлен новый) — галочка просто отводит от машинки, как Esc (пользователь 2026-11-25: «должна действовать чисто как escape»).
 function takeOutSheet() {
   const out = tw.eject({ refill: true });
-  if (!out) return hint(t('hint.sheet.empty'), 3000);
+  if (!out) return tw.leave();
   dropSheet(out.img, out.lines, out.fmt, out.seed); saveNow(); twBusyUntil = performance.now() + 1800;
   hint(typedCount > 1 ? t('hint.typing.sheetsDown') : t('hint.typing.sheetDown'), 6000);
 }
