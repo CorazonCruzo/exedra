@@ -445,10 +445,9 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
   }
   // Вставка (пользователь 2026-11-25: вставить текст и сразу получить распечатку по порядку в подшивке, «как самиздат»). Текст печатается мгновенно, будто его набрали
   // на клавиатуре этим же шрифтом: тот же перенос слов, выключка, абзацы по Enter и смена листов, только без звуков ударов и без ожидания.
-  // Поместился на лист в каретке — остаётся на нём (лист перепечатывается целиком). Не поместился — все листы по порядку (первый — тот, что был в каретке, с уже набранным)
-  // и последний недопечатанный отдаются: { pages: [{ lines, fmt, seed }], cut }, а в каретку встаёт чистый лист. max — сколько листов самое большее; cut — текст не вошёл.
-  // keepLast — последний недопечатанный лист остаётся в каретке, как при наборе (отдаются только заполненные).
-  function paste(text, max = Infinity, { keepLast = false } = {}) {
+  // Заполненные листы (первый — тот, что был в каретке, с уже набранным) отдаются по порядку: { pages: [{ lines, fmt, seed }], cut }; последний недопечатанный остаётся
+  // в каретке, каретка — в конце вставленного (пользователь 2026-11-25: «вставил что-то и дальше пишешь»). max — сколько листов самое большее; cut — текст не вошёл.
+  function paste(text, max = Infinity) {
     if (!active || !loaded) return null;
     unshift(); settleTurn();
     const chars = [...String(text).replace(/\r\n?/g, '\n').replace(/\t/g, '    ').replace(/\s+$/, '')].filter(ch => ch === '\n' || (ch.length === 1 && ch >= ' ' && ch !== '\x7f'));
@@ -458,14 +457,10 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
     try { for (; k < chars.length && bulkPages.length < max; k++) onKey(chars[k] === '\n' ? synth('Enter', 'Enter') : { key: chars[k], code: '', metaKey: false, ctrlKey: false, preventDefault() {} }); }
     finally { bulk = false; sound.on = loud; struck = worn; }
     const pages = bulkPages; bulkPages = [];
-    if (!pages.length) {
-      clearPage(pageSeed); prows.forEach((r, i) => r.chars.forEach(c => inkChar(c, i))); placeLine(); aim(); sound.strike();
-      return { pages, cut: false };
-    }
     const cut = k < chars.length; sheetsOut += pages.length;
-    if (keepLast && !cut) { clearPage(pageSeed); prows.forEach((r, i) => r.chars.forEach(c => inkChar(c, i))); placeLine(); aim(); feedFrom(1.1); sound.paper(); return { pages, cut }; }
-    if (!cut && prows.some(r => rowText(r).trim())) pages.push({ lines: prows.map(rowText), fmt: prows.map(fmtOf), seed: pageSeed });
-    loadSheet(null, true); sound.paper(); sheetsOut = 0;   // вся вставка ушла в подшивку: чистый лист за ней — снова как первый (следующая вставка — в свою подшивку)
+    // На листе в каретке — то, что осталось (без вышедших листов — тот же лист, допечатанный): перепечатать целиком; новый лист выезжает снизу.
+    clearPage(pageSeed); prows.forEach((r, i) => r.chars.forEach(c => inkChar(c, i))); placeLine(); aim();
+    if (pages.length) { feedFrom(1.1); sound.paper(); } else sound.strike();
     return { pages, cut };
   }
   // Заправить лист в каретку: чистый или недопечатанный (draft — строки, их формат и число листа). animate — лист выезжает снизу, иначе он просто стоит на месте.

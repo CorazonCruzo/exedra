@@ -2380,12 +2380,13 @@ const LIGHT_MAX = 1.6;
 // Свет хранится всегда, даже нетронутый: прежнее значение по умолчанию (.45) без отметки «трогали» — не выбор, а старый дефолт, его сменяет новый.
 let lightTouched = !!stored.lightSet || (stored.light != null && stored.light !== .45);
 let lightLevel = clamp(lightTouched ? stored.light : LIGHT, 0, LIGHT_MAX), inkLevel = clamp(stored.ink ?? .35, 0, 1);
+let bound = Number.isInteger(stored.bound) ? stored.bound : null;   // папка, к которой привязан лист в каретке (вставка, `pasteTyped`)
 let stale = false, nextId = stored.nextId || 1, saveT, ready = false, typeFace = stored.face === 'book' ? 'book' : 'mono', draft = stored.draft || null, warned = false;
 const saveNow = () => {
   clearTimeout(saveT); if (!ready || stale) return;
   if (tw) draft = tw.draft;
   try {
-    localStorage.setItem(KEY, JSON.stringify({ v: 2, nextId, face: typeFace, light: lightLevel, lightSet: lightTouched || undefined, ink: inkLevel, decor: { ...decor, sculpt: savedSculpt, weight: savedWeight, art: savedArt }, draft, tw: twM ? twM.data : stored.tw, lamp: lampM ? { ...lampM.data, on: lamp.on } : stored.lamp, weight: weightM ? weightM.data : stored.weight, books: books.length ? books.map(b => b.data) : storedBooks, hallLamps: tableLamps?.touched ? tableLamps.bits() : stored.hallLamps, hallChairs: chairs?.touched ? chairs.data() : stored.hallChairs, sheets: sheets.map(s => s.data), binders: folders.filter(f => !f.gone).map(f => f.data) }));
+    localStorage.setItem(KEY, JSON.stringify({ v: 2, nextId, bound: boundFolder()?.id, face: typeFace, light: lightLevel, lightSet: lightTouched || undefined, ink: inkLevel, decor: { ...decor, sculpt: savedSculpt, weight: savedWeight, art: savedArt }, draft, tw: twM ? twM.data : stored.tw, lamp: lampM ? { ...lampM.data, on: lamp.on } : stored.lamp, weight: weightM ? weightM.data : stored.weight, books: books.length ? books.map(b => b.data) : storedBooks, hallLamps: tableLamps?.touched ? tableLamps.bits() : stored.hallLamps, hallChairs: chairs?.touched ? chairs.data() : stored.hallChairs, sheets: sheets.map(s => s.data), binders: folders.filter(f => !f.gone).map(f => f.data) }));
   } catch { if (!warned) { warned = true; hint(t('hint.save.noSpace'), 9000); } }
 };
 const save = () => { clearTimeout(saveT); saveT = setTimeout(saveNow, 400); };
@@ -2651,8 +2652,8 @@ function beginTyping() {
   hint(t(tw.loaded ? 'hint.typing.loaded' : 'hint.typing.start'), 8000);
   typedCount = 0; sound.wake?.(); sfx.wake();
   // Лист уже в каретке — печатаем сразу, с того же места; иначе чистый заправляется, пока взгляд подходит.
-  if (tw.loaded) tw.begin(leaveTyping, dropSheet);
-  else beginT = setTimeout(() => { if (state === 'typing') tw.begin(leaveTyping, dropSheet); }, 900);
+  if (tw.loaded) tw.begin(leaveTyping, typedPage);
+  else beginT = setTimeout(() => { if (state === 'typing') tw.begin(leaveTyping, typedPage); }, 900);
 }
 // Esc раньше, чем лист заправился, — просто вернуться к столу.
 function cancelTyping() {
@@ -2705,7 +2706,9 @@ function leaveTyping() {
 function takeOutSheet() {
   const out = tw.eject({ refill: true });
   if (!out) return tw.leave();
-  dropSheet(out.img, out.lines, out.fmt, out.seed); saveNow(); twBusyUntil = performance.now() + 1800;
+  const f = boundFolder(); twBusyUntil = performance.now() + 1800;
+  if (f) { bindPages(f, [out]); bound = null; saveNow(); return hint(t('hint.typing.filed', { name: f.b.name || t('hint.paste.noName') }), 6000); }   // последний лист подшивки — в её конец
+  dropSheet(out.img, out.lines, out.fmt, out.seed); saveNow();
   hint(typedCount > 1 ? t('hint.typing.sheetsDown') : t('hint.typing.sheetDown'), 6000);
 }
 $('doneBtn').onclick = () => { $('doneBtn').blur(); if (tw?.active) takeOutSheet(); else if (state === 'typing') cancelTyping(); };
@@ -2906,28 +2909,39 @@ function newFolder(name = null) {
 }
 // ——— Вставка в машинку: «самиздат» ———
 // Пользователь 2026-11-25: вставить текст и сразу получить распечатку с правильным порядком в подшивке. У машинки ⌘V (или клавиша «вставить» — на планшете) печатает текст
-// мгновенно тем же шрифтом и переносом, что и набор (typewriter.js, `paste`). Помещается на лист в каретке — всё как обычно, текст на нём. Не помещается:
-// — лист в каретке первый за этот подход к машинке (чистый или уже начатый) — все листы по порядку, с последним недопечатанным, ложатся в новую папку с надписью
-//   по первой строке текста, в каретке — чистый лист;
-// — до него за этот подход уже выходили листы — заполненные ложатся на стол туда же и так же, как выходившие до вставки (по порядку, новые сверху), последний недопечатанный
-//   остаётся в каретке, как при наборе («листы укладываются не в подшивку, а на стол… с сохранением порядка»).
-// Больше PASTE_MAX листов за раз не печатается (папка толще не бывает): остальное — следующей вставкой.
+// мгновенно тем же шрифтом и переносом, что и набор (typewriter.js, `paste`); последний недопечатанный лист остаётся в каретке, каретка — в конце вставленного: «вставил
+// что-то и дальше пишешь». Помещается на лист в каретке — всё как обычно. Не помещается:
+// — лист в каретке первый за этот подход к машинке (чистый или начатый) — заполненные листы по порядку ложатся в новую папку с надписью по первой строке текста,
+//   а лист в каретке привязан к ней (`bound`): заполнится — встанет в её конец, вынут галочкой — тоже в конец, и привязка кончается; следующая вставка — туда же;
+// — до него за этот подход уже выходили листы — заполненные ложатся на стол туда же и так же, как выходившие до вставки (по порядку, новые сверху).
+// Лист вынули из каретки рукой или папку убрали — привязки нет. Больше PASTE_MAX листов за раз не печатается (папка толще не бывает): остальное — следующей вставкой.
 const PASTE_MAX = 200;
+const boundFolder = () => { const f = bound === null ? null : folders.find(x => x.id === bound && !x.gone && !x.leaving); if (!f) bound = null; return f ?? null; };
+// Листы — в конец папки по порядку.
+function bindPages(f, pages) {
+  const at = sheetsOf(f.id).length;
+  pages.forEach((p, k) => addSheet({ id: nextId++, lines: p.lines, fmt: p.fmt, seed: p.seed, binder: f.id, order: at + k + 1, x: f.px.t, z: f.pz.t, rot: f.pr.t }));
+  typedCount += pages.length; f.b.refresh(); sfx.play('page', { gain: .5, rate: .9 });
+}
+// Заполненный лист вышел из машинки сам: в привязанную папку или, как всегда, на стол справа.
+function typedPage(img, lines, fmt, seed) {
+  const f = boundFolder(); if (!f) return dropSheet(img, lines, fmt, seed);
+  bindPages(f, [{ lines, fmt, seed }]); save();
+}
 function pasteTyped(text) {
   if (state !== 'typing' || !tw?.active) return;
-  const bind = tw.firstSheet, r = tw.paste(text, PASTE_MAX, { keepLast: !bind }); if (!r) return hint(t('hint.paste.empty'), 3000);
+  const f0 = boundFolder(), first = tw.firstSheet, r = tw.paste(text, PASTE_MAX); if (!r) return hint(t('hint.paste.empty'), 3000);
   twBusyUntil = performance.now() + 1800;
   if (!r.pages.length) { saveNow(); return; }
   const cut = r.cut ? ' ' + t('hint.paste.cut', { max: PASTE_MAX }) : '';
-  if (!bind) {
+  if (f0) { bindPages(f0, r.pages); saveNow(); return hint(t('hint.paste.more', { n: r.pages.length, name: f0.b.name || t('hint.paste.noName') }) + cut, 8000); }
+  if (!first) {
     for (const p of r.pages) dropSheet(null, p.lines, p.fmt, p.seed);
     saveNow(); return hint(t('hint.paste.desk', { n: r.pages.length }) + cut, 8000);
   }
-  const first = text.split(/\r?\n/).map(l => l.replace(/\s+/g, ' ').trim()).find(Boolean) ?? '';
-  const name = first.length > 60 ? first.slice(0, 59).replace(/\s+\S*$/, '') + '…' : first;
-  const f = newFolder(name || null);
-  r.pages.forEach((p, k) => addSheet({ id: nextId++, lines: p.lines, fmt: p.fmt, seed: p.seed, binder: f.id, order: k + 1, x: f.px.t, z: f.pz.t, rot: f.pr.t }));
-  typedCount += r.pages.length; f.b.refresh(); sfx.play('page', { gain: .5, rate: .9 }); saveNow();
+  const line = text.split(/\r?\n/).map(l => l.replace(/\s+/g, ' ').trim()).find(Boolean) ?? '';
+  const name = line.length > 60 ? line.slice(0, 59).replace(/\s+\S*$/, '') + '…' : line;
+  const f = newFolder(name || null); bindPages(f, r.pages); bound = f.id; saveNow();
   hint(t('hint.paste.folder', { n: r.pages.length, name: name || t('hint.paste.noName') }) + cut, 9000);
 }
 addEventListener('paste', e => {
@@ -4366,6 +4380,7 @@ function pullOut(d, q, e) {
 function pullFromMachine(d, e) {
   if (!tw.draft) { drag = null; return hint(t('hint.sheet.empty'), 3000); }
   const out = tw.eject({ refill: true, quick: true }); if (!out) { drag = null; return; }
+  bound = null;   // лист в руке — уже не продолжение подшивки
   const P = station.worldToLocal(d.point.clone()), r = twM.rot.t, cy = Math.cos(r), sy = Math.sin(r), gx = (d.at.u - .5) * A4.w, gz = (.5 - d.at.v) * A4.h;
   const s = addSheet({ id: nextId++, lines: out.lines, fmt: out.fmt, seed: out.seed, x: 0, z: 0, rot: r }, out.img);
   s.grab = { x: gx, z: gz }; s.px.set(P.x - (gx * cy + gz * sy)); s.pz.set(P.z - (-gx * sy + gz * cy)); s.pr.set(r); s.lift.set(Math.max(0, P.y - s.floor));
