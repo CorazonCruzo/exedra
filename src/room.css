@@ -223,7 +223,7 @@ button.key:active { transform: translateY(1.5px); }
 body.reading #tools, body.reading #inkPanel, body.reading #views .key:not([data-v=read]) { display: none; }
 body.nocursor, body.nocursor * { cursor: none !important; }
 body.reading:not(.idleui) .bar, body.reading:not(.idleui) #hint { transition-duration: .15s; }
-body.idleui .bar, body.idleui #hint, body.idleui #bookTip, body.idleui #lightPanel, body.idleui #credits { opacity: 0 !important; pointer-events: none !important; transition-duration: .4s; }
+body.idleui .bar, body.idleui #hint, body.idleui #bookTip, body.idleui #lightPanel, body.idleui #penPanel, body.idleui #credits { opacity: 0 !important; pointer-events: none !important; transition-duration: .4s; }
 body.reading #views [data-v=read] { opacity: 1; width: 46px; height: 46px; }
 body.reading #views [data-v=read]::after, #fsKey .key::after { left: -6px; transform: none; }
 #fsKey { left: 83px; top: 18px; display: none; }
@@ -433,3 +433,18 @@ html:lang(ja) body *, html:lang(zh) body * { font-style: normal !important; }
 .tour-btn:hover, .tour-btn:focus-visible { background: rgba(92,64,36,.85); box-shadow: inset 0 0 0 1px #d8b878; outline: 0; }
 #help .help-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 #help .help-actions button { margin-top: 18px; }
+
+/* Маркер и карандаш при чтении (ink.js): та же бумажная плашка, что у ползунков, только в столбик. */
+.slider.pen { flex-direction: column; align-items: stretch; gap: 9px; padding: 11px 14px 12px; }
+.pen-tools { display: flex; gap: 8px; }
+.pen-tools button { width: 40px; height: 36px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 3px; color: #2f2418; background: rgba(255,250,235,.45); box-shadow: inset 0 0 0 1px rgba(110,80,45,.35); cursor: pointer; }
+.pen-tools button:hover { background: rgba(255,250,235,.75); }
+.pen-tools button.on { background: #3a2a1a; color: #f3e7cc; box-shadow: none; }
+.pen-tools button[data-pen=hl].on { color: #b8f27a; }
+.pen-tools #penUndo { margin-left: auto; }
+.pen-tools button:disabled { opacity: .4; cursor: default; }
+.pen-row { display: grid; grid-template-columns: 1fr; gap: 2px; font: 13px 'Old Standard TT', serif; }
+.pen-row[hidden] { display: none; }
+.slider.pen .pen-row input[type=range] { width: 100%; }
+.pen-check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.slider.pen input[type=checkbox] { -webkit-appearance: auto; appearance: auto; width: 15px; height: 15px; margin: 0; accent-color: #3a2a1a; }

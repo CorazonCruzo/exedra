@@ -162,19 +162,19 @@ const MIP_Q = typeof location !== 'undefined' ? new URLSearchParams(location.sea
 const MIP_BIAS = (MIP_Q === null || MIP_Q === '' || isNaN(+MIP_Q) ? 0 : +MIP_Q).toFixed(2);   // строкой с точкой — для GLSL
 function pageMaterial(mats, fit, look) {
   const uBack = { value: WHITE() }, uPaper = { value: mats.paper ?? WHITE() }, uFit = { value: fit };
-  const u = { Cf: { value: new THREE.Color(1, 1, 1) }, Cb: { value: new THREE.Color(1, 1, 1) }, Wf: { value: 1 }, Wb: { value: 1 }, Kf: { value: 1 }, Kb: { value: 1 } };
+  const u = { Cf: { value: new THREE.Color(1, 1, 1) }, Cb: { value: new THREE.Color(1, 1, 1) }, Wf: { value: 1 }, Wb: { value: 1 }, Kf: { value: 1 }, Kb: { value: 1 }, If: { value: WHITE() }, Ib: { value: WHITE() } };
   const m = new THREE.MeshStandardMaterial({ map: WHITE(), normalMap: mats.paperNormal ?? null, normalScale: new THREE.Vector2(.45, .45), roughness: .93, side: THREE.DoubleSide });
   m.userData.back = uBack; m.userData.u = u;
   m.onBeforeCompile = sh => {
     sh.uniforms.uPaper = uPaper; sh.uniforms.uBack = uBack; sh.uniforms.uFit = uFit; sh.uniforms.uMul = look.mul; sh.uniforms.uFile = look.file; sh.uniforms.uInk = look.ink;
     if (mats.squash) sh.uniforms.uSq = mats.squash;
-    sh.uniforms.uCf = u.Cf; sh.uniforms.uCb = u.Cb; sh.uniforms.uWf = u.Wf; sh.uniforms.uWb = u.Wb; sh.uniforms.uKf = u.Kf; sh.uniforms.uKb = u.Kb;
+    sh.uniforms.uCf = u.Cf; sh.uniforms.uCb = u.Cb; sh.uniforms.uWf = u.Wf; sh.uniforms.uWb = u.Wb; sh.uniforms.uKf = u.Kf; sh.uniforms.uKb = u.Kb; sh.uniforms.uInkF = u.If; sh.uniforms.uInkB = u.Ib;
     // Бумага просвечивает: рассеянный свет считается и для обратной нормали, с весом 0,35 (лист в воздухе с теневой стороны не чёрный).
     const C0 = THREE.ShaderChunk;
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <lights_physical_pars_fragment>', C0.lights_physical_pars_fragment.replace('float dotNL = saturate( dot( geometryNormal, directLight.direction ) );\n\tvec3 irradiance = dotNL * directLight.color;', 'float dotNL = saturate( dot( geometryNormal, directLight.direction ) ) + .35 * saturate( dot( - geometryNormal, directLight.direction ) );\n\tvec3 irradiance = dotNL * directLight.color;'))
       .replace('#include <lights_fragment_begin>', C0.lights_fragment_begin.replace('irradiance += getHemisphereLightIrradiance( hemisphereLights[ i ], geometryNormal );', 'irradiance += getHemisphereLightIrradiance( hemisphereLights[ i ], geometryNormal ) + .35 * getHemisphereLightIrradiance( hemisphereLights[ i ], - geometryNormal );'));
-    sh.fragmentShader = 'uniform sampler2D uPaper, uBack;\nuniform vec2 uFit;\nuniform vec3 uCf, uCb, uMul;\nuniform float uWf, uWb, uKf, uKb, uFile, uInk;\n' + (mats.squash ? 'uniform vec4 uSq;\n' : '') + sh.fragmentShader.replace('#include <map_fragment>', `
+    sh.fragmentShader = 'uniform sampler2D uPaper, uBack, uInkF, uInkB;\nuniform vec2 uFit;\nuniform vec3 uCf, uCb, uMul;\nuniform float uWf, uWb, uKf, uKb, uFile, uInk;\n' + (mats.squash ? 'uniform vec4 uSq;\n' : '') + sh.fragmentShader.replace('#include <map_fragment>', `
       // Все три снимка берутся всегда (до ветвления): производные для mip-уровней должны считаться в однородном коде.
       // Страница вписана в лист целиком (uFit — какую долю листа она занимает), поля — цвета фона страницы.
       float ff = gl_FrontFacing ? 1. : 0.;
@@ -186,9 +186,14 @@ function pageMaterial(mats, fit, look) {
       // Издали тонкие штрихи размываются в серое: у белых страниц тёмное чуть сгущаем (белое остаётся белым), чтобы буквы были плотными, как краска.
       vec3 inked = pow(max(im, vec3(1e-4)), vec3(mix(1., uInk, w)));
       vec3 col = mix(mix(im * k, inked * pap, w), im, uFile);
+      // Маркер и карандаш (ink.js): свой холст у лица и у оборота, белый — ничего нет; умножаются на страницу, как чернила. Зелёный маркер флуоресцентный — отдаёт света больше,
+      // чем получил (поглощённое синее светится зелёным): у красок, где зелёного много больше синего, яркость чуть выше простого умножения.
+      vec3 mk = mix(vec3(1.), mix(texture2D(uInkB, vec2(1. - q.x, q.y)).rgb, texture2D(uInkF, q).rgb, ff), ins);
+      float fl = clamp((mk.g - mk.b) * 1.6, 0., 1.);
+      col *= mk * (1. + fl * vec3(.15, .35, .05));
       vec4 sampledDiffuseColor = vec4(col, 1.);
       diffuseColor *= sampledDiffuseColor;
-      vec3 inkK = clamp(im / max(bg, vec3(.03)), 0., 1.);`);
+      vec3 inkK = clamp(im / max(bg, vec3(.03)), 0., 1.) * mk;`);
     // Зал (mats.squash — вектор сжатия яркости, как у листов): бумага под самой лампой не выгорает добела — яркость сжимается целиком, вместе с буквами.
     if (mats.squash) sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', `
       float lit = dot(outgoingLight / max(inkK, vec3(.05)), vec3(.2126, .7152, .0722));
@@ -411,7 +416,7 @@ export class Book {
     this.pressS = new Spring(data.flat ? 1 : 0, 50, 12); this.padWant = ctx.rest !== false; this.restS = new Spring(this.padWant && !data.flat ? 1 : 0, 50, 12); this.openS = new Spring(this.pose === 'face' ? 0 : 1, 34, 10); this.backS = new Spring(this.pose === 'back' ? 1 : 0, 34, 10); this.iS = new Spring(this.i, 60, 12);
     this.fill = { src: null, list: [], todo: [], timer: 0, ctl: null }; this.leafSeq = 0;
     this.imgs = new Map(); this.clock = 0; this.fresh = false; this.dead = false; this.uploads = []; this.timer = 0;
-    this.detail = 1280; this.settled = false; this.cost = {}; this.stat = { req: 0, abort: 0, done: 0, upload: 0 };
+    this.detail = 1280; this.ink = null; this.settled = false; this.cost = {}; this.stat = { req: 0, abort: 0, done: 0, upload: 0 };
     this.layout(); this.syncPages();
   }
   // Где середина книги в осях тела при данном положении: закрытая лицом вверх лежит вправо от петли, раскрытая — вокруг неё, задней — влево.
@@ -748,7 +753,7 @@ export class Book {
     const k = lumS < .35 ? 1 : clamp((this.paperLum ?? .8) / Math.max(lumL, 1e-3), .8, 1.5);
     return { w, c, k };
   }
-  setLook(mat, side, n) { const L = n ? this.pageLook(n) : { w: 1, c: new THREE.Color(1, 1, 1), k: 1 }, u = mat.userData.u; u['C' + side].value.copy(L.c); u['W' + side].value = L.w; u['K' + side].value = L.k; }
+  setLook(mat, side, n) { const L = n ? this.pageLook(n) : { w: 1, c: new THREE.Color(1, 1, 1), k: 1 }, u = mat.userData.u; u['C' + side].value.copy(L.c); u['W' + side].value = L.w; u['K' + side].value = L.k; u['I' + side].value = (n && this.ink?.tex(n)) || WHITE(); }   // ink — маркер и карандаш на страницах (ink.js; ставит зал)
   applyPages() {
     this.ensurePaper();
     const [l, r] = this.spread(), tx = n => this.imgs.get(n)?.tex ?? WHITE();

@@ -57,6 +57,10 @@
   <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3.5c3 4 6 7.3 6 10.5a6 6 0 0 1-12 0c0-3.2 3-6.5 6-10.5z"/></symbol>
   <symbol id="i-drop-full" viewBox="0 0 24 24"><path d="M12 3.5c3 4 6 7.3 6 10.5a6 6 0 0 1-12 0c0-3.2 3-6.5 6-10.5z" fill="currentColor"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M15 4.5a7.5 7.5 0 1 0 4.5 12.8A6.2 6.2 0 0 1 15 4.5z"/></symbol>
+  <symbol id="i-marker" viewBox="0 0 24 24"><path d="M18.4 2.6l3 3-9.4 9.4-3-3zM9 12l-2.6 5.6 5.6-2.6M6.4 17.6l-1.6 1.6"/><path d="M12.8 21.2h8.4" style="stroke-width:3.2"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M16.2 3.3l4.5 4.5L8.3 20.2H3.8v-4.5zM13.7 5.8l4.5 4.5M3.8 15.7l4.5 4.5"/></symbol>
+  <symbol id="i-eraser" viewBox="0 0 24 24"><path d="M10.5 20.5h10M4.2 14.3l9.1-9.1a1.4 1.4 0 0 1 2 0l4.5 4.5a1.4 1.4 0 0 1 0 2l-8.8 8.8H9.4l-5.2-5.2a.7.7 0 0 1 0-1zM8.6 9.9l6.5 6.5"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M8.5 4.5 4 9l4.5 4.5M4.5 9H14a5.5 5.5 0 0 1 0 11h-3.5"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M5.6 18.4l1.7-1.7M16.7 7.3l1.7-1.7"/></symbol>
 </svg>
 <!-- Шторка: на миг затемняет кадр, пока вход в режим чтения и выход из него меняют набор рисуемого (без z-index — полоски клавиш остаются поверх). -->
@@ -68,7 +72,7 @@
   <button data-v="nook" class="key" data-tip="to the film corner" aria-label="to the film corner" data-i18n-attr="data-tip:views.nook; aria-label:views.nook"><svg><use href="#i-nook"/></svg></button>
   <button id="fsHallBtn" class="key" data-tip="fullscreen" aria-label="fullscreen" data-i18n-attr="data-tip:tools.fullscreen; aria-label:tools.fullscreen"><svg><use href="#i-fs"/></svg></button>
 </div>
-<div id="fsKey" class="ui bar"><button id="fsBtn" class="key" data-tip="fullscreen" aria-label="fullscreen" data-i18n-attr="data-tip:tools.fullscreen; aria-label:tools.fullscreen"><svg><use href="#i-fs"/></svg></button><button id="lightReadBtn" class="key" data-tip="light" aria-label="light" data-i18n-attr="data-tip:tools.lightRead; aria-label:tools.lightRead" aria-expanded="false"><svg><use href="#i-light"/></svg></button></div>
+<div id="fsKey" class="ui bar"><button id="fsBtn" class="key" data-tip="fullscreen" aria-label="fullscreen" data-i18n-attr="data-tip:tools.fullscreen; aria-label:tools.fullscreen"><svg><use href="#i-fs"/></svg></button><button id="lightReadBtn" class="key" data-tip="light" aria-label="light" data-i18n-attr="data-tip:tools.lightRead; aria-label:tools.lightRead" aria-expanded="false"><svg><use href="#i-light"/></svg></button><button id="penBtn" class="key" data-tip="marker and pencil" aria-label="marker and pencil" data-i18n-attr="data-tip:tools.pen; aria-label:tools.pen" aria-expanded="false"><svg><use href="#i-marker"/></svg></button></div>
 <div id="tools" class="ui bar">
   <button id="folderBtn" class="key" data-tip="new folder" aria-label="new folder" data-i18n-attr="data-tip:tools.folderNew; aria-label:tools.folderNew"><svg><use href="#i-folder"/></svg></button>
   <button id="deskSaveBtn" class="key" data-tip="save the desk to a file" aria-label="save the desk to a file" data-i18n-attr="data-tip:tools.deskSave; aria-label:tools.deskSave"><svg><use href="#i-deskout"/></svg></button>
@@ -80,6 +84,18 @@
   <button id="helpBtn" class="key" data-tip="how to use" aria-label="how to use" data-i18n-attr="data-tip:tools.help; aria-label:tools.help"><svg><use href="#i-help"/></svg></button>
 </div>
 <div id="lightPanel" class="ui slider" hidden><svg><use href="#i-moon"/></svg><input type="range" min="0" max="160" step="1" aria-label="room light" data-i18n-attr="aria-label:tools.roomLight"><svg><use href="#i-sun"/></svg></div>
+<!-- Маркер и карандаш при чтении (ink.js): инструмент, толщина, угол наконечника маркера, ровные линии, отмена. -->
+<div id="penPanel" class="ui slider pen" hidden>
+  <div class="pen-tools">
+    <button type="button" data-pen="hl" title="highlighter" aria-label="highlighter" data-i18n-attr="title:pen.hl; aria-label:pen.hl"><svg><use href="#i-marker"/></svg></button>
+    <button type="button" data-pen="pc" title="pencil" aria-label="pencil" data-i18n-attr="title:pen.pc; aria-label:pen.pc"><svg><use href="#i-pencil"/></svg></button>
+    <button type="button" data-pen="er" title="eraser" aria-label="eraser" data-i18n-attr="title:pen.er; aria-label:pen.er"><svg><use href="#i-eraser"/></svg></button>
+    <button type="button" id="penUndo" title="undo (⌘Z)" aria-label="undo" data-i18n-attr="title:pen.undo; aria-label:pen.undo"><svg><use href="#i-undo"/></svg></button>
+  </div>
+  <label class="pen-row" id="penWRow"><span data-i18n="pen.width">thickness</span><input id="penW" type="range" min="0" max="100" step="1"></label>
+  <label class="pen-row" id="penARow"><span data-i18n="pen.angle">nib angle</span><input id="penA" type="range" min="0" max="180" step="1"></label>
+  <label class="pen-row pen-check" id="penSRow"><input id="penS" type="checkbox"><span data-i18n="pen.straight">straight lines (Shift — freehand)</span></label>
+</div>
 <div id="inkPanel" class="ui slider" hidden><svg><use href="#i-drop"/></svg><input type="range" min="0" max="100" step="1" aria-label="ink strength" data-i18n-attr="aria-label:type.ink"><svg><use href="#i-drop-full"/></svg></div>
 <div id="typeTools" class="ui bar">
   <button id="faceBtn" class="key" data-tip="typewriter font" aria-label="typewriter font" data-i18n-attr="data-tip:type.faceTypewriter; aria-label:type.faceTypewriter"><span class="glyph" data-i18n="type.glyph">Aa</span></button>
@@ -185,6 +201,7 @@
       <dt data-i18n="help.folders.t">Folders and sheets</dt><dd data-i18n="help.folders.d"></dd>
       <dt data-i18n="help.book.t">Book</dt><dd data-i18n="help.book.d"></dd>
       <dt data-i18n="help.read.t">Read</dt><dd data-i18n="help.read.d"></dd>
+      <dt data-i18n="help.pen.t">Highlight</dt><dd data-i18n="help.pen.d"></dd>
       <dt data-i18n="help.projector.t">Projector</dt><dd data-i18n="help.projector.d"></dd>
       <dt data-i18n="help.back.t">Go back</dt><dd data-i18n="help.back.d"></dd>
     </dl>

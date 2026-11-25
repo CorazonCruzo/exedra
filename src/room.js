@@ -18,7 +18,8 @@ import { Book, bookSize } from './book.js';
 import { MARK_MAX } from './marks.js';
 import { buildStand, bookPlace, NOTCH, NOTCHES, STAND_URL } from './stand.js';
 import { BINDINGS, bindingMats, bindingOf, bindingRatio } from './bindings.js';
-import { saveBook, openBook as openFile, removeBook, listBooks } from './bookfile.js';
+import { saveBook, openBook as openFile, removeBook as removeBookFile, listBooks } from './bookfile.js';
+import { Ink, PEN, removeInk } from './ink.js';
 import { buildPaperweight, FIGURES, SLAB } from './paperweight.js';
 import { fillShelves, liftUpper } from './books.js';
 import { buildCeiling, ART_SETS, sweep } from './ceiling.js';
@@ -2096,6 +2097,8 @@ class BookThing extends Mover {
   // Тело книги по данным; страницы берутся из файла (src), пока файла нет — чистая бумага.
   make(d) {
     const f = this.file, bk = new Book(d, { mats: bookMatsFor(this.bind), sound: bookSound, init: t => renderer.initTexture(t), source: this.src, aspect: f ? f.w / f.h : undefined, rest: this.pad });
+    // Маркер и карандаш (ink.js) — за файлом: та же книга с тем же PDF после переплёта или из ящика приносит свои выделения.
+    if (f) { if (this.ink?.id !== f.id) { this.ink?.dispose(); this.ink = new Ink(f.id, f.w / f.h); this.ink.onChange = () => this.book?.applyPages(); this.ink.upload = inkUpload; } bk.ink = this.ink; } else { this.ink?.dispose(); this.ink = null; }
     bk.tableEdge = (lx, lz, dir) => tableEdgeAhead(bk, lx, lz, dir); bk.group.traverse(o => o.layers.enable(1)); bk.setPaperMode(decor.bookPaper === 'file'); bk.thing = this; bk.onTurn = () => { save(); bookBarDirty = true; }; this.holder.add(bk.group); this.applyStand(this.mt, bk); return bk;
   }
   // Стоит на подставке (по выбору, пока раскрыта и лежит на столе).
@@ -3088,6 +3091,8 @@ function unfoldBook(b, leaf = null, quiet = false) {
   save(); return true;
 }
 const BOOK_HINT = 'reading-room-bookhint';
+// Файл книги уходит из хранилища — вместе с выделениями на его страницах.
+function removeBook(id) { removeInk(id); return removeBookFile(id); }
 // Нажали на раскрытую книгу издалека: книга с PDF — только предложение читать, взгляд на месте; пустая или «остаться так» уже сказано — взгляд подходит, как раньше.
 function bookFar(bt) { if (bt.file && !bt.stayed && !reading && bt.book.pose === 'open') offerRead(bt); else lookAtBook(bt); }
 // Нажали на поле крышки раскрытой книги: она закрывается этой крышкой (левой — лицом вверх, правой — задней крышкой вверх).
@@ -3228,6 +3233,76 @@ function readKey(e) {
   }
   e.preventDefault(); return true;
 }
+// ——— Маркер и карандаш (ink.js) ———
+// Пользователь 2026-11-25: выделять слова зелёным флуоресцентным маркером (снимки экрана — дальше, прежде всего для английского), «управлять этим как в жизни»: вести, выделять, лучше ровно,
+// с выбором угла; и самый простой карандаш, натуральный на бумаге, со стилусом на планшете. Клавиша рядом со светом открывает плашку: маркер, карандаш, ластик, отмена (⌘Z), толщина,
+// угол наконечника маркера и «ровные линии» (у маркера по умолчанию: штрих — прямая от места нажатия, почти горизонтальная ложится ровно по строке; Shift — наоборот, от руки; у карандаша
+// Shift — прямая). Пока инструмент в руке, нажатие на страницу рисует, а не листает (листают стрелки, пробел, нажатие мимо книги, два пальца). Стилус: нажим — толщина и густота карандаша;
+// после первого касания стилусом палец больше не рисует (ладонь на экране не оставляет следов), а листает и поворачивает взгляд, как обычно. Инструмент кладётся при выходе из чтения и по Esc.
+const PEN_KEY = 'exedra.pen';
+const pen = (() => {
+  let o = {}; try { o = JSON.parse(localStorage.getItem(PEN_KEY)) || {}; } catch {}
+  const num = (v, [a, b], d) => Number.isFinite(v) ? clamp(v, a, b) : d;
+  return { tool: null, stylus: false, w: { hl: num(o.w?.hl, PEN.hl.w, PEN.hl.w0), pc: num(o.w?.pc, PEN.pc.w, PEN.pc.w0) }, a: num(o.a, [0, Math.PI], PEN.hl.a0), straight: o.straight ?? true };
+})();
+const penSave = () => { try { localStorage.setItem(PEN_KEY, JSON.stringify({ w: pen.w, a: pen.a, straight: pen.straight })); } catch {} };
+const penP = e => e.pointerType === 'pen' ? clamp(e.pressure || .5, .05, 1) : .5;
+// Точка страницы под указателем: какая половина (only — только эта), какая страница и где на ней (доли картинки страницы, верх — y = 0). Лист в воздухе или пролист — null.
+function inkAt(e, only = -1) {
+  const bk = bookM?.book; if (!reading || !bk || !bookM.ink || bk.pose !== 'open' || bk.turn || bk.rif) return null;
+  setRay(e); const sp = bk.spread();
+  for (let k = 0; k < 2; k++) {
+    const h = bk.halves[k]; if ((only >= 0 && k !== only) || !sp[k] || !h.pageMesh.visible) continue;
+    const hit = ray.intersectObject(h.pageMesh, false)[0]; if (!hit?.uv) continue;
+    const x = (hit.uv.x - .5) / bk.fit.x + .5, y = (hit.uv.y - .5) / bk.fit.y + .5;
+    if (x >= 0 && x <= 1 && y >= 0 && y <= 1) return { k, n: sp[k], x, y };
+  }
+  return null;
+}
+function inkDown(e, at) {
+  const ink = bookM.ink, t = pen.tool;
+  if (t === 'er') ink.erase(at.n, at.x, at.y); else ink.begin(at.n, { k: t, w: pen.w[t], ...(t === 'hl' ? { a: pen.a } : {}) }, at.x, at.y, penP(e));
+  drag = { kind: 'ink', id: e.pointerId, from: { x: e.clientX, y: e.clientY }, touch: e.pointerType === 'touch', k: at.k, n: at.n, ink, tool: t };
+}
+// Повели: каждое промежуточное положение (у стилуса их несколько за кадр) — в штрих; вне своей страницы — пропуск.
+function inkMove(e) {
+  const d = drag, evs = e.getCoalescedEvents?.() ?? [];
+  for (const ev of evs.length ? evs : [e]) {
+    const at = inkAt(ev, d.k); if (!at || at.n !== d.n) continue;
+    if (d.tool === 'er') d.ink.erase(at.n, at.x, at.y); else d.ink.move(at.x, at.y, penP(ev), d.tool === 'hl' ? pen.straight !== ev.shiftKey : ev.shiftKey);
+  }
+}
+const penPanel = $('penPanel'), penW = $('penW'), penA = $('penA'), penS = $('penS');
+function penSync() {
+  const t = pen.tool, k = t === 'pc' ? 'pc' : 'hl', [a, b] = PEN[k].w;
+  for (const x of penPanel.querySelectorAll('[data-pen]')) x.classList.toggle('on', x.dataset.pen === t);
+  $('penBtn').classList.toggle('armed', !!t); $('penBtn').querySelector('use').setAttribute('href', t === 'pc' ? '#i-pencil' : t === 'er' ? '#i-eraser' : '#i-marker');
+  $('penWRow').hidden = t === 'er'; $('penARow').hidden = $('penSRow').hidden = k !== 'hl' || t === 'er';
+  penW.value = Math.round((pen.w[k] - a) / (b - a) * 100); penA.value = Math.round(pen.a * 180 / Math.PI); penS.checked = pen.straight;
+  $('penUndo').disabled = !bookM?.ink?.undo.length;
+}
+function setPen(t) { pen.tool = t; penSync(); if (!t) canvasEl.style.cursor = ''; }
+const penUI = { p: penPanel, keys: [$('penBtn')], from: null, open: () => !penPanel.hidden };
+penUI.show = (on, key = $('penBtn')) => {
+  if (!on && penPanel.contains(document.activeElement)) document.activeElement.blur();
+  penPanel.hidden = !on; key.classList.toggle('on', on); key.setAttribute('aria-expanded', on);
+  if (!on) return; penUI.from = key; penSync();
+  const r = key.getBoundingClientRect(), w = penPanel.offsetWidth; penPanel.style.top = r.bottom + 14 + 'px'; penPanel.style.left = clamp(r.left + r.width / 2 - w / 2, 8, innerWidth - w - 8) + 'px';
+};
+sliders.push(penUI);
+$('penBtn').onclick = e => { e.currentTarget.blur(); const again = penUI.open(); for (const o of sliders) o.show(false); showPick(false); penUI.show(!again); };
+for (const x of penPanel.querySelectorAll('[data-pen]')) x.onclick = () => { x.blur(); setPen(pen.tool === x.dataset.pen ? null : x.dataset.pen); };
+$('penUndo').onclick = () => { $('penUndo').blur(); penUndo(); };
+penW.oninput = () => { const k = pen.tool === 'pc' ? 'pc' : 'hl', [a, b] = PEN[k].w; pen.w[k] = a + (b - a) * penW.value / 100; penSave(); };
+penA.oninput = () => { pen.a = penA.value * Math.PI / 180; penSave(); };
+penS.onchange = () => { pen.straight = penS.checked; penSave(); };
+// Изменённый за кадр прямоугольник холста — в уже загруженную текстуру (ink.js, `flush`); текстура ещё не на видеокарте — false, грузится целиком.
+const inkBox = new THREE.Box2(), inkPos = new THREE.Vector2();
+function inkUpload(tex, x, y, w, h) {
+  const p = renderer.properties.get(tex); if (!p.__webglTexture || p.__version !== tex.version) return false;
+  inkBox.min.set(x, y); inkBox.max.set(x + w, y + h); inkPos.set(x, y); renderer.copyTextureToTexture(tex, tex, inkBox, inkPos); return true;
+}
+function penUndo() { const ink = bookM?.ink; if (ink && !drag) ink.back(); penSync(); }
 // Слои: книга (в том числе то, что строится позже, — `BookThing.make`), стол с ящиками и все лампы — ещё и на слое 1.
 function markReadLayers() {
   scene.traverse(o => { if (o.isLight) o.layers.enable(1); });
@@ -3354,7 +3429,7 @@ function exitRead(then) {
   if (!reading || readBusy) return;
   curBack(); if (fsOwn) fsLeave();
   readSwitch(() => {
-    camera.layers.set(0); bookBarDirty = true; readOnly = false; reading = false; readZ = 1; document.body.classList.remove('reading'); for (const b of books) setSharp(b, false);
+    setPen(null); penUI.show(false); camera.layers.set(0); bookBarDirty = true; readOnly = false; reading = false; readZ = 1; document.body.classList.remove('reading'); for (const b of books) setSharp(b, false);
     if (then) return then();
     const b = readBack; eyeGoal.copy(b.pos); yaw.t = b.yaw; pitch.t = b.pitch; fovGoal = b.fov; viewOn(b.view);
     // Пока читали, книга переехала или встала на подставку (сошла с неё): взгляд идёт к ней, как она теперь стоит, а не к прежнему месту.
@@ -3951,8 +4026,9 @@ const screenAxes = () => { const f = forward(), r = new THREE.Vector3().crossVec
 canvasEl.addEventListener('pointerdown', e => {
   if (e.pointerType === 'touch') {
     touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (touches.size === 2 && state !== 'loading' && (!drag || ['look', 'pan', 'rtap', 'rtilt'].includes(drag.kind))) { canvasEl.setPointerCapture(e.pointerId); drag = { kind: 'pinch', last: pinchNow() }; return; }
+    if (touches.size === 2 && state !== 'loading' && (!drag || ['look', 'pan', 'rtap', 'rtilt', 'ink'].includes(drag.kind))) { if (drag?.kind === 'ink') drag.ink.cancel(); canvasEl.setPointerCapture(e.pointerId); drag = { kind: 'pinch', last: pinchNow() }; return; }   // второй палец во время штриха — это щипок: штрих не остаётся
   }
+  if (e.pointerType === 'pen') pen.stylus = true;
   if (!e.isPrimary) return;
   // Застрявший перенос (кнопку отпустили где-то за окном) — отменяем, а не блокируем всё.
   if (drag) cancel();
@@ -3963,6 +4039,8 @@ canvasEl.addEventListener('pointerdown', e => {
   const from = { x: e.clientX, y: e.clientY }, id = e.pointerId, touch = e.pointerType === 'touch', look = () => { drag = reading ? { kind: 'rtap', id, from, touch } : { kind: 'look', id, from, last: from, touch }; };
   if (e.button === 2 || e.button === 1 || (e.button === 0 && e.shiftKey)) { if (!reading) drag = { kind: 'pan', id, from, last: from, touch }; return; }   // при чтении сдвига нет
   if (e.button !== 0) return;
+  // Маркер или карандаш в руке, нажали на страницу — рисуем (палец — только пока стилуса не было: дальше им листают).
+  if (reading && pen.tool && !(touch && pen.stylus) && !putting) { station.updateMatrixWorld(true); const at = inkAt(e); if (at) return inkDown(e, at); }
   if (state === 'typing' && tw?.active) { setRay(e); const code = tw.keyAt(ray); if (code) { tw.tap(code); drag = { kind: 'key', id, from, touch }; return; } }
   const hit = pick(e), tl = tableLampAt(hit);
   // Проектор (нажать — «Проектор») и экран на стене (идёт файл — пауза, иначе — «Проектор»): ничто их не заслоняет.
@@ -4090,12 +4168,13 @@ addEventListener('pointermove', e => {
   }
   if (state === 'typing' && tw?.active && !e.buttons) { setRay(e); canvasEl.style.cursor = tw.keyAt(ray) ? 'pointer' : twPaperAt(e) ? 'grab' : ''; return; }
   // Над глобусом — ладонь: его можно крутить.
-  if (reading && state === 'idle' && !drag && !e.buttons && e.pointerType === 'mouse') { setRay(e); canvasEl.style.cursor = bookCursor(e) || (bookM.file ? 'pointer' : ''); }
+  if (reading && state === 'idle' && !drag && !e.buttons && e.pointerType === 'mouse') { setRay(e); canvasEl.style.cursor = pen.tool && inkAt(e) ? 'crosshair' : bookCursor(e) || (bookM.file ? 'pointer' : ''); }
   else if (state === 'idle' && !drag && !e.buttons && e.pointerType === 'mouse' && (globes.length || hungClock || catalogs.length || doorParts.length || tableLamps || chairs || cinema)) { setRay(e); canvasEl.style.cursor = globeAt() || clockAt() ? 'grab' : catalogAt() || doorAt() || cinemaAt(e) || (tableLampAt(null) && tableLampAt(pick(e))) ? 'pointer' : chairAt(null) && chairAt(pick(e)) ? 'grab' : weightAt(e) || twPaperAt(e) ? 'grab' : bookCursor(e); }
   ytHover(cinema?.mode === 'web' && state === 'idle' && !reading && !drag && !e.buttons && e.pointerType === 'mouse' && !cinemaAskOpen() && (setRay(e), panelAt(pick(e))));
   if (!drag) { hoverLeaf(e); hoverLabel(e); }
   if (!drag || e.pointerId !== drag.id) return;
   if (e.pointerType === 'mouse' && !e.buttons) return endDrag(e);
+  if (drag.kind === 'ink') return inkMove(e);
   const dx = e.clientX - (drag.last || drag.from).x, dy = e.clientY - (drag.last || drag.from).y;
   if (drag.kind === 'look') { const g = .005 * camera.fov / FOV; yaw.t += dx * g; pitch.t = clamp(pitch.t + dy * g, -1.35, .9); drag.last = { x: e.clientX, y: e.clientY }; viewOn(null); }
   else if (drag.kind === 'pan') {
@@ -4746,6 +4825,7 @@ function landStep() {
 function endDrag(e) {
   const d = drag; drag = null; highlight(null);
   if (!d) return;
+  if (d.kind === 'ink') { d.ink.end(); penSync(); return; }
   const tap = e && (d.kind === 'item' && d.item instanceof Sheet ? !d.lifted : Math.hypot(e.clientX - d.from.x, e.clientY - d.from.y) < (d.touch ? 12 : 6)), car = d.carry;   // car — вещь несли над всем (`carryStep`)
   if (d.kind === 'item') {
     const it = d.item, isSheet = it instanceof Sheet, Y0 = car && it instanceof Folder ? it.floor + Math.max(0, it.lift.v) : null;   // Y0 — где висел низ папки в руке
@@ -4962,6 +5042,7 @@ function cancel(e) {
   if (d.kind === 'drawer') d.d.open.t = d.start >= .5 ? 1 : 0;
   if (d.kind === 'globe') { d.g.held = false; d.g.vel = 0; canvasEl.style.cursor = ''; }
   if (d.kind === 'clock') canvasEl.style.cursor = '';
+  if (d.kind === 'ink') { d.ink.end(); penSync(); }   // система забрала стилус посреди штриха — нарисованное остаётся
 }
 addEventListener('pointercancel', cancel);
 canvasEl.addEventListener('lostpointercapture', cancel);
@@ -4978,6 +5059,7 @@ addEventListener('keydown', e => {
   if (e.code === 'Space' && !e.repeat && !e.metaKey && !e.ctrlKey && !e.altKey && (cinema?.mode === 'file' || cinema?.mode === 'web') && !reading && state === 'idle' && !e.target.closest?.('button, input, select, textarea, [contenteditable]')) { e.preventDefault(); return cinemaPause(); }
   if (e.key === 'Escape' && foAskOpen()) { e.stopImmediatePropagation(); e.preventDefault(); return showFolderAsk(false); }
   if (e.key === 'Escape' && askOpen()) { e.stopImmediatePropagation(); e.preventDefault(); return showAsk(false); }
+  if (reading && state === 'idle' && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.code === 'KeyZ' && bookM?.ink && !e.target.closest?.('input, textarea')) { e.preventDefault(); return penUndo(); }   // отменить штрих
   if (reading && e.key !== 'Escape' && state === 'idle' && readKey(e)) return;
   // Backspace у раскрытой книги, на которой видны буквы, — «назад» (после перехода); в поле номера страницы, в машинке и вне книги — как прежде.
   if (e.key === 'Backspace' && !reading && state === 'idle' && readOwn === 'book' && bookM?.book.pose === 'open' && nearB(bookM) && bookM.trail.length && !e.metaKey && !e.ctrlKey && !e.altKey && !e.target.closest?.('input, textarea, [contenteditable]')) { e.preventDefault(); return bookBack(); }
@@ -4994,6 +5076,7 @@ addEventListener('keydown', e => {
   }
   // Esc, закрывший полоску или карточку, дальше не идёт: иначе машинка заодно вынула бы лист.
   if (e.key === 'Escape' && (openSlider() || !weightPick.hidden || aboutOpen() || helpOpen() || decorOpen() || doorOpen())) { e.stopImmediatePropagation(); return openSlider() || !weightPick.hidden ? closeSliders() : doorOpen() ? showDoor(false) : aboutOpen() ? showAbout(false) : decorOpen() ? showDecor(false) : showHelp(false); }
+  if (e.key === 'Escape' && reading && pen.tool) return setPen(null);   // сперва кладём маркер или карандаш
   if (e.key === 'Escape' && reading) return readMoved() ? readReset() : exitRead();
   if (e.key === 'Escape' && state === 'typing' && !tw?.active) return cancelTyping();
   // В киноуголке (после нажатия на проектор, коробки или экран) Esc только закрывает плашки — к столу не уводит, пока не ушли из уголка клавишей вида.
@@ -5392,6 +5475,7 @@ function frame() {
   heldStep(performance.now());
   cinemaStep(dt);
   inkPages();   // страницы подшивок допечатываются по кадрам
+  bookM?.ink?.flush();   // маркер и карандаш: изменённое за кадр — в текстуру страницы
   walk(dt);
   spinGlobes(dt);
   // Стрелки бегут к настоящему времени — всё медленнее к концу пути; солнце — следом (не чаще кадра).
