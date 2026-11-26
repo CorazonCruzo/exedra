@@ -350,6 +350,20 @@ body.reading #views [data-v=read].cap::after { opacity: 1; }
 .filmlib .fl-meta { font: italic 500 14.5px 'Cormorant Garamond', Georgia, serif; opacity: .72; }
 .filmlib .fl-note { font: italic 500 15px/1.3 'Cormorant Garamond', Georgia, serif; opacity: .85; }
 .filmlib .fl-more[hidden] { display: none; }
+.filmlib .fl-row { display: flex; align-items: stretch; gap: 2px; }
+.filmlib .fl-row .fl-item { flex: 1; min-width: 0; }
+/* Галочка карандашом на полях: пустое место для неё проступает под курсором, у начатого — первый штрих, у просмотренного — вся; просмотренный фильм бледнее. */
+.filmlib .fl-tick { flex: none; width: 30px; padding: 0; border: 0; border-radius: 9px; background: none; color: #eadfc8; cursor: pointer; display: grid; place-items: center; opacity: 0; }
+.filmlib .fl-tick svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.filmlib .fl-row:hover .fl-tick { opacity: .22; }
+.filmlib .fl-tick:hover, .filmlib .fl-tick:focus-visible { opacity: .55; outline: 0; }
+.filmlib .fl-row.started .fl-tick, .filmlib .fl-row.seen .fl-tick { opacity: .9; }
+.filmlib .fl-row.started .fl-tick .b { opacity: .22; }
+.filmlib .fl-row.seen .fl-tick:hover { opacity: .5; }
+.filmlib .fl-row.seen .fl-item { opacity: .6; }
+.filmlib .fl-row.seen .fl-item:hover, .filmlib .fl-row.seen .fl-item:focus-visible { opacity: 1; }
+.filmlib .fl-at { font: italic 500 14.5px 'Cormorant Garamond', Georgia, serif; color: #d8b878; }
+.filmlib .fl-at[hidden] { display: none; }
 #cinemaCredit a { color: #d8b878; }
 
 /* Японский и китайский: у иероглифов нет курсива — браузер наклонял бы их искусственно; везде прямое начертание. */

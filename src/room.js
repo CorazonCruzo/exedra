@@ -30,7 +30,7 @@ import { leadedSide, leadedFan, fanPanes } from './glass.js';
 import { buildNook, placeLounge, loadLounge, loungeVariant, nookBooks, panelWorld } from './lounge.js';
 import { buildCinema } from './cinema.js';
 import { parseVideoLink } from './webplayers.js';
-import { filmLibrary } from './filmlib.js';
+import { filmLibrary, filmMark, filmProgress } from './filmlib.js';
 import { makeTour } from './tour.js';
 import { deskBlob as packDesk, readDesk, applyDesk, sweepBooksExcept, DeskError, mb } from './deskfile.js';
 import { t, tn, lang, LANGS, setLang, applyDom } from './i18n.js';
@@ -5217,7 +5217,7 @@ function ytHover(over) {
 function cinemaLink(link) {
   if (!cinema || reading || readBusy || state === 'loading') return false;
   showCinemaAsk(false);
-  if (link.site) cinema.playWeb(link.site, link.m, sfx.on);
+  if (link.site) { filmSave(); filmKey = null; cinema.playWeb(link.site, link.m, sfx.on); }
   else cinemaFile(null, link.direct);
   if (state === 'idle' && camera.position.y > -1.5) goView('nook');
   if (link.site) hint(t('hint.cinema.site'), 7000);
@@ -5260,9 +5260,9 @@ function cinemaPause() {
   if (!cinema.togglePause()) return;
   hint(cinema.paused ? t('hint.cinema.paused') : '', cinema.paused ? 5000 : 0);
 }
-function cinemaOff() { cinema.stop(); showCinemaAsk(false); hint(t('hint.cinema.off'), 3000); }
+function cinemaOff() { filmSave(); filmKey = null; cinema.stop(); showCinemaAsk(false); hint(t('hint.cinema.off'), 3000); }
 async function cinemaFile(f, link = null, meta = null) {
-  showCinemaAsk(false);
+  showCinemaAsk(false); filmSave(); filmKey = meta?.key || null;
   try {
     if (!await cinema.playFile(f, sfx.on, link, meta)) return; sfx.wake();
     // Одна подсказка сразу: звук не дали включить — как его включить (важнее), иначе — как управлять.
@@ -5276,13 +5276,14 @@ async function cinemaFile(f, link = null, meta = null) {
       else if (!cinema.soundOk) hint(t('hint.cinema.soundWaits'), 6000);
       else if (!cinema.ownAudio && !cinema.silent && cinema.video.webkitAudioDecodedByteCount === 0) hint(t('hint.cinema.badAudio'), 7000);
     }, 3000);
-  } catch (err) { console.warn(err); if (cinema.mode === 'off') cinemaEnded(f ? 'error' : 'link-error', f?.name ?? decodeURIComponent(new URL(link).pathname.split('/').filter(Boolean).pop() ?? link)); }
+  } catch (err) { console.warn(err); filmKey = null; if (cinema.mode === 'off') cinemaEnded(f ? 'error' : 'link-error', f?.name ?? decodeURIComponent(new URL(link).pathname.split('/').filter(Boolean).pop() ?? link)); }
 }
 // Конец показа — подсказка; ошибка — карточка на самом экране (как интертитр: проектор светит ею, пока её не выключат) и та же строка на плашке.
 const cinemaEnded = (why, name) => {
   const err = why === 'web-error' ? name : why === 'link-error' ? t('cinema.errLink', { name }) : why === 'error' ? t('cinema.errFile', { name }) : '';
   if (err) { cinema.showError(err); hint(t('hint.cinema.errShown'), 7000); }
-  else hint(t('hint.cinema.ended'), 6000);
+  else { hint(t('hint.cinema.ended'), 6000); if (why === 'ended') filmProgress(filmKey, 1, 1); }
+  filmKey = null;
   if (cinemaAskOpen()) cinemaSync();
 };
 for (const t of ['keydown', 'keyup', 'keypress']) $('cinemaAsk').addEventListener(t, e => { e.stopPropagation(); if (t === 'keydown' && e.key === 'Escape') { e.preventDefault(); showCinemaAsk(false); } });
@@ -5305,12 +5306,19 @@ async function cinemaFilm(film) {
   if (!cinema || reading || readBusy || state === 'loading') return;
   showCinemaAsk(false); lib?.close();
   if (state === 'idle' && camera.position.y > -1.5) goView('nook');
-  await cinemaFile(null, film.url, { name: film.name, credit: film.credit, page: film.page, silent: film.silent !== false });
+  await cinemaFile(null, film.url, { name: film.name, credit: film.credit, page: film.page, silent: film.silent !== false, key: film.key });
+  // Начатый — с того места, где остановились (на 3 с раньше, чтобы вспомнить кадр); с начала — ползунок на плашке.
+  const at = filmMark(film.key)?.at;
+  if (at && cinema.mode === 'file' && filmKey === film.key) { cinema.seek(Math.max(0, at - 3)); hint(t('hint.cinema.resume', { t: clock(at) }), 7000); }
   if (film.vtt && cinema.mode === 'file') {
     try { const t = await (await fetch(film.vtt)).blob(); await cinema.loadSubFile(new File([t], film.vtt.split('/').pop())); } catch (e) { console.warn(e); }
   }
 }
 const lib = filmLibrary({ root: $('filmLib'), play: cinemaFilm });
+// Отметки фильмотеки (filmlib.js): какой фильм из неё сейчас на стене и где он идёт — раз в 5 с, при смене или выключении показа и при закрытии вкладки.
+let filmKey = null;
+function filmSave() { if (filmKey && cinema?.mode === 'file') filmProgress(filmKey, cinema.time, cinema.duration); }
+setInterval(filmSave, 5000); addEventListener('pagehide', filmSave);
 const openLib = (tab = 'pick') => { if (!cinema || reading) return; showCinemaAsk(false); lib.open(tab); };
 $('cinemaLibBtn').onclick = () => openLib();
 $('cinemaSub').onchange = e => { const v = e.target.value; if (v !== 'ext') cinema.setSubtitle(+v); e.target.blur(); cinemaSync(); };

@@ -26,6 +26,26 @@ export async function commonsStream(file) {
   return { url, credit: [lic, who].filter(Boolean).join(' · '), page: vi.descriptionurl };
 }
 
+// Просмотренное и начатое (решение пользователя 2026-11-26): ключ — имя файла на Commons, у подборки и архива общее (фильм отмечен в обоих списках).
+// localStorage `exedra.films`: { ключ: { seen: 'ГГГГ-ММ-ДД' } | { at: где остановились, с; dur } }. Досмотрен до 90 % (в конце немых лент часто титры и пустая плёнка) —
+// просмотрен сам; начат — с 20-й секунды. Галочку ставят и снимают руками (это не текст — менять можно).
+const SEEN_AT = .9, STARTED_AT = 20, MARKS_KEY = 'exedra.films';
+let marks = {}; try { marks = JSON.parse(localStorage.getItem(MARKS_KEY)) ?? {}; } catch {}
+const saveMarks = () => { try { localStorage.setItem(MARKS_KEY, JSON.stringify(marks)); } catch {} };
+export const filmMark = key => (key && marks[key]) || null;
+// Зал сообщает, где идёт фильм из фильмотеки (раз в несколько секунд, при остановке и в конце). Просмотренный назад в «начатые» не переходит.
+export function filmProgress(key, at, dur) {
+  if (!key || !(dur > 0) || marks[key]?.seen) return;
+  if (at >= dur * SEEN_AT) marks[key] = { seen: new Date().toISOString().slice(0, 10) };
+  else if (at >= STARTED_AT) marks[key] = { at: Math.floor(at), dur: Math.round(dur) };
+  else return;
+  saveMarks();
+}
+const setSeen = (key, on) => { if (on) marks[key] = { seen: new Date().toISOString().slice(0, 10) }; else delete marks[key]; saveMarks(); };
+export const fmtClock = s => { s = Math.max(0, Math.floor(s)); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, ss = String(s % 60).padStart(2, '0'); return h ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`; };
+// Галочка карандашом на полях: у начатого — только первый штрих, у просмотренного — вся.
+const TICK = '<svg viewBox="0 0 22 22" aria-hidden="true"><path class="a" d="M3.5 12.2c1.3 1.1 2.6 2.6 3.8 4.4"/><path class="b" d="M7.3 16.6C9.7 11.5 13.2 7 18.6 3.5"/></svg>';
+
 // Короткие подписи разделов подборки для кнопок.
 // Подпись раздела на кнопке: из словаря (`lib.short.<id>`), иначе — полное название из переводов подборки.
 let GROUPS = {};
@@ -45,21 +65,34 @@ export function filmLibrary({ root, play }) {
   const fDec = sel(t('lib.dec'), [['', t('lib.dec.all')], ['1870', t('lib.dec.1870')], ['1900', t('lib.dec.1900')], ['1910', t('lib.dec.1910')], ['1920', t('lib.dec.1920')], ['1930', t('lib.dec.1930')]]);
   const fCountry = sel(t('lib.country'), [['', t('lib.country.all')]]), fTheme = sel(t('lib.theme'), [['', t('lib.theme.all')]]);
   const fLen = sel(t('lib.len'), [['', t('lib.len.any')], ['s', t('lib.len.s')], ['m', t('lib.len.m')], ['l', t('lib.len.l')]]);
+  // Отбор по отметкам — общий для подборки и архива (переезжает в строку той вкладки, что открыта).
+  const fSeen = sel(t('lib.seen'), [['', t('lib.seen.all')], ['new', t('lib.seen.new')], ['started', t('lib.seen.started')], ['seen', t('lib.seen.seen')]]); fSeen.className = 'fl-order';
+  const seenOk = f => { const m = marks[f.key]; return fSeen.value === 'new' ? !m?.seen : fSeen.value === 'started' ? !!m?.at : fSeen.value === 'seen' ? !!m?.seen : true; };
+  // Строка счёта: что найдено и сколько просмотрено (`counted` — список, по которому считать; галочка рукой пересчитывает сразу).
+  let countBase = '', counted = [];
+  const showCount = (base = countBase, films = counted) => { countBase = base; counted = films; const n = films.filter(f => marks[f.key]?.seen).length; count.textContent = base + (n ? ' ' + t('lib.count.seen', { n }) : ''); };
   filters.append(search, fDec, fCountry, fTheme, fLen);
   const count = el('p', 'fl-count'), list = el('div', 'fl-list'), more = el('button', 'fl-more', t('lib.more')); more.type = 'button'; more.hidden = true;
   panel.append(head, filters, count, list, more); root.appendChild(panel); panel.hidden = true;
 
+  // Строка фильма: галочка на полях (своя кнопка) и сам фильм; у начатого — где остановились.
   const item = (f, onPick) => {
-    const b = el('button', 'fl-item'); b.type = 'button';
-    b.append(el('b', '', f.title), el('span', 'fl-meta', [...new Set([f.year, f.place, f.director, f.dur ? fmtDur(f.dur) : '', f.heavy || f.mb > 150 ? t('lib.meta.heavy') : '', f.sound ? t('lib.meta.sound') : ''])].filter(Boolean).join(' · ')));
+    const row = el('div', 'fl-row'), tick = el('button', 'fl-tick'), b = el('button', 'fl-item'), at = el('span', 'fl-at'); tick.type = b.type = 'button'; tick.innerHTML = TICK;
+    b.append(el('b', '', f.title), el('span', 'fl-meta', [...new Set([f.year, f.place, f.director, f.dur ? fmtDur(f.dur) : '', f.heavy || f.mb > 150 ? t('lib.meta.heavy') : '', f.sound ? t('lib.meta.sound') : ''])].filter(Boolean).join(' · ')), at);
     if (f.note) b.append(el('span', 'fl-note', f.note));
-    b.onclick = () => onPick(f, b); return b;
+    const paint = () => {
+      const m = marks[f.key]; row.classList.toggle('seen', !!m?.seen); row.classList.toggle('started', !!m?.at);
+      at.textContent = m?.at ? t('lib.at', { t: fmtClock(m.at) }) : ''; at.hidden = !m?.at;
+      tick.title = m?.seen ? t('lib.unmark') : t('lib.mark'); tick.setAttribute('aria-pressed', String(!!m?.seen));
+    };
+    tick.onclick = () => { setSeen(f.key, !marks[f.key]?.seen); paint(); showCount(); };
+    b.onclick = () => onPick(f, b); paint(); row.append(tick, b); return row;
   };
   const go = async (f, b) => {
     b?.classList.add('busy');
     try {
       const s = f.stream && !f.file ? { url: f.stream, credit: f.credit, page: f.page } : await commonsStream(f.file);
-      api.close(); play({ name: f.year && !String(f.title).includes(f.year) ? `${f.title}, ${f.year}` : f.title, url: s.url, credit: s.credit || f.credit || '', page: s.page || f.page || '', silent: !f.sound, vtt: f.vtt });
+      api.close(); play({ name: f.year && !String(f.title).includes(f.year) ? `${f.title}, ${f.year}` : f.title, url: s.url, credit: s.credit || f.credit || '', page: s.page || f.page || '', silent: !f.sound, vtt: f.vtt, key: f.key });
     } catch (e) { console.warn(e); count.textContent = t('lib.openFail', { title: f.title, msg: e.message }); }
     finally { b?.classList.remove('busy'); }
   };
@@ -78,15 +111,15 @@ export function filmLibrary({ root, play }) {
   const pickRow = el('div', 'fl-pickrow'); pickRow.append(pickSearch, pickOrder); pickRow.hidden = true;
   panel.insertBefore(pickRow, count); panel.insertBefore(chips, count);
   function renderPick() {
-    list.replaceChildren(); more.hidden = true; filters.hidden = true; chips.hidden = pickRow.hidden = pickSearch.hidden = false;
+    list.replaceChildren(); more.hidden = true; filters.hidden = true; chips.hidden = pickRow.hidden = pickSearch.hidden = false; pickRow.append(fSeen);
     if (!catalog) { count.textContent = t('lib.loading'); return; }
     if (!chips.childElementCount) {
       const groups = ['', ...new Set(catalog.map(f => f.group))];
       chips.append(...groups.map(g => { const b = el('button', g === pickGroup ? 'on' : '', g ? shortOf(g) : t('lib.all')); b.type = 'button'; b.onclick = () => { pickGroup = g; for (const c of chips.children) c.classList.toggle('on', c === b); renderPick(); }; return b; }));
     }
     const q = pickSearch.value.trim().toLowerCase();
-    const hits = catalog.filter(f => (!pickGroup || f.group === pickGroup) && (!q || `${f.title} ${f.year ?? ''} ${f.director ?? ''} ${f.note ?? ''}`.toLowerCase().includes(q))).sort(ORDERS[pickOrder.value]);
-    count.textContent = t('lib.count.pick', { n: hits.length, total: catalog.length });
+    const hits = catalog.filter(f => (!pickGroup || f.group === pickGroup) && (!q || `${f.title} ${f.year ?? ''} ${f.director ?? ''} ${f.note ?? ''}`.toLowerCase().includes(q)) && seenOk(f)).sort(ORDERS[pickOrder.value]);
+    showCount(t('lib.count.pick', { n: hits.length, total: catalog.length }), catalog);
     list.replaceChildren(...hits.map(f => item({ ...f, place: pickGroup ? '' : shortOf(f.group) }, go)));
   }
   // Весь архив: фильтры и поиск по загруженному индексу, по 60 строк.
@@ -99,16 +132,17 @@ export function filmLibrary({ root, play }) {
     if (fTheme.value && !f.themes?.includes(fTheme.value)) return false;
     const m = (f.dur || 0) / 60;
     if (fLen.value === 's' ? !(m && m < 5) : fLen.value === 'm' ? !(m >= 5 && m <= 25) : fLen.value === 'l' ? !(m > 25) : false) return false;
-    return true;
+    return seenOk(f);
   }
   function renderAll() {
-    filters.hidden = false;
+    filters.hidden = false; filters.append(fSeen);
     if (!index) { list.replaceChildren(); more.hidden = true; count.textContent = t('lib.loadingAll'); return; }
     const hits = index.films.filter(matches);
-    count.textContent = t('lib.count.all', { n: hits.length, total: index.films.length });
+    showCount(t('lib.count.all', { n: hits.length, total: index.films.length }), index.films);
     list.replaceChildren(...hits.slice(0, shown).map(f => item(f, go))); more.hidden = hits.length <= shown;
   }
   const render = () => { if (tab !== 'pick') chips.hidden = pickRow.hidden = true; return tab === 'pick' ? renderPick() : renderAll(); };
+  fSeen.addEventListener('change', () => { shown = 60; render(); });
   for (const c of [search, fDec, fCountry, fTheme, fLen]) c.addEventListener(c === search ? 'input' : 'change', () => { shown = 60; renderAll(); });
   more.onclick = () => { shown += 60; renderAll(); };
   tPick.onclick = () => { tab = 'pick'; tPick.classList.add('on'); tAll.classList.remove('on'); render(); };
@@ -144,7 +178,7 @@ export function filmLibrary({ root, play }) {
 
 // Подборка: запись каталога + тексты на языке зала (tx) → { title, year, director, dur, note, group, stream, credit, page }.
 function normPick(f, tx) {
-  return { title: tx(f.id, 'title') ?? f.title ?? '', year: f.year, director: tx(f.id, 'director') ?? f.director, dur: f.durationSec, note: tx(f.id, 'note') ?? f.note, group: f.group, stream: f.stream ?? f.streamUrl,
+  return { key: String(f.commonsFile ?? '').replace(/^File:/, ''), title: tx(f.id, 'title') ?? f.title ?? '', year: f.year, director: tx(f.id, 'director') ?? f.director, dur: f.durationSec, note: tx(f.id, 'note') ?? f.note, group: f.group, stream: f.stream ?? f.streamUrl,
     credit: [f.license, tx(f.id, 'attribution') ?? f.attribution].filter(Boolean).join(' · '), page: f.commonsPage, heavy: !!f.heavy, sound: !!f.modernAudio, fame: f.fame || 0 };
 }
 // Архив (tools/cinema/build-commons-index.mjs): строка фильма — [имя файла, год, длительность с, размер МБ, подсказка потока, маска стран, маска тем, номер лицензии];
@@ -157,7 +191,7 @@ function normIndex(d) {
   const C = d.countries ?? [], T = d.themes ?? [], L = d.licenses ?? [];
   const bits = (m, list) => list.filter((_, i) => m & (1 << i)).map(([k]) => k);
   const films = (d.films ?? []).map(([file, year, dur, mb, , cm, tm, li]) => ({
-    file, year, dur, mb, countries: bits(cm, C), themes: bits(tm, T), license: L[li] ?? '',
+    file, key: file, year, dur, mb, countries: bits(cm, C), themes: bits(tm, T), license: L[li] ?? '',
     title: cleanTitle(file),
   }));
   return { films, countries: C.map(([k, en]) => [k, label('lib.c.', k, en)]), themes: T.map(([k, en]) => [k, label('lib.th.', k, en)]) };
