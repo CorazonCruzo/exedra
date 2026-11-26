@@ -169,6 +169,7 @@
 - PT Mono — ParaType, SIL Open Font License 1.1.
 - Old Standard TT — Alexey Kryukov, SIL Open Font License 1.1.
 - Cormorant Garamond — Christian Thalmann, SIL Open Font License 1.1.
+- Abril Fatface — TypeTogether (Veronika Burian, José Scaglione), SIL Open Font License 1.1: надпись «Typewriter» на задней стенке машинки, перерисованная чётко.
 
 Сейчас шрифты подгружаются с Google Fonts; перед публикацией их стоит положить в проект вместе с OFL.txt.
 

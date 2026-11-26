@@ -169,6 +169,7 @@ The windows are round panes (Butzenscheiben) in lead, in a bottle-green tone (th
 - PT Mono — ParaType, SIL Open Font License 1.1.
 - Old Standard TT — Alexey Kryukov, SIL Open Font License 1.1.
 - Cormorant Garamond — Christian Thalmann, SIL Open Font License 1.1.
+- Abril Fatface — TypeTogether (Veronika Burian, José Scaglione), SIL Open Font License 1.1: the “Typewriter” lettering on the typewriter’s back panel, redrawn sharp.
 
 For now the fonts are loaded from Google Fonts; before publication they should be put into the project together with OFL.txt.
 

@@ -70,6 +70,59 @@ const SHIFTED = {
 };
 
 // Связные куски сетки: каждая клавиша (колпачок со штоком) — отдельный кусок.
+// Надпись «Typewriter» на задней стенке в текстуре модели крошечная (≈ 20 × 140 точек на всю стенку) и вблизи расплывалась (её «логотип как-то стал нечётко
+// выглядеть», 2026-11-26). Грани с ней (их развёртка — в левом нижнем углу атласа) уходят в свою деталь с текстурой в 8 раз крупнее: лак и золотая рамка — тот же кусок,
+// увеличенный, с резкой границей золота по середине перехода; само слово набрано заново шрифтом того же склада (Abril Fatface, OFL) — у исходных 15 точек на букву
+// засечек не разобрать, порог рисовал кляксы. Новая развёртка — вторая (uv1), рельеф и шероховатость берутся по прежней.
+const LOGO = { text: 'Typewriter', font: 'Abril Fatface', K: 8 };
+async function sharpLogo(mesh) {
+  const g = mesh.geometry, idx = g.index, uv = g.attributes.uv, img = mesh.material.map?.image; if (!idx || !uv || !img?.width) return;
+  const W = img.width, H = img.height, inBox = i => uv.getX(i) < .12 && uv.getY(i) > .78, logo = [], rest = [];
+  for (let t = 0; t < idx.count; t += 3) { const a = idx.getX(t), b = idx.getX(t + 1), c = idx.getX(t + 2); (inBox(a) && inBox(b) && inBox(c) ? logo : rest).push(a, b, c); }
+  if (!logo.length) return;
+  let u0 = 1, u1 = 0, v0 = 1, v1 = 0; for (const i of logo) { u0 = Math.min(u0, uv.getX(i)); u1 = Math.max(u1, uv.getX(i)); v0 = Math.min(v0, uv.getY(i)); v1 = Math.max(v1, uv.getY(i)); }
+  const K = LOGO.K, x0 = Math.max(0, Math.floor(u0 * W) - 2), y0 = Math.max(0, Math.floor(v0 * H) - 2), w = Math.min(W, Math.ceil(u1 * W) + 2) - x0, h = Math.min(H, Math.ceil(v1 * H) + 2) - y0;
+  const src = document.createElement('canvas'); src.width = w; src.height = h; const sx = src.getContext('2d'); sx.drawImage(img, x0, y0, w, h, 0, 0, w, h);
+  const goldOf = r => Math.min(1, Math.max(0, (r - 28) / 110));   // лак — красного около 15, золото в тени букв — от 70, на свету — за 200
+  // Цвет золота и лака — средние из самого куска; где слово — золото вдали от краёв куска (у краёв — рамка).
+  const sp = sx.getImageData(0, 0, w, h).data, gold = [0, 0, 0, 0], lac = [0, 0, 0, 0], m = 21; let bx0 = w, bx1 = 0, by0 = h, by1 = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const i = (y * w + x) * 4, k = goldOf(sp[i]), o = k > .9 ? gold : k < .05 ? lac : null; if (o) { o[0] += sp[i]; o[1] += sp[i + 1]; o[2] += sp[i + 2]; o[3]++; }
+    if (k > .5 && x > m && x < w - m && y > m && y < h - m) { bx0 = Math.min(bx0, x); bx1 = Math.max(bx1, x); by0 = Math.min(by0, y); by1 = Math.max(by1, y); }
+  }
+  for (const o of [gold, lac]) for (let j = 0; j < 3; j++) o[j] /= Math.max(1, o[3]);
+  const rgb = (c, k = 1) => `rgb(${c.slice(0, 3).map(v => Math.round(Math.min(255, v * k))).join(',')})`;
+  const c = document.createElement('canvas'); c.width = w * K; c.height = h * K;
+  const cx = c.getContext('2d'); cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high'; cx.drawImage(src, 0, 0, w * K, h * K);
+  const d = cx.getImageData(0, 0, c.width, c.height), p = d.data;
+  for (let i = 0; i < p.length; i += 4) {
+    const k = goldOf(p[i]), e = Math.min(1, Math.max(0, (k - .22) / .16)), s = e * e * (3 - 2 * e), lit = .82 + .3 * k;
+    for (let j = 0; j < 3; j++) p[i + j] = lac[j] + (gold[j] * lit - lac[j]) * s;
+  }
+  cx.putImageData(d, 0, 0);
+  // Слово: в атласе оно идёт вдоль куска (по y) и лежит зеркально — так оно и рисуется: поворот на четверть против часовой и зеркало.
+  if (bx1 > bx0) {
+    const pad = 2; cx.fillStyle = rgb(lac); cx.fillRect((bx0 - pad) * K, (by0 - pad) * K, (bx1 - bx0 + 2 * pad) * K, (by1 - by0 + 2 * pad) * K);
+    try { await document.fonts.load(`100px "${LOGO.font}"`, LOGO.text); } catch {}
+    const len = (by1 - by0 + 1) * K, tall = (bx1 - bx0 + 1) * K;
+    cx.save(); cx.translate((bx0 + bx1 + 1) / 2 * K, (by0 + by1 + 1) / 2 * K); cx.rotate(-Math.PI / 2); cx.scale(-1, 1);
+    cx.font = `100px "${LOGO.font}", Georgia, serif`; const mt = cx.measureText(LOGO.text), fw = mt.width, fh = mt.actualBoundingBoxAscent + mt.actualBoundingBoxDescent;
+    cx.scale(len / fw * .94, tall / fh * .9); cx.textAlign = 'center'; cx.textBaseline = 'alphabetic';
+    const base = (mt.actualBoundingBoxAscent - mt.actualBoundingBoxDescent) / 2, gr = cx.createLinearGradient(0, -mt.actualBoundingBoxAscent + base, 0, mt.actualBoundingBoxDescent + base);
+    gr.addColorStop(0, rgb(gold, 1.25)); gr.addColorStop(.55, rgb(gold, 1)); gr.addColorStop(1, rgb(gold, .7));
+    cx.fillStyle = rgb(lac, .5); cx.fillText(LOGO.text, 1.6, base + 2.4);                  // тень: буквы чуть над лаком
+    cx.fillStyle = gr; cx.fillText(LOGO.text, 0, base);
+    cx.lineWidth = 1.1; cx.strokeStyle = rgb(gold, .45); cx.strokeText(LOGO.text, 0, base);    // тёмный край, как у тиснения
+    cx.restore();
+  }
+  const g2 = g.clone(), uv1 = new Float32Array(uv.count * 2);
+  for (let i = 0; i < uv.count; i++) { uv1[i * 2] = (uv.getX(i) * W - x0) / w; uv1[i * 2 + 1] = (uv.getY(i) * H - y0) / h; }
+  g2.setAttribute('uv1', new THREE.BufferAttribute(uv1, 2)); g2.setIndex(logo); g.setIndex(rest);
+  const map = new THREE.CanvasTexture(c); map.flipY = false; map.colorSpace = mesh.material.map.colorSpace; map.channel = 1; map.anisotropy = 8;
+  const mat = mesh.material.clone(); mat.map = map;
+  const plate = new THREE.Mesh(g2, mat); plate.castShadow = plate.receiveShadow = true; plate.position.copy(mesh.position); plate.quaternion.copy(mesh.quaternion); plate.scale.copy(mesh.scale); mesh.parent.add(plate);
+}
+
 function components(geo) {
   const pos = geo.attributes.position, n = pos.count, parent = new Int32Array(n);
   for (let i = 0; i < n; i++) parent[i] = i;
@@ -114,6 +167,7 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
     if (stay.length) {
       const body = new THREE.Mesh(g.clone().setIndex(stay), m.material); body.castShadow = body.receiveShadow = true;
       m.parent.add(body); body.position.copy(m.position); body.quaternion.copy(m.quaternion); body.scale.copy(m.scale); g.setIndex(keep);
+      if (m.material.name === 'Rodillo') await sharpLogo(body);
     }
     carriage.attach(m);
   }
