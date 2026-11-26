@@ -2375,8 +2375,8 @@ let savedSculpt = choice(SCULPTS, stored.decor?.sculpt, 'boar');
 let savedWeight = choice(FIGURES, stored.decor?.weight, 'mouse');
 const BOOK_PAPER = { old: { title: t('decor.paper.old') }, file: { title: t('decor.paper.file') } };
 // Корзина для бумаг у стола (пользователь 2026-11-25: «интерактивную корзину… стильную»; две на выбор — «хочу глазами сверить»). Пока она только стоит; выбрасывать в неё — следующим шагом.
-// Wicker Basket — Dudzy, CC BY 4.0; News Paper Basket — eeelabvisual, CC BY 4.0 (оригиналы — originals/bin, подготовка — tools/models/basket.py). rot — поворот, чтобы к читателю смотрела лучшая сторона.
-const BINS = { wicker: { title: t('decor.bin.wicker'), url: 'assets/models/bin/wicker.glb', rot: .5 }, twisted: { title: t('decor.bin.twisted'), url: 'assets/models/bin/twisted.glb', rot: 0 } };
+// Wicker Basket — Dudzy, CC BY 4.0; News Paper Basket — eeelabvisual, CC BY 4.0 (оригиналы — originals/bin, подготовка — tools/models/basket.py). rot — поворот, чтобы к читателю смотрела лучшая сторона; x — своё расстояние от стола; tone — тонировка: витая — в цвет стола (средний цвет его дерева 53,38,30 с поправкой на baseColorFactor .79 модели; её решение 2026-11-26).
+const BINS = { wicker: { title: t('decor.bin.wicker'), url: 'assets/models/bin/wicker.glb', rot: .5 }, twisted: { title: t('decor.bin.twisted'), url: 'assets/models/bin/twisted.glb', rot: 0, x: .4, tone: [70, 50, 40] } };
 const decor = { bookPaper: choice(BOOK_PAPER, stored.decor?.bookPaper, 'old'), bin: choice(BINS, Q.get('bin') ?? stored.decor?.bin, 'wicker'), sculpt: choice(SCULPTS, Q.get('sculpt'), savedSculpt), weight: choice(FIGURES, Q.get('weight'), savedWeight), art: choice(ART_SETS, Q.get('art'), savedArt) };
 // Свет зала — 0…1,6: выше единицы — «ещё светлее» (её просьба 2026-11-22: «возможность ещё больше света добавить»).
 const LIGHT_MAX = 1.6;
@@ -2833,15 +2833,24 @@ async function chooseArt(k) {
   ceiling.setArt(set); shownArt = k; shownSaved = savedArt; shadowDirty = true;
 }
 // Корзина: модель грузится, когда её выбрали (и при входе — выбранная), и встаёт на пол справа от стола, у передней ножки, где её достаёт рука сидящего.
-const BIN_AT = { x: .2, z: .1 };   // от правого края стола наружу и от середины его глубины к читателю, м
+const BIN_AT = { x: .2, z: .1 };   // середина корзины: от правого края стола наружу (у корзины может быть своё `x`) и от середины его глубины к читателю, м
+// Тонировка (`tone` у корзины): текстура перекрашивается в тон, яркость каждой точки — относительно средней, так что рисунок дерева остаётся.
+function toneMap(tex, rgb) {
+  const im = tex.image, c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+  const g = c.getContext('2d'); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, c.width, c.height), p = d.data;
+  let sum = 0; for (let i = 0; i < p.length; i += 4) sum += .3 * p[i] + .59 * p[i + 1] + .11 * p[i + 2];
+  const mean = sum / (p.length / 4) || 1;
+  for (let i = 0; i < p.length; i += 4) { const k = (.3 * p[i] + .59 * p[i + 1] + .11 * p[i + 2]) / mean; p[i] = rgb[0] * k; p[i + 1] = rgb[1] * k; p[i + 2] = rgb[2] * k; }
+  g.putImageData(d, 0, 0); tex.image = c; tex.needsUpdate = true;
+}
 let bin = null; const binModels = {};
 async function chooseBin(k) {
   decor.bin = k; markDecor(); save();
-  const B = BINS[k]; binModels[k] ??= loadModel(B.url).catch(e => { console.warn('bin', e); return null; });
+  const B = BINS[k]; binModels[k] ??= loadModel(B.url).then(m => { if (B.tone) m.traverse(o => o.material?.map && toneMap(o.material.map, B.tone)); return m; }).catch(e => { console.warn('bin', e); return null; });
   const m = await binModels[k]; if (!m || decor.bin !== k) return;
   if (bin) station.remove(bin);
   m.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.userData.bin = true; } });
-  m.position.set(DESK.hw + BIN_AT.x, 0, BIN_AT.z); m.rotation.y = B.rot; station.add(m); bin = m; lightMasks(); shadowDirty = true;
+  m.position.set(DESK.hw + (B.x ?? BIN_AT.x), 0, BIN_AT.z); m.rotation.y = B.rot; station.add(m); bin = m; lightMasks(); shadowDirty = true;
 }
 // Бумага книги: «старая» — страница печатается на нашей бумаге, «как в файле» — цвета файла как есть (белое остаётся белым).
 const chooseBookPaper = k => { decor.bookPaper = k; markDecor(); for (const b of books) b.book.setPaperMode(k === 'file'); shadowDirty = true; save(); };
