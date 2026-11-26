@@ -212,6 +212,8 @@ export default {
   "bin.out": "vider la corbeille",
   "bin.outSure": "pour de bon, sans retour — appuyez encore",
   "bin.blank": "feuille sans texte",
+  "bin.folderBack": "rendre le dossier",
+  "bin.folderEmpty": "il n’y reste plus de feuilles",
   "hint.bin.sheet": "La feuille est dans la corbeille. Pour la reprendre : la touche de la corbeille en haut, ou touchez la corbeille près du bureau.",
   "hint.bin.folder": "Le dossier et ses {many} sont dans la corbeille. Pour les reprendre : la touche de la corbeille en haut, ou touchez la corbeille près du bureau.",
   "hint.bin.folderEmpty": "Le dossier vide est dans la corbeille.",

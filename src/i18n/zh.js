@@ -212,6 +212,8 @@ export default {
   "bin.out": "倒空废纸篓",
   "bin.outSure": "永久删除、无法恢复——再按一次",
   "bin.blank": "没有文字的纸",
+  "bin.folderBack": "取回文件夹",
+  "bin.folderEmpty": "里面已没有纸",
   "hint.bin.sheet": "纸已在废纸篓里。取回：顶部的废纸篓键，或点桌边的废纸篓。",
   "hint.bin.folder": "文件夹和其中的{many}已在废纸篓里。取回：顶部的废纸篓键，或点桌边的废纸篓。",
   "hint.bin.folderEmpty": "空文件夹已在废纸篓里。",

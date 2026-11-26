@@ -212,6 +212,8 @@ export default {
   "bin.out": "Papierkorb leeren",
   "bin.outSure": "endgültig, ohne Rückweg — noch einmal drücken",
   "bin.blank": "Blatt ohne Text",
+  "bin.folderBack": "Mappe zurückholen",
+  "bin.folderEmpty": "keine Blätter mehr darin",
   "hint.bin.sheet": "Das Blatt liegt im Papierkorb. Zurückholen: die Papierkorb-Taste oben oder ein Tipp auf den Papierkorb am Tisch.",
   "hint.bin.folder": "Die Mappe und ihre {many} liegen im Papierkorb. Zurückholen: die Papierkorb-Taste oben oder ein Tipp auf den Papierkorb am Tisch.",
   "hint.bin.folderEmpty": "Die leere Mappe liegt im Papierkorb.",

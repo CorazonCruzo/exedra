@@ -2837,7 +2837,7 @@ async function chooseArt(k) {
 // Короб на наружной стенке правой тумбы: задней стенкой к тумбе, верх — под пояском (0,76 м). Передняя стенка наклонена наружу — кверху шире; на ней филёнка, как на ящиках,
 // и латунная рамка для ярлыка. Дерево — сам материал стола: развёртка короба ложится на тот участок его текстуры, что на стенке тумбы, в том же масштабе и так же зеркально
 // от середины. Внутри — зелёный бархат (сукно зала с блеском ворса — sheen) с кантом по верху; тяга по верху и цоколь по низу — в два уступа; на боках — латунные шурупы.
-// Бросают в неё только бумагу — листы и папки, аккуратно, не комкая: внутри они стоят торцом вверх, сложенные листы ниже края, папки выглядывают.
+// Бросают в неё только бумагу — листы и папки, аккуратно, не комкая: внутри они стоят торцом вверх, сложенные вдвое ниже края; папка — стопкой своих листов, без обложки.
 const DESK_BIN = { w: .25, d: .135, db: .095, h: .23, t: .009, top: .74, z: .03, side: .036 };   // ширина вдоль стенки, вынос поверху и понизу, высота, толщина стенок; верх, середина по z; на сколько стенка тумбы внутри края столешницы, м
 // Участок текстуры стола со стенкой тумбы (замерено лучом по столу): u — от середины стенки к краю, v — снизу вверх; единиц текстуры на метр.
 const DESK_SIDE_UV = { u: .355, v: .48, k: .335 };
@@ -2897,7 +2897,7 @@ function placeDeskBin() {
 }
 // Над серединой корзины, в координатах стола: туда летят листы и уходят папки.
 const binMouth = () => new THREE.Vector3(bin.position.x + DESK_BIN.d * .5, DESK_BIN.top + .02, bin.position.z);
-// Что видно в корзине: последние вещи стоят торцом вверх рядком от стенки тумбы наружу — сложенный вдвое лист (ниже края) или папка (выглядывает); старые — глубже.
+// Что видно в корзине: последние вещи стоят торцом вверх рядком от стенки тумбы наружу — сложенный вдвое лист или стопка листов папки (обложек в корзине не видно); старые — глубже.
 const BIN_SHOW = 9;
 let binPaper = null;
 function binFill() {
@@ -2907,8 +2907,8 @@ function binFill() {
   binPaper ??= new THREE.MeshStandardMaterial({ map: texShared('assets/textures/paper-bunin.jpg?v=2', true, [1, 1]), roughness: .95 });
   const { t, db } = DESK_BIN, list = trash.slice(-BIN_SHOW), step = Math.min(.009, (db - 2 * t - .01) / Math.max(1, list.length));
   list.forEach((e, k) => {
-    const j = Math.sin((k + 1) * 12.9898 + trash.length) * 43758.5453 % 1, fo = e.kind === 'folder', [th, hh, ww] = fo ? [.012, .3, .215] : [.0016, .205, .145];
-    const o = new THREE.Mesh(new THREE.BoxGeometry(th, hh, ww), fo ? folderMats.cover : binPaper);
+    const j = Math.sin((k + 1) * 12.9898 + trash.length) * 43758.5453 % 1, th = e.kind === 'folder' ? Math.min(.012, .0016 + e.sheets.length * .0006) : .0016, hh = .205, ww = .145;
+    const o = new THREE.Mesh(new THREE.BoxGeometry(th, hh, ww), binPaper);
     o.position.set(t + .006 + k * step + th / 2, t + .003 + hh / 2, j * .02); o.rotation.set(j * .04, j * .05, -.04 - k * .006);
     o.castShadow = o.receiveShadow = true; binIn.add(o);
   });
@@ -2950,6 +2950,14 @@ function throwTyped() {
 }
 // Достать из корзины: лист — на свою страницу в папке (если папка есть) или туда, где лежал; папка — со всеми листами на своё место (занято — на ближайшее свободное).
 function takeFromBin(key) {
+  // Один лист из выброшенной папки: папка остаётся в корзине без него, лист ложится на стол — туда, где лежала папка (рядом, если занято).
+  const fs = /^fsheet:(\d+):(\d+)$/.exec(key);
+  if (fs) {
+    const e = trash.find(x => x.kind === 'folder' && x.folder.id === +fs[1]), k = e ? e.sheets.findIndex(d => d.id === +fs[2]) : -1; if (k < 0) return;
+    const [d] = e.sheets.splice(k, 1), s = addSheet({ ...d, binder: null, drawer: null, layer: undefined, x: e.folder.x, z: e.folder.z, rot: e.folder.rot });
+    const [x, z] = landSpot(s, { x: e.folder.x, z: e.folder.z }); s.px.set(x); s.pz.set(z); s.lift.set(.2); s.lift.t = 0;
+    sfx.play('page', { gain: .35, rate: .95 }); binFill(); shadowDirty = true; saveNow(); return;
+  }
   const i = trash.findIndex(e => binKey(e) === key); if (i < 0) return;
   const [e] = trash.splice(i, 1);
   if (e.kind === 'sheet') {
@@ -2980,9 +2988,10 @@ function openBinScreen() {
   const when = iso => { try { return new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' }).format(new Date(iso)); } catch { return ''; } };
   const firstLine = p => (p?.lines ?? []).map(l => String(l).trim()).find(Boolean) ?? '';
   const cut = s => s.length > 48 ? s.slice(0, 47).replace(/\s+\S*$/, '') + '…' : s;
-  const items = trash.slice().reverse().map(e => e.kind === 'sheet'
-    ? { key: binKey(e), kind: 'sheet', page: e.sheet, title: cut(firstLine(e.sheet)) || t('bin.blank'), sub: when(e.at) }
-    : { key: binKey(e), kind: 'folder', page: e.sheets[0] ?? null, title: cut(e.folder.name || firstLine(e.sheets[0])) || t('folder.untitled'), sub: tn('n.sheets', e.sheets.length) + ' · ' + when(e.at) });
+  const sheetItem = (key, d, sub) => ({ key, kind: 'sheet', page: d, title: cut(firstLine(d)) || t('bin.blank'), sub });
+  const items = trash.slice().reverse().map(e => e.kind === 'sheet' ? sheetItem(binKey(e), e.sheet, when(e.at))
+    : { key: binKey(e), kind: 'folder', title: cut(e.folder.name || firstLine(e.sheets[0])) || t('folder.untitled'), sub: tn('n.sheets', e.sheets.length) + ' · ' + when(e.at),
+      sheets: e.sheets.map((d, k) => sheetItem(`fsheet:${e.folder.id}:${d.id}`, d, t('folder.sheetOf', { i: k + 1, n: e.sheets.length }))) });
   openBin({ items, onTake: takeFromBin, onEmpty: () => { trash = []; binFill(); saveNow(); hint(t('hint.bin.emptied'), 5000); } });
 }
 $('binBtn').onclick = e => { e.currentTarget.blur(); if (state === 'idle' && !reading) openBinScreen(); };

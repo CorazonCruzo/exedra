@@ -170,9 +170,15 @@ button.key:active { transform: translateY(1.5px); }
 .bin-paper { position: relative; display: block; width: var(--w); aspect-ratio: 1024 / 1448; background: #e4d8b8; box-shadow: 0 1px 1.5px rgba(0, 0, 0, .55), 0 3px 6px rgba(0, 0, 0, .38), 0 7px 14px rgba(0, 0, 0, .2); }
 .bin-paper canvas { display: block; width: 100%; height: 100%; }
 .bin-card:hover .bin-paper, .bin-card:focus-visible .bin-paper { box-shadow: 3px 12px 22px rgba(0, 0, 0, .36), 6px 28px 48px rgba(0, 0, 0, .3), 0 0 0 1px #d8b878; }
-/* Папка: под первой страницей — ещё листы и обложка. */
-.bin-card.is-folder .bin-paper { box-shadow: 3px 3px 0 #d9cca9, 6px 6px 0 #cdbf9b, 10px 10px 0 #4a3a2e, 10px 12px 14px rgba(0, 0, 0, .45); }
-.bin-card.is-folder:hover .bin-paper, .bin-card.is-folder:focus-visible .bin-paper { box-shadow: 3px 3px 0 #d9cca9, 6px 6px 0 #cdbf9b, 10px 10px 0 #4a3a2e, 12px 18px 26px rgba(0, 0, 0, .5), 0 0 0 1px #d8b878; }
+/* Папка в корзине — раздел во всю ширину: название, сколько листов, «вернуть папку»; под ним её листы с отступом и тонкой линией слева. */
+.bin-folder { flex: 0 0 100%; display: flex; flex-direction: column; gap: 14px; padding: 4px 0 6px 16px; border-left: 1px solid rgba(216, 184, 120, .35); transition: opacity .22s; }
+.bin-folder.gone { opacity: 0; pointer-events: none; }
+.bin-fhead { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; color: #eadfc8; text-shadow: 0 1px 4px rgba(0, 0, 0, .8); }
+.bin-fhead b { font: italic 600 19px/1.2 'Cormorant Garamond', serif; }
+.bin-fhead i { font: italic 500 15px 'Cormorant Garamond', serif; opacity: .72; }
+.bin-back { border: 0; border-radius: 9px; padding: 3px 11px 4px; cursor: pointer; color: #eadfc8; background: rgba(60, 42, 26, .7); box-shadow: inset 0 0 0 1px rgba(216, 184, 120, .3); font: italic 500 15px 'Cormorant Garamond', Georgia, serif; }
+.bin-back:hover, .bin-back:focus-visible { background: rgba(92, 64, 36, .9); box-shadow: inset 0 0 0 1px #d8b878; outline: 0; }
+.bin-fsheets { display: flex; flex-wrap: wrap; gap: 30px 26px; }
 .bin-cap { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: calc(var(--w) + 20px); text-shadow: 0 1px 4px rgba(0, 0, 0, .8); }
 .bin-cap b { font: italic 600 15.5px/1.2 'Cormorant Garamond', serif; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .bin-cap i { font: italic 500 14px/1.2 'Cormorant Garamond', serif; opacity: .7; }

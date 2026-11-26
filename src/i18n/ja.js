@@ -212,6 +212,8 @@ export default {
   "bin.out": "くずかごを空にする",
   "bin.outSure": "完全に消えて戻せません — もう一度押す",
   "bin.blank": "文字のない紙",
+  "bin.folderBack": "ファイルを戻す",
+  "bin.folderEmpty": "紙は残っていません",
   "hint.bin.sheet": "紙をくずかごに入れました。取り戻すには上のくずかごのキー、または机のくずかごをタップ。",
   "hint.bin.folder": "ファイルと{many}をくずかごに入れました。取り戻すには上のくずかごのキー、または机のくずかごをタップ。",
   "hint.bin.folderEmpty": "空のファイルをくずかごに入れました。",

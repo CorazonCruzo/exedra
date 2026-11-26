@@ -212,6 +212,8 @@ export default {
   "bin.out": "vaciar la papelera",
   "bin.outSure": "para siempre, sin vuelta atrás: pulsa otra vez",
   "bin.blank": "hoja sin texto",
+  "bin.folderBack": "devolver la carpeta",
+  "bin.folderEmpty": "ya no le quedan hojas",
   "hint.bin.sheet": "La hoja está en la papelera. Para recuperarla: la tecla de la papelera arriba, o toca la papelera junto a la mesa.",
   "hint.bin.folder": "La carpeta y sus {many} están en la papelera. Para recuperarlas: la tecla de la papelera arriba, o toca la papelera junto a la mesa.",
   "hint.bin.folderEmpty": "La carpeta vacía está en la papelera.",

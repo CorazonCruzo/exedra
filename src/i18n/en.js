@@ -212,6 +212,8 @@ export default {
   "bin.out": "empty the wastebasket",
   "bin.outSure": "for good, no way back — press again",
   "bin.blank": "sheet without text",
+  "bin.folderBack": "return the folder",
+  "bin.folderEmpty": "no sheets left in it",
   "hint.bin.sheet": "The sheet is in the wastebasket. To take it back: the wastebasket key at the top, or tap the wastebasket by the desk.",
   "hint.bin.folder": "The folder and its {many} are in the wastebasket. To take them back: the wastebasket key at the top, or tap the wastebasket by the desk.",
   "hint.bin.folderEmpty": "The empty folder is in the wastebasket.",

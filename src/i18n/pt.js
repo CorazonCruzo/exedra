@@ -212,6 +212,8 @@ export default {
   "bin.out": "esvaziar o cesto",
   "bin.outSure": "para sempre, sem volta — toque de novo",
   "bin.blank": "folha sem texto",
+  "bin.folderBack": "devolver a pasta",
+  "bin.folderEmpty": "não restam folhas nela",
   "hint.bin.sheet": "A folha está no cesto. Para recuperá-la: a tecla do cesto no alto, ou toque no cesto junto à mesa.",
   "hint.bin.folder": "A pasta e as suas {many} estão no cesto. Para recuperá-las: a tecla do cesto no alto, ou toque no cesto junto à mesa.",
   "hint.bin.folderEmpty": "A pasta vazia está no cesto.",
