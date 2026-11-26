@@ -2856,7 +2856,7 @@ let binIn = null;   // то, что лежит в корзине (`binFill`)
 function makeDeskBin() {
   const { w, d, db, h, t } = DESK_BIN, g = new THREE.Group();
   let deskMesh = null; deskBody.traverse(o => { if (o.isMesh && o.material?.map && !deskMesh) deskMesh = o; });
-  const wd = deskMesh.material, brass = new THREE.MeshStandardMaterial({ color: 0xb48c4c, metalness: 1, roughness: .3 });
+  const wd = deskMesh.material.clone(), brass = new THREE.MeshStandardMaterial({ color: 0xb48c4c, metalness: 1, roughness: .3 });
   const velvet = new THREE.MeshPhysicalMaterial({ map: texShared('assets/textures/baize-color.jpg', true, [1 / BAIZE.mottle, 1 / BAIZE.mottle]), normalMap: texShared('assets/textures/baize-normal.jpg', false, [3, 3]), normalScale: new THREE.Vector2(1.6, 1.6),
     color: 0x2f6a3c, roughness: .92, sheen: 1, sheenColor: new THREE.Color(0x86bb84), sheenRoughness: .3, side: THREE.DoubleSide });
   const add = (geo, m, x = 0, y = 0, z = 0, parent = g) => { const o = new THREE.Mesh(m === velvet ? metricUV(geo) : geo, m); o.position.set(x, y, z); parent.add(o); return o; };
@@ -2889,7 +2889,7 @@ function makeDeskBin() {
   for (const sg of [-1, 1]) for (const y of [.04, h - .045]) { const sc = new THREE.Mesh(new THREE.SphereGeometry(.0045, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), brass); sc.rotation.x = sg * Math.PI / 2; sc.scale.y = .45; sc.position.set(.024, y, sg * w / 2); g.add(sc); }
   binIn = new THREE.Group(); g.add(binIn);
   g.updateMatrixWorld(true); g.traverse(o => { if (o.isMesh) { if (o.material === wd) deskUV(o, g); o.castShadow = o.receiveShadow = true; o.layers.mask = deskMesh.layers.mask; } });
-  g.userData.bin = true; return g;
+  g.userData.bin = true; g.userData.wood = wd; g.userData.velvet = velvet; return g;
 }
 let bin = null;
 function placeDeskBin() {
@@ -2900,11 +2900,12 @@ const binMouth = () => new THREE.Vector3(bin.position.x + DESK_BIN.d * .5, DESK_
 // Что видно в корзине: последние вещи стоят торцом вверх рядком от стенки тумбы наружу — сложенный вдвое лист или стопка листов папки (обложек в корзине не видно); старые — глубже.
 const BIN_SHOW = 9;
 let binPaper = null;
+const paperMat = () => binPaper ??= new THREE.MeshStandardMaterial({ map: texShared('assets/textures/paper-bunin.jpg?v=2', true, [1, 1]), roughness: .95 });
 function binFill() {
   $('binBtn').hidden = !trash.length;
   if (!binIn) return;
   for (const o of [...binIn.children]) { binIn.remove(o); o.geometry.dispose(); }
-  binPaper ??= new THREE.MeshStandardMaterial({ map: texShared('assets/textures/paper-bunin.jpg?v=2', true, [1, 1]), roughness: .95 });
+  paperMat();
   const { t, db } = DESK_BIN, list = trash.slice(-BIN_SHOW), step = Math.min(.009, (db - 2 * t - .01) / Math.max(1, list.length));
   list.forEach((e, k) => {
     const j = Math.sin((k + 1) * 12.9898 + trash.length) * 43758.5453 % 1, th = e.kind === 'folder' ? Math.min(.012, .0016 + e.sheets.length * .0006) : .0016, hh = .205, ww = .145;
@@ -2923,6 +2924,35 @@ function flightsStep(dt) {
     f.obj.quaternion.slerpQuaternions(f.q0, f.q1, Math.min(1, e * 1.4)); f.obj.scale.setScalar(1 + (f.sc - 1) * e); shadowDirty = true;
     if (k >= 1) { flights.splice(flights.indexOf(f), 1); f.then?.(); }
   }
+}
+// Папка — в корзину (её просьба 2026-11-26: «подшивку не показывать, только бумажки»): обложка исчезает сразу, в корзину летит стопка её листов;
+// в корзине она хранится целиком — с названием, порядком листов и местом, чтобы вернуть.
+function binFolder(f) {
+  const list = sheetsOf(f.id), n = list.length;
+  f.leaving = f.held = f.gone = true;
+  if (ownF === f) { ownF = null; syncBar(); } if (hov === f) hov = null; if (ride?.f === f) ride = null; if (lookBack?.key === f) lookBackNow();
+  trash.push({ kind: 'folder', at: new Date().toISOString(), folder: { ...f.data, pose: 'face' }, sheets: list.map(s => s.data) });
+  const th = .001 + n * .0004, m = new THREE.Mesh(new THREE.BoxGeometry(A4.w, th, A4.h), paperMat());
+  m.position.set(f.px.v, f.floor + Math.max(0, f.lift.v) + th / 2, f.pz.v); m.rotation.y = f.pr.v; m.castShadow = true; station.add(m);
+  flights.push({ obj: m, p0: m.position.clone(), to: binMouth().setY(DESK_BIN.top - .09), up: .14, q0: m.quaternion.clone(), q1: new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, -Math.PI / 2)), sc: .5, dur: .6, t: 0,
+    then: () => { station.remove(m); m.geometry.dispose(); } });
+  for (const s of list) { const i = sheets.indexOf(s); if (i >= 0) sheets.splice(i, 1); s.hide(); }
+  const i = folders.indexOf(f); if (i >= 0) folders.splice(i, 1);
+  station.remove(f.b.group); f.b.dispose();
+  binFill(); restack(); lightMasks(); shadowDirty = true; saveNow();
+  sfx.play('page', { gain: .45, rate: 1.05 });
+  hint(t(n ? 'hint.bin.folder' : 'hint.bin.folderEmpty', { many: tn('n.sheets', n) }), 6000);
+}
+// Подсветка корзины (её просьба 2026-11-26: «корзину подсвечивать надо… при перетаскивании к ней бумаги»): пока в руке лист или папка — чуть теплеет,
+// над ней (отпустишь — упадёт туда) — светится вся: дерево тёплым, бархат внутри — зелёным.
+const BIN_GLOW = { wood: 0x24160a, velvet: 0x0f3215, near: .25 };
+let binGlow = 0;
+function binGlowStep(dt) {
+  if (!bin) return;
+  const it = drag?.kind === 'item' ? drag.item : null, want = it && binnable(it) ? (drag.overBin ? 1 : drag.lifted || drag.carry || !(it instanceof Sheet) ? BIN_GLOW.near : 0) : 0;
+  if (Math.abs(want - binGlow) < .002) { if (binGlow === want) return; binGlow = want; }
+  else binGlow += (want - binGlow) * (1 - Math.exp(-dt * 12));
+  bin.userData.wood.emissive.setHex(BIN_GLOW.wood).multiplyScalar(binGlow); bin.userData.velvet.emissive.setHex(BIN_GLOW.velvet).multiplyScalar(binGlow);
 }
 // Лист — в корзину: с ним его место (на столе, в ящике или в папке — на своей странице), чтобы вернуть туда же.
 function throwSheet(s) {
@@ -3221,6 +3251,7 @@ async function removeFolder(f, keep) {
   if (f.filing) return hint(t('hint.folder.filing'), 3000);
   if (drag || f.held) return;
   if (f.drawer === null && weightM && baseOf(weightM.x.t, weightM.z.t) === f) return squeeze(f, 'weight');
+  if (toBin) return binFolder(f);
   f.leaving = true; f.held = true;   // для остальных вещей её уже нет: не преграда, не берётся
   if (ownF === f) { ownF = null; syncBar(); }
   if (hov === f) hov = null; if (ride?.f === f) ride = null;
@@ -3238,11 +3269,9 @@ async function removeFolder(f, keep) {
       else { s.drawer = null; s.floor = deskTop + .002; liftToTop(s); s.px.set(spot[0] + j * .003); s.pz.set(spot[1] + k * .003); s.pr.set(r + k * .012); s.lift.set(.06); }
     }
   } else {
-    if (toBin) { trash.push({ kind: 'folder', at: new Date().toISOString(), folder: { ...f.data, pose: 'face' }, sheets: list.map(s => s.data) }); binFill(); }
     for (const s of list) { const i = sheets.indexOf(s); if (i >= 0) sheets.splice(i, 1); s.hide(); }
   }
   f.gone = true; saveNow();
-  if (toBin && !inDrawer) { const m = binMouth(); f.px.t = m.x; f.pz.t = m.z; }   // поднимаясь, папка уходит за край стола — к корзине
   // Показ: папка поднимается; листы опускаются по одному на её место.
   const step = Math.min(80, 600 / Math.max(1, n));
   f.lift.k = 120; f.lift.c = 13; f.lift.t = .18; f.sz = new Spring(1, 200, 22); sfx.play('page', { gain: .45, rate: 1.15 });
@@ -3258,7 +3287,7 @@ async function removeFolder(f, keep) {
   const i = folders.indexOf(f); if (i >= 0) folders.splice(i, 1);
   station.remove(f.b.group); f.b.dispose();
   restack(); lightMasks(); shadowDirty = true; saveNow();
-  hint(toBin ? t(n ? 'hint.bin.folder' : 'hint.bin.folderEmpty', { many: tn('n.sheets', n) }) : keep ? (n ? t(inDrawer ? 'hint.folder.goneDrawer' : 'hint.folder.goneDesk', { many: tn('n.sheets', n) }) : t('hint.folder.gone')) : t('hint.folder.deleted', { many: tn('n.sheets', n) }), 6000);
+  hint(keep ? (n ? t(inDrawer ? 'hint.folder.goneDrawer' : 'hint.folder.goneDesk', { many: tn('n.sheets', n) }) : t('hint.folder.gone')) : t('hint.folder.deleted', { many: tn('n.sheets', n) }), 6000);
 }
 
 // ——— Взгляд подходит к вещи ———
@@ -5741,7 +5770,7 @@ function frame() {
   if (timeDirty && (!(timeBack || drag?.kind === 'clock') || performance.now() - sunAt0 > 100)) { timeDirty = false; sunAt0 = performance.now(); updateSun(); }
   setClockHands();
   for (const c of catalogs) if (c.update(dt)) shadowDirty = true;
-  settleDrawers(); syncBar(); syncBinBar(); syncBookBar(); if (editF) placeLabelEdit(); flightsStep(dt);
+  settleDrawers(); syncBar(); syncBinBar(); syncBookBar(); if (editF) placeLabelEdit(); flightsStep(dt); binGlowStep(dt);
   for (const d of drawers) if (d.update(dt)) shadowDirty = true;
   if (reading && !readBusy) readStep();
   if (lamp?.update(dt)) shadowDirty = true;
