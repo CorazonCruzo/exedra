@@ -51,7 +51,7 @@
   <symbol id="i-mark" viewBox="0 0 24 24"><path d="M8.5 2.5h7v19l-3.5-3.8-3.5 3.8z"/></symbol>
   <symbol id="i-back" viewBox="0 0 24 24"><path d="M9.5 5 4 10.5 9.5 16M4.5 10.5H14a5.5 5.5 0 0 1 0 11h-3"/></symbol>
   <symbol id="i-pad" viewBox="0 0 24 24"><path d="M3 20.6h18M12 20.6h9v-5.2zM3.2 14.6l13.6-5.8 1.1 2.3-13.6 5.8zM3.2 14.6v3.3"/></symbol>
-  <symbol id="i-bin" viewBox="0 0 24 24"><path d="M4 6.5h16M9.5 6.5V4h5v2.5M6 6.5l1 13.5h10l1-13.5M10 10.5v6M14 10.5v6"/></symbol>
+  <symbol id="i-bin" viewBox="0 0 24 24"><path d="M4 6.5h16M9.5 6.5V4h5v2.5M6 6.5l1 13.5h10l1-13.5M10 10.5v6M14 10.5v6"/></symbol><symbol id="i-binlook" viewBox="0 0 24 24"><path d="M4.5 10h15l-1.6 10.5H6.1zM8.5 10V4.2l4.6-.7.6 6.5M14.6 10l1.6-4.8 3.1 1-1.2 3.8"/></symbol><symbol id="i-pagebin" viewBox="0 0 24 24"><path d="M12 21H5.5V3h8l4 4v5.5M13.5 3v4h4"/><path d="M17.5 15.5v6M15 19l2.5 2.5L20 19"/></symbol><symbol id="i-unbind" viewBox="0 0 24 24"><path d="M3 10h18v10H3zM3 10l1.6-3h5.2L11 10"/><path d="M14 6.5l3-3.5 3 3.5M17 3v8"/></symbol>
   <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M3 7h3.5c3.5 0 5.5 10 9 10H20M3 17h3.5c1.3 0 2.4-.8 3.3-2M14.2 9c.9-1.2 1.9-2 3.3-2H20M17.5 4l3 3-3 3M17.5 14l3 3-3 3"/></symbol>
   <symbol id="i-ink" viewBox="0 0 24 24"><path d="M12 3.5c3 4 6 7.3 6 10.5a6 6 0 0 1-12 0c0-3.2 3-6.5 6-10.5z"/><path d="M6.4 15h11.2a5.6 5.6 0 0 1-11.2 0z" fill="currentColor" stroke="none"/></symbol>
   <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3.5c3 4 6 7.3 6 10.5a6 6 0 0 1-12 0c0-3.2 3-6.5 6-10.5z"/></symbol>
@@ -76,6 +76,7 @@
 <div id="fsKey" class="ui bar"><button id="fsBtn" class="key" data-tip="fullscreen" aria-label="fullscreen" data-i18n-attr="data-tip:tools.fullscreen; aria-label:tools.fullscreen"><svg><use href="#i-fs"/></svg></button><button id="lightReadBtn" class="key" data-tip="light" aria-label="light" data-i18n-attr="data-tip:tools.lightRead; aria-label:tools.lightRead" aria-expanded="false"><svg><use href="#i-light"/></svg></button><button id="penBtn" class="key" data-tip="marker and pencil" aria-label="marker and pencil" data-i18n-attr="data-tip:tools.pen; aria-label:tools.pen" aria-expanded="false"><svg><use href="#i-marker"/></svg></button></div>
 <div id="tools" class="ui bar">
   <button id="folderBtn" class="key" data-tip="new folder" aria-label="new folder" data-i18n-attr="data-tip:tools.folderNew; aria-label:tools.folderNew"><svg><use href="#i-folder"/></svg></button>
+  <button id="binBtn" class="key" data-tip="wastebasket" aria-label="wastebasket" data-i18n-attr="data-tip:tools.bin; aria-label:tools.bin" hidden><svg><use href="#i-binlook"/></svg></button>
   <button id="deskSaveBtn" class="key" data-tip="save the desk to a file" aria-label="save the desk to a file" data-i18n-attr="data-tip:tools.deskSave; aria-label:tools.deskSave"><svg><use href="#i-deskout"/></svg></button>
   <button id="deskOpenBtn" class="key" data-tip="open a desk from a file" aria-label="open a desk from a file" data-i18n-attr="data-tip:tools.deskOpen; aria-label:tools.deskOpen"><svg><use href="#i-deskin"/></svg></button>
   <input id="deskFile" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden>
@@ -103,6 +104,7 @@
   <button id="inkBtn" class="key" data-tip="ink strength" aria-label="ink strength" data-i18n-attr="data-tip:type.ink; aria-label:type.ink" aria-expanded="false"><svg><use href="#i-ink"/></svg></button>
   <button id="soundBtn" class="key" data-tip="sound on" aria-label="sound on" data-i18n-attr="data-tip:tools.soundOn; aria-label:tools.soundOn"><svg><use href="#i-sound"/></svg></button>
   <button id="pasteBtn" class="key" data-tip="paste text (⌘V)" aria-label="paste text (⌘V)" data-i18n-attr="data-tip:type.paste; aria-label:type.paste"><svg><use href="#i-paste"/></svg></button>
+  <button id="twBin" class="key" data-tip="sheet into the wastebasket" aria-label="sheet into the wastebasket" data-i18n-attr="data-tip:type.bin; aria-label:type.bin"><svg><use href="#i-bin"/></svg></button>
   <button id="doneBtn" class="key" data-tip="take out the sheet — it will lie on the desk" aria-label="take out the sheet — it will lie on the desk" data-i18n-attr="data-tip:type.eject; aria-label:type.eject"><svg><use href="#i-done"/></svg></button>
 </div>
 <input id="labelEdit" type="text" maxlength="60" autocomplete="off" spellcheck="false" aria-label="folder name — Enter to save, Esc to cancel" data-i18n-attr="aria-label:folder.nameEdit" hidden>
@@ -110,8 +112,11 @@
   <button id="labelBtn" class="key" data-tip="label the folder" aria-label="label the folder" data-i18n-attr="data-tip:folder.label; aria-label:folder.label"><svg><use href="#i-label"/></svg></button><input id="folderName" type="text" maxlength="60" autocomplete="off" spellcheck="false" aria-label="folder name — Enter to save" data-i18n-attr="aria-label:folder.nameBar" hidden>
   <button id="shuffleBtn" class="key" data-tip="shuffle the sheets" aria-label="shuffle the sheets" data-i18n-attr="data-tip:folder.shuffle; aria-label:folder.shuffle" hidden><svg><use href="#i-shuffle"/></svg></button>
   <button id="pdfBtn" class="key" data-tip="download PDF" aria-label="download PDF" data-i18n-attr="data-tip:folder.pdf; aria-label:folder.pdf"><svg><use href="#i-pdf"/></svg></button>
+  <button id="sheetOut" class="key" data-tip="this sheet into the wastebasket" aria-label="this sheet into the wastebasket" data-i18n-attr="data-tip:folder.sheetOut; aria-label:folder.sheetOut"><svg><use href="#i-pagebin"/></svg></button>
+  <button id="folderUnbind" class="key" data-tip="unbind the folder" aria-label="unbind the folder" data-i18n-attr="data-tip:folder.unbind; aria-label:folder.unbind"><svg><use href="#i-unbind"/></svg></button>
   <button id="folderOut" class="key" data-tip="remove the folder from the room" aria-label="remove the folder from the room" data-i18n-attr="data-tip:folder.remove; aria-label:folder.remove"><svg><use href="#i-bin"/></svg></button>
 </div>
+<div id="binTools" class="ui bar"><button id="binThrow" class="key" data-tip="into the wastebasket" aria-label="into the wastebasket" data-i18n-attr="data-tip:bin.throw; aria-label:bin.throw"><svg><use href="#i-bin"/></svg></button></div>
 <div id="bookBar" class="ui bar"><span id="bookTitle" class="label title" hidden></span>
   <button id="bookPut" class="key" data-tip="put a PDF in the book" aria-label="put a PDF in the book" data-i18n-attr="data-tip:book.put; aria-label:book.put"><svg><use href="#i-bookput"/></svg></button>
   <span id="bookCount" class="label"></span><input id="bookNo" type="text" inputmode="numeric" autocomplete="off" aria-label="page number — Enter to go" title="page number — Enter to go" data-i18n-attr="aria-label:book.pageNo; title:book.pageNo">
@@ -141,9 +146,8 @@
   <button id="askRep" class="opt"><b data-i18n="bookAsk.rep">instead of this one</b><span id="askRepSub"></span></button>
 </div></div>
 <div id="folderAsk" class="ui" hidden><div class="plate" role="dialog" aria-labelledby="folderAskTitle">
-  <h3 id="folderAskTitle" data-i18n="folderAsk.title">Remove the folder?</h3>
+  <h3 id="folderAskTitle" data-i18n="folderAsk.title">Unbind the folder?</h3>
   <button id="foAsk1" class="opt"><b id="foAsk1b" data-i18n="folderAsk.toDesk">sheets — onto the desk</b><span id="foAsk1s"></span></button>
-  <button id="foAsk2" class="opt danger"><b id="foAsk2b" data-i18n="folderAsk.withSheets">together with its sheets</b><span id="foAsk2s"></span></button>
 </div></div>
 <div id="deskAsk" class="ui" hidden><div class="plate" role="dialog" aria-labelledby="deskAskTitle">
   <h3 id="deskAskTitle" data-i18n="deskAsk.title">Open a desk from a file?</h3>
@@ -204,6 +208,7 @@
       <dt data-i18n="help.book.t">Book</dt><dd data-i18n="help.book.d"></dd>
       <dt data-i18n="help.read.t">Read</dt><dd data-i18n="help.read.d"></dd>
       <dt data-i18n="help.pen.t">Highlight</dt><dd data-i18n="help.pen.d"></dd>
+      <dt data-i18n="help.bin.t">Wastebasket</dt><dd data-i18n="help.bin.d"></dd>
       <dt data-i18n="help.projector.t">Projector</dt><dd data-i18n="help.projector.d"></dd>
       <dt data-i18n="help.back.t">Go back</dt><dd data-i18n="help.back.d"></dd>
     </dl>
