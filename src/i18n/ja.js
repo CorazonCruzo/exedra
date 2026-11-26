@@ -164,10 +164,6 @@ export default {
   "decor.art": "ドームの絵",
   "decor.sculpt": "カタログ棚の彫刻",
   "decor.weight": "机の上の文鎮",
-  "decor.bin": "くずかご",
-  "decor.bin.wicker": "革巻きの籐",
-  "decor.bin.twisted": "ねじれ編み",
-  "decor.bin.desk": "机の側面に",
   "decor.paper": "本の紙",
   "decor.chairs": "部屋の椅子",
   "decor.chairsBack": "元に戻す",
@@ -266,7 +262,7 @@ export default {
   "phone.title": "Exedra にはもっと大きな画面が必要です",
   "phone.text": "この部屋はタブレットかパソコン向けです。スマートフォンでは文字も操作も小さすぎます。タブレットかパソコンで開いてください。",
   // credits
-  "credits.line": "タイプライター：Tijerín Art Studio · ランプ：Noah · 机：Matthew Collings · キャビネット：Lorenzo Drago · スタッコ装飾：Dikart、gussbronze · 時計：Crea · アテナのフクロウ：Danzer · 壁の照明：Javier Carceller · ドアノッカー：Fernando Closs · 書見台：Francesco Coldesina · 肘掛け椅子：Ashe · ソファ：Oleksandr Tserkovniy · ラグ：mfb64 · フロアランプ：Mad_Lobster_Workshop · パテ・ベビー映写機：timvanderheijden · ヤシ：AllQuad · 鉢：Emily Rink · チェス：igi — CC BY 4.0 · 文鎮：ネズミ — Emm、テリア — oxlade-3d、CC BY 4.0；ロバ — The Hunt Museum、マラカイト（写真）— Kalamansi123、CC0 · くずかご：Dudzy, eeelabvisual, CC BY 4.0 · フォルダー：Georg Hulbe、1902年 — メトロポリタン美術館、CC0 · ドッペルマイヤーの地球儀、石膏のイノシシ、枝にとまるワタリガラス：Muzea Małopolski — CC0；地球儀の地図：C. de Jode、A. Cellarius — パブリックドメイン · 椅子、シャンデリア、額縁、木材、寄木の床、ダマスク織、コーヒーテーブルとサイドテーブル：Poly Haven — CC0；革：ambientCG — CC0 · 絵画と図版：L. von Hofmann、P. Puvis de Chavannes、A. Böcklin、A. Rylov、A. Kuindzhi、I. Levitan；ポスター：A. Mauzan — パテ・ベビー、1928年、「Teatro Ópera」、ブエノスアイレス、1930年；M. Kalmanson —「Tormented Souls」、1917年 — パブリックドメイン；絵画の写真：Belvedere、Johannes Stoll — CC BY-SA 4.0、Allie Caulfield — CC BY 2.0 · 窓ガラス：Wolfgang Sauberの写真 — CC BY-SA 4.0 · 音：lonemonk — CC BY 3.0、Work With Sounds — CC BY 4.0、_stubb — CC0；引き出し、ページ、スイッチの音 — パブリックドメイン · 紙：ブーニン、パリ、1920年；用紙の書き込み：チェーホフ、ベルリン、1920年 — パブリックドメイン · <a id=\"aboutLink\" href=\"CREDITS.md\" style=\"color:inherit;pointer-events:auto\">詳細</a>",
+  "credits.line": "タイプライター：Tijerín Art Studio · ランプ：Noah · 机：Matthew Collings · キャビネット：Lorenzo Drago · スタッコ装飾：Dikart、gussbronze · 時計：Crea · アテナのフクロウ：Danzer · 壁の照明：Javier Carceller · ドアノッカー：Fernando Closs · 書見台：Francesco Coldesina · 肘掛け椅子：Ashe · ソファ：Oleksandr Tserkovniy · ラグ：mfb64 · フロアランプ：Mad_Lobster_Workshop · パテ・ベビー映写機：timvanderheijden · ヤシ：AllQuad · 鉢：Emily Rink · チェス：igi — CC BY 4.0 · 文鎮：ネズミ — Emm、テリア — oxlade-3d、CC BY 4.0；ロバ — The Hunt Museum、マラカイト（写真）— Kalamansi123、CC0 · フォルダー：Georg Hulbe、1902年 — メトロポリタン美術館、CC0 · ドッペルマイヤーの地球儀、石膏のイノシシ、枝にとまるワタリガラス：Muzea Małopolski — CC0；地球儀の地図：C. de Jode、A. Cellarius — パブリックドメイン · 椅子、シャンデリア、額縁、木材、寄木の床、ダマスク織、コーヒーテーブルとサイドテーブル：Poly Haven — CC0；革：ambientCG — CC0 · 絵画と図版：L. von Hofmann、P. Puvis de Chavannes、A. Böcklin、A. Rylov、A. Kuindzhi、I. Levitan；ポスター：A. Mauzan — パテ・ベビー、1928年、「Teatro Ópera」、ブエノスアイレス、1930年；M. Kalmanson —「Tormented Souls」、1917年 — パブリックドメイン；絵画の写真：Belvedere、Johannes Stoll — CC BY-SA 4.0、Allie Caulfield — CC BY 2.0 · 窓ガラス：Wolfgang Sauberの写真 — CC BY-SA 4.0 · 音：lonemonk — CC BY 3.0、Work With Sounds — CC BY 4.0、_stubb — CC0；引き出し、ページ、スイッチの音 — パブリックドメイン · 紙：ブーニン、パリ、1920年；用紙の書き込み：チェーホフ、ベルリン、1920年 — パブリックドメイン · <a id=\"aboutLink\" href=\"CREDITS.md\" style=\"color:inherit;pointer-events:auto\">詳細</a>",
   // app
   "app.title": "Exedra",
   // hint

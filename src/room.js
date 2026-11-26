@@ -2374,11 +2374,7 @@ let savedSculpt = choice(SCULPTS, stored.decor?.sculpt, 'boar');
 // savedWeight — фигурка на пресс-папье, выбранная в карточке; ?weight= — другая на этот раз.
 let savedWeight = choice(FIGURES, stored.decor?.weight, 'mouse');
 const BOOK_PAPER = { old: { title: t('decor.paper.old') }, file: { title: t('decor.paper.file') } };
-// Корзина для бумаг у стола (пользователь 2026-11-25: «интерактивную корзину… стильную»; две на выбор — «хочу глазами сверить»). Пока она только стоит; выбрасывать в неё — следующим шагом.
-// Wicker Basket — Dudzy, CC BY 4.0; News Paper Basket — eeelabvisual, CC BY 4.0 (оригиналы — originals/bin, подготовка — tools/models/basket.py). rot — поворот, чтобы к читателю смотрела лучшая сторона; x — своё расстояние от стола; tone — тонировка: витая — в цвет стола (средний цвет его дерева 53,38,30 с поправкой на baseColorFactor .79 модели; её решение 2026-11-26).
-// desk — короб на стенке тумбы (её просьба 2026-11-26: «прибитую к столу мусорку. обитую зелёным бархатом внутри… аккуратную, под бумаги»), строится здесь же (`makeDeskBin`).
-const BINS = { wicker: { title: t('decor.bin.wicker'), url: 'assets/models/bin/wicker.glb', rot: .5 }, twisted: { title: t('decor.bin.twisted'), url: 'assets/models/bin/twisted.glb', rot: 0, x: .4, tone: [70, 50, 40] }, desk: { title: t('decor.bin.desk'), make: () => makeDeskBin() } };
-const decor = { bookPaper: choice(BOOK_PAPER, stored.decor?.bookPaper, 'old'), bin: choice(BINS, Q.get('bin') ?? stored.decor?.bin, 'wicker'), sculpt: choice(SCULPTS, Q.get('sculpt'), savedSculpt), weight: choice(FIGURES, Q.get('weight'), savedWeight), art: choice(ART_SETS, Q.get('art'), savedArt) };
+const decor = { bookPaper: choice(BOOK_PAPER, stored.decor?.bookPaper, 'old'), sculpt: choice(SCULPTS, Q.get('sculpt'), savedSculpt), weight: choice(FIGURES, Q.get('weight'), savedWeight), art: choice(ART_SETS, Q.get('art'), savedArt) };
 // Свет зала — 0…1,6: выше единицы — «ещё светлее» (её просьба 2026-11-22: «возможность ещё больше света добавить»).
 const LIGHT_MAX = 1.6;
 // Свет хранится всегда, даже нетронутый: прежнее значение по умолчанию (.45) без отметки «трогали» — не выбор, а старый дефолт, его сменяет новый.
@@ -2819,7 +2815,7 @@ $('help').addEventListener('pointerdown', e => { if (e.target === $('help')) sho
 const applyGlass = () => { ceiling?.setGlass({ side: glassOf(false), fan: glassOf(true), sideGain: GLASS.sideGain, fanGain: GLASS.fanGain }); sunThroughGlass(); };
 const decorOpen = () => !$('decor').hidden;
 // Кнопки вариантов заводятся один раз; выбор только переставляет ободок — фокус остаётся на нажатой.
-const DECOR_ROWS = [['decorArt', ART_SETS, 'art'], ['decorSculpt', SCULPTS, 'sculpt'], ['decorWeight', FIGURES, 'weight'], ['decorBin', BINS, 'bin'], ['decorPaper', BOOK_PAPER, 'bookPaper']];
+const DECOR_ROWS = [['decorArt', ART_SETS, 'art'], ['decorSculpt', SCULPTS, 'sculpt'], ['decorWeight', FIGURES, 'weight'], ['decorPaper', BOOK_PAPER, 'bookPaper']];
 const markDecor = () => { for (const [id, , key] of DECOR_ROWS) for (const b of $(id).children) b.classList.toggle('on', b.dataset.k === decor[key]); };
 let shownArt = null, shownSaved = null;
 async function chooseArt(k) {
@@ -2833,27 +2829,32 @@ async function chooseArt(k) {
   if (!set) { decor.art = shownArt ?? was; savedArt = shownSaved ?? wasSaved; markDecor(); save(); hint(t('hint.art.fail'), 5000); return; }
   ceiling.setArt(set); shownArt = k; shownSaved = savedArt; shadowDirty = true;
 }
-// Корзина: модель грузится, когда её выбрали (и при входе — выбранная), и встаёт на пол справа от стола, у передней ножки, где её достаёт рука сидящего.
-const BIN_AT = { x: .2, z: .1 };   // середина корзины: от правого края стола наружу (у корзины может быть своё `x`) и от середины его глубины к читателю, м
-// Тонировка (`tone` у корзины): текстура перекрашивается в тон, яркость каждой точки — относительно средней, так что рисунок дерева остаётся.
-function toneMap(tex, rgb) {
-  const im = tex.image, c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
-  const g = c.getContext('2d'); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, c.width, c.height), p = d.data;
-  let sum = 0; for (let i = 0; i < p.length; i += 4) sum += .3 * p[i] + .59 * p[i + 1] + .11 * p[i + 2];
-  const mean = sum / (p.length / 4) || 1;
-  for (let i = 0; i < p.length; i += 4) { const k = (.3 * p[i] + .59 * p[i + 1] + .11 * p[i + 2]) / mean; p[i] = rgb[0] * k; p[i + 1] = rgb[1] * k; p[i + 2] = rgb[2] * k; }
-  g.putImageData(d, 0, 0); tex.image = c; tex.needsUpdate = true;
+// Корзина для бумаг (пользователь 2026-11-25: «интерактивную корзину… стильную»; 2026-11-26 из трёх вариантов осталась эта: «прибитую к столу мусорку. обитую зелёным
+// бархатом внутри… аккуратную, под бумаги»; «дерево хотелось бы текстуры стола. и цвета… чтобы они смотрелись, как один предмет мебели»). Бросать в неё — только бумагу.
+// Короб на наружной стенке правой тумбы: задней стенкой к тумбе, верх — под пояском (0,76 м). Передняя стенка наклонена наружу — кверху шире; на ней филёнка, как на ящиках.
+// Дерево — сам материал стола: развёртка короба ложится на тот участок его текстуры, что на стенке тумбы, в том же масштабе и так же зеркально от середины.
+// Внутри — зелёный бархат (сукно зала с блеском ворса — sheen) с кантом по верху; по верху — тяга, по низу — цоколь, на боках у тумбы — латунные шурупы.
+const DESK_BIN = { w: .25, d: .14, db: .1, h: .23, t: .012, top: .74, z: .03, side: .036 };   // ширина вдоль стенки, вынос поверху и понизу, высота, толщина стенок; верх, середина по z; на сколько стенка тумбы внутри края столешницы, м
+// Участок текстуры стола со стенкой тумбы (замерено лучом по столу): u — от середины стенки к краю, v — снизу вверх; единиц текстуры на метр.
+const DESK_SIDE_UV = { u: .355, v: .48, k: .335 };
+function deskUV(o, root) {
+  const geo = o.geometry, p = geo.attributes.position, n = geo.attributes.normal, uv = new Float32Array(p.count * 2), m = new THREE.Matrix4().copy(root.matrixWorld).invert().multiply(o.matrixWorld);
+  const nm = new THREE.Matrix3().getNormalMatrix(m), v = new THREE.Vector3(), w = new THREE.Vector3(), { u: U, v: V, k } = DESK_SIDE_UV;
+  for (let i = 0; i < p.count; i++) {
+    v.fromBufferAttribute(p, i).applyMatrix4(m); w.fromBufferAttribute(n, i).applyMatrix3(nm);
+    const ax = Math.abs(w.x), ay = Math.abs(w.y), az = Math.abs(w.z);
+    const [a, b] = ax >= ay && ax >= az ? [Math.abs(v.z), v.y] : az >= ay ? [v.x, v.y] : [Math.abs(v.z), v.x];
+    uv[i * 2] = U - a * k; uv[i * 2 + 1] = V + b * k;
+  }
+  geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
 }
-// Короб на правой стенке правой тумбы: задней стенкой к тумбе, верх — под пояском (0,76 м), середина чуть ближе к читателю. Передняя стенка наклонена наружу —
-// кверху короб шире; на ней филёнка, как на ящиках стола. Дерево — красное, в тон стола; внутри — зелёный бархат (сукно зала с блеском ворса — sheen) с кантом
-// по верхнему краю; по верху — тяга, по низу — цоколь, на боках у тумбы — латунные шурупы, которыми он «прибит».
-const DESK_BIN = { w: .32, d: .16, db: .115, h: .24, t: .012, top: .74, z: .02, side: .036 };   // ширина вдоль стенки, вынос поверху и понизу, высота, толщина стенок; верх, середина по z; на сколько стенка тумбы внутри края столешницы, м
 function makeDeskBin() {
   const { w, d, db, h, t } = DESK_BIN, g = new THREE.Group();
-  const wd = wood('mahogany', [2.6, 2.6], 0x76605a, .5), brass = new THREE.MeshStandardMaterial({ color: 0xb48c4c, metalness: 1, roughness: .32 });
-  const velvet = new THREE.MeshPhysicalMaterial({ map: texShared('assets/textures/baize-color.jpg', true, [1 / BAIZE.mottle, 1 / BAIZE.mottle]), normalMap: texShared('assets/textures/baize-normal.jpg', false, [1 / BAIZE.nap, 1 / BAIZE.nap]),
-    color: 0x2f6a3c, roughness: .9, sheen: 1, sheenColor: new THREE.Color(0x7fb47f), sheenRoughness: .35, side: THREE.DoubleSide });
-  const add = (geo, m, x = 0, y = 0, z = 0, parent = g) => { const o = new THREE.Mesh(metricUV(geo), m); o.position.set(x, y, z); parent.add(o); return o; };
+  let deskMesh = null; deskBody.traverse(o => { if (o.isMesh && o.material?.map && !deskMesh) deskMesh = o; });
+  const wd = deskMesh.material, brass = new THREE.MeshStandardMaterial({ color: 0xb48c4c, metalness: 1, roughness: .32 });
+  const velvet = new THREE.MeshPhysicalMaterial({ map: texShared('assets/textures/baize-color.jpg', true, [1 / BAIZE.mottle, 1 / BAIZE.mottle]), normalMap: texShared('assets/textures/baize-normal.jpg', false, [3, 3]), normalScale: new THREE.Vector2(1.6, 1.6),
+    color: 0x2f6a3c, roughness: .92, sheen: 1, sheenColor: new THREE.Color(0x86bb84), sheenRoughness: .3, side: THREE.DoubleSide });
+  const add = (geo, m, x = 0, y = 0, z = 0, parent = g) => { const o = new THREE.Mesh(m === velvet ? metricUV(geo) : geo, m); o.position.set(x, y, z); parent.add(o); return o; };
   const box = (sx, sy, sz, x, y, z, m = wd, parent) => add(new THREE.BoxGeometry(sx, sy, sz), m, x, y, z, parent);
   // Бок — трапеция в плоскости x-y (понизу вынос db, поверху d), толщиной вдоль z; бархат — такая же, чуть меньше, по внутренней грани.
   const side = (inset, depth, m, z) => { const s = new THREE.Shape([new THREE.Vector2(inset, inset), new THREE.Vector2(db - inset, inset), new THREE.Vector2(d - inset, h), new THREE.Vector2(inset, h)]);
@@ -2864,10 +2865,10 @@ function makeDeskBin() {
   // Передняя стенка — своя группа, повёрнутая по наклону: x — наружу по нормали, y — вверх вдоль стенки.
   const a = Math.atan2(d - db, h), L = Math.hypot(h, d - db), fr = new THREE.Group(); fr.position.set((db + d) / 2, h / 2, 0); fr.rotation.z = -a; g.add(fr);
   box(t, L, w, -t / 2, 0, 0, wd, fr); box(.002, L - t * 1.5, w - 2 * t, -t - .001, t * .25, 0, velvet, fr);
-  const pw = w - .07, ph = L - .07, bar = .009;                                                                    // филёнка: рамка из тонких брусков, чуть выступает
+  const pw = w - .06, ph = L - .06, bar = .008;                                                                    // филёнка: рамка из тонких брусков, чуть выступает
   for (const sg of [-1, 1]) { box(.004, ph, bar, .002, 0, sg * (pw / 2 - bar / 2), wd, fr); box(.004, bar, pw, .002, sg * (ph / 2 - bar / 2), 0, wd, fr); }
   // Тяга по верху (чуть шире короба) и цоколь по низу.
-  const rim = .02, rh = .014;
+  const rim = .018, rh = .014;
   box(rim, rh, w + .012, d - rim / 2 + .006, h + rh / 2, 0); box(t + .004, rh, w, (t + .004) / 2, h + rh / 2, 0);
   for (const sg of [-1, 1]) box(d + .006, rh, rim, (d + .006) / 2, h + rh / 2, sg * (w / 2 + .006 - rim / 2));
   box(db + .01, .016, w + .014, (db + .01) / 2, .008, 0);
@@ -2876,17 +2877,12 @@ function makeDeskBin() {
   pipe(w - 2 * t, t + .003, 0, 'z'); pipe(w - 2 * t, d - t - .003, 0, 'z'); for (const sg of [-1, 1]) pipe(d - 2 * t, d / 2, sg * (w / 2 - t - .003), 'x');
   // Латунные шурупы: по два на каждом боку у стенки тумбы.
   for (const sg of [-1, 1]) for (const y of [.045, h - .05]) { const sc = new THREE.Mesh(new THREE.SphereGeometry(.0055, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), brass); sc.rotation.x = sg * Math.PI / 2; sc.scale.y = .45; sc.position.set(.028, y, sg * w / 2); g.add(sc); }
+  g.updateMatrixWorld(true); g.traverse(o => { if (o.isMesh) { if (o.material === wd) deskUV(o, g); o.castShadow = o.receiveShadow = true; o.layers.mask = deskMesh.layers.mask; } });
   return g;
 }
-let bin = null; const binModels = {};
-async function chooseBin(k) {
-  decor.bin = k; markDecor(); save();
-  const B = BINS[k]; binModels[k] ??= (B.make ? Promise.resolve(B.make()) : loadModel(B.url)).then(m => { if (B.tone) m.traverse(o => o.material?.map && toneMap(o.material.map, B.tone)); return m; }).catch(e => { console.warn('bin', e); return null; });
-  const m = await binModels[k]; if (!m || decor.bin !== k) return;
-  if (bin) station.remove(bin);
-  m.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.userData.bin = true; } });
-  if (B.make) m.position.set(DESK.hw - DESK_BIN.side, DESK_BIN.top - DESK_BIN.h - .016, DESK_BIN.z); else { m.position.set(DESK.hw + (B.x ?? BIN_AT.x), 0, BIN_AT.z); m.rotation.y = B.rot; }
-  station.add(m); bin = m; lightMasks(); shadowDirty = true;
+let bin = null;
+function placeDeskBin() {
+  bin = makeDeskBin(); bin.position.set(DESK.hw - DESK_BIN.side, DESK_BIN.top - DESK_BIN.h - .014, DESK_BIN.z); station.add(bin); lightMasks(); shadowDirty = true;
 }
 // Бумага книги: «старая» — страница печатается на нашей бумаге, «как в файле» — цвета файла как есть (белое остаётся белым).
 const chooseBookPaper = k => { decor.bookPaper = k; markDecor(); for (const b of books) b.book.setPaperMode(k === 'file'); shadowDirty = true; save(); };
@@ -2901,7 +2897,7 @@ function showDecor(on) {
   if (on) {
     closeSliders();
     for (const [id, list, key] of DECOR_ROWS) if (!$(id).children.length) $(id).append(...Object.entries(list).map(([k, v]) => {
-      const b = document.createElement('button'); b.textContent = v.title; b.dataset.k = k; b.onclick = () => (key === 'art' ? chooseArt(k) : key === 'sculpt' ? chooseSculpt(k) : key === 'weight' ? chooseWeight(k) : key === 'bin' ? chooseBin(k) : chooseBookPaper(k)); return b;
+      const b = document.createElement('button'); b.textContent = v.title; b.dataset.k = k; b.onclick = () => (key === 'art' ? chooseArt(k) : key === 'sculpt' ? chooseSculpt(k) : key === 'weight' ? chooseWeight(k) : chooseBookPaper(k)); return b;
     }));
     if (!$('decorLang').children.length) $('decorLang').append(...LANGS.map(([code, name]) => { const b = document.createElement('button'); b.textContent = name; b.dataset.k = code; b.classList.toggle('on', code === lang); b.onclick = () => setLang(code); return b; }));
     markDecor(); $('chairsBack').disabled = !(chairs && (chairs.touched || stored.hallChairs));
@@ -5434,7 +5430,7 @@ async function init() {
   weight = buildPaperweight({ map: photo('assets/textures/malachite.jpg', true) }); weight.group.userData.weight = true; station.add(weight.group);
   weightM = new Mover(weight.group, stored.weight || { x: -.34, z: .2, rot: .4 }, .07); weightM.rest(underAt);
   { const k = decor.weight; loadWeight(k).then(m => { if (m && decor.weight === k) { weight.setFigure(k, m); shadowDirty = true; } }); }
-  chooseBin(decor.bin);
+  placeDeskBin();
   goView(Q.get('view') === 'wall' ? 'wall' : 'seat', true);
   tableLamps = buildTableLamps({ scene, model: desk.lampModel, copies: await lampLoad, spots: lampSpots, y: -HALL.depth + TABLE_H + .028, light: tableLit, dress: below });
   const chair = await chairLoad; if (chair) placeChairs(chair);
