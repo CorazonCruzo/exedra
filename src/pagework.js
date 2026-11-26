@@ -10,8 +10,8 @@ let env = { paper: null, stamps: [], stampScale: 1 }, ready = null;
 async function loadFonts() {
   const css = await (await fetch(FONTS)).text();
   for (const [, face] of css.matchAll(/@font-face\s*{([^}]*)}/g)) {
-    const family = face.match(/font-family:\s*['"]?([^;'"]+)/)?.[1], src = face.match(/url\(([^)]+)\)/)?.[1], range = face.match(/unicode-range:\s*([^;]+)/)?.[1];
-    if (FAMILIES.includes(family) && src && !/font-style:\s*italic/.test(face)) self.fonts.add(new FontFace(family, `url(${new URL(src, FONTS)})`, { style: 'normal', weight: '400', ...(range ? { unicodeRange: range } : {}) }));
+    const family = face.match(/font-family:\s*['"]?([^;'"]+)/)?.[1], src = face.match(/url\(([^)]+)\)/)?.[1], range = face.match(/unicode-range:\s*([^;]+)/)?.[1], adjust = face.match(/size-adjust:\s*([^;]+)/)?.[1];
+    if (FAMILIES.includes(family) && src && !/font-style:\s*italic/.test(face)) self.fonts.add(new FontFace(family, `url(${new URL(src, FONTS)})`, { style: 'normal', weight: '400', ...(range ? { unicodeRange: range } : {}), ...(adjust ? { sizeAdjust: adjust } : {}) }));
   }
 }
 const W = 1024, H = 1448, WB = 512, HB = 724;

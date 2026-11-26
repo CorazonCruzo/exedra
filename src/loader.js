@@ -1539,8 +1539,8 @@ if (typeof document === 'undefined') {
   const captionFont = async () => {
     const css = await (await fetch(CAPTION_CSS)).text();
     for (const [, face] of css.matchAll(/@font-face\s*{([^}]*)}/g)) {
-      const src = face.match(/url\(([^)]+)\)/)?.[1], range = face.match(/unicode-range:\s*([^;]+)/)?.[1];
-      if (src && /Cormorant Garamond/.test(face) && /font-style:\s*italic/.test(face)) self.fonts.add(new FontFace('Cormorant Garamond', `url(${new URL(src, CAPTION_CSS)})`, { style: 'italic', weight: '500', ...(range ? { unicodeRange: range } : {}) }));
+      const src = face.match(/url\(([^)]+)\)/)?.[1], range = face.match(/unicode-range:\s*([^;]+)/)?.[1], adjust = face.match(/size-adjust:\s*([^;]+)/)?.[1];
+      if (src && /Cormorant Garamond/.test(face) && /font-style:\s*italic/.test(face)) self.fonts.add(new FontFace('Cormorant Garamond', `url(${new URL(src, CAPTION_CSS)})`, { style: 'italic', weight: '500', ...(range ? { unicodeRange: range } : {}), ...(adjust ? { sizeAdjust: adjust } : {}) }));
     }
     await self.fonts.load(CAPTION_FONT, CAPTION);
   };

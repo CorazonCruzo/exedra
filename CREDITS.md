@@ -169,6 +169,10 @@
 - PT Mono — ParaType, SIL Open Font License 1.1.
 - Old Standard TT — Alexey Kryukov, SIL Open Font License 1.1.
 - Cormorant Garamond — Christian Thalmann, SIL Open Font License 1.1.
+- Греческие буквы. У Cormorant Garamond, PT Mono и Old Standard TT с Google Fonts греческого нет, поэтому греческие знаки под теми же именами берутся из подобранных шрифтов:
+  - для Old Standard TT — Old Standard 2.7 (пакет CTAN oldstandard): Alexey Kryukov, Robert Alessi, Antonis Tsolomitis, SIL Open Font License 1.1; вырезан только греческий;
+  - для Cormorant Garamond — EB Garamond (Georg Duffner, Octavio Pardo), SIL Open Font License 1.1; вес облегчён под Cormorant;
+  - для PT Mono — Fira Mono (Mozilla, Telefónica; Carrois Apostrophe), SIL Open Font License 1.1.
 - Abril Fatface — TypeTogether (Veronika Burian, José Scaglione), SIL Open Font License 1.1: надпись «Typewriter» на задней стенке машинки, перерисованная чётко.
 
 Файлы шрифтов (WOFF2, наборы знаков как на Google Fonts) лежат в `assets/fonts/`, там же лицензия каждого — `OFL-*.txt`.

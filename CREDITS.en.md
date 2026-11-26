@@ -169,6 +169,10 @@ The windows are round panes (Butzenscheiben) in lead, in a bottle-green tone (th
 - PT Mono — ParaType, SIL Open Font License 1.1.
 - Old Standard TT — Alexey Kryukov, SIL Open Font License 1.1.
 - Cormorant Garamond — Christian Thalmann, SIL Open Font License 1.1.
+- Greek letters. Cormorant Garamond, PT Mono and Old Standard TT from Google Fonts have no Greek, so Greek characters under the same family names come from matched fonts:
+  - for Old Standard TT — Old Standard 2.7 (CTAN package oldstandard): Alexey Kryukov, Robert Alessi, Antonis Tsolomitis, SIL Open Font License 1.1; only the Greek is cut out;
+  - for Cormorant Garamond — EB Garamond (Georg Duffner, Octavio Pardo), SIL Open Font License 1.1; weight lightened to sit with Cormorant;
+  - for PT Mono — Fira Mono (Mozilla, Telefónica; Carrois Apostrophe), SIL Open Font License 1.1.
 - Abril Fatface — TypeTogether (Veronika Burian, José Scaglione), SIL Open Font License 1.1: the “Typewriter” lettering on the typewriter’s back panel, redrawn sharp.
 
 The font files (WOFF2, with the same character subsets as on Google Fonts) are in `assets/fonts/`, each with its licence as `OFL-*.txt`.
