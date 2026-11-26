@@ -382,6 +382,7 @@ export default {
   "n.sheets": { one: "{n} лист", few: "{n} листа", many: "{n} листов", other: "{n} листа" },
   "n.folders": { one: "{n} папка", few: "{n} папки", many: "{n} папок", other: "{n} папки" },
   "n.books": { one: "{n} книга", few: "{n} книги", many: "{n} книг", other: "{n} книги" },
+  "n.binned": "в корзине: {n}",
   // pdf
   "pdf.defaultName": "записи",
   // desk

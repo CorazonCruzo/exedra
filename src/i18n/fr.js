@@ -382,6 +382,7 @@ export default {
   "n.sheets": { one: "{n} feuille", many: "{n} feuilles", other: "{n} feuilles" },
   "n.folders": { one: "{n} chemise", many: "{n} chemises", other: "{n} chemises" },
   "n.books": { one: "{n} livre", many: "{n} livres", other: "{n} livres" },
+  "n.binned": "{n} dans la corbeille",
   // pdf
   "pdf.defaultName": "notes",
   // desk

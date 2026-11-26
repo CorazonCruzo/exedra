@@ -382,6 +382,7 @@ export default {
   "n.sheets": { other: "用紙{n}枚" },
   "n.folders": { other: "フォルダー{n}つ" },
   "n.books": { other: "本{n}冊" },
+  "n.binned": "くずかごに{n}",
   // pdf
   "pdf.defaultName": "メモ",
   // desk

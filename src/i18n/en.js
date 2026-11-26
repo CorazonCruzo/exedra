@@ -382,6 +382,7 @@ export default {
   "n.sheets": { one: "{n} sheet", other: "{n} sheets" },
   "n.folders": { one: "{n} folder", other: "{n} folders" },
   "n.books": { one: "{n} book", other: "{n} books" },
+  "n.binned": "{n} in the wastebasket",
   // pdf
   "pdf.defaultName": "notes",
   // desk

@@ -382,6 +382,7 @@ export default {
   "n.sheets": { other: "{n} 张纸" },
   "n.folders": { other: "{n} 个文件夹" },
   "n.books": { other: "{n} 本书" },
+  "n.binned": "废纸篓里{n}件",
   // pdf
   "pdf.defaultName": "笔记",
   // desk

@@ -1,5 +1,5 @@
 // Стол — в файл и из файла: один ZIP с несжатыми записями, написанный здесь же, без библиотек.
-//   desk.json          — { app: 'reading-room', format: 1, saved: ISO, state: <то, что лежит в localStorage под ключом стола> }
+//   desk.json          — { app: 'reading-room', format: 1, saved: ISO, state: <то, что лежит в localStorage под ключом стола; корзина — state.trash> }
 //   books/<id>.pdf     — файл каждой книги, на которую ссылается стол (id — как в state.books[].file.id)
 // Записи НЕ сжимаются (STORED): PDF и так сжат, а главное — файл книги кладётся в архив как есть, ссылкой на OPFS-файл, не копируясь в память.
 //   deskBlob(state, onProgress) → { blob, books, missing, bytes }  — собирает архив; onProgress(доля 0…1, подпись)
@@ -117,7 +117,7 @@ async function entryData(file, e) {
   return file.slice(start, start + e.csize);
 }
 
-// Читает и проверяет файл стола, ничего не меняя. plan: { state, pdfs: [{ id, name, blob }], missing, counts: { sheets, folders, books }, saved }
+// Читает и проверяет файл стола, ничего не меняя. plan: { state, pdfs: [{ id, name, blob }], missing, counts: { sheets, folders, books, binned }, saved }
 export async function readDesk(file) {
   const map = await zipEntries(file);
   const e = map.get('desk.json'); if (!e) throw notDesk();
@@ -129,7 +129,7 @@ export async function readDesk(file) {
   if (doc.format !== FORMAT.format) throw new DeskError(doc.format > FORMAT.format ? t('desk.err.newer') : notDesk().message);
   const st = doc.state;
   if (!st || typeof st !== 'object' || Array.isArray(st)) throw notDesk();
-  for (const k of ['sheets', 'binders', 'books']) if (st[k] != null && !Array.isArray(st[k])) throw notDesk();
+  for (const k of ['sheets', 'binders', 'books', 'trash']) if (st[k] != null && !Array.isArray(st[k])) throw notDesk();
   if (st.sheets?.some(s => !s || typeof s !== 'object') || st.binders?.some(s => !s || typeof s !== 'object')) throw notDesk();
   // Книги: прежняя одиночная `book` — тоже книга.
   const books = (Array.isArray(st.books) ? st.books : st.book ? [st.book] : []).filter(b => b && typeof b === 'object');
@@ -140,7 +140,7 @@ export async function readDesk(file) {
     if (!ent) { missing++; continue; }
     if (!pdfs.has(id)) pdfs.set(id, { id, name: typeof b.file.name === 'string' ? b.file.name : id + '.pdf', blob: await entryData(file, ent) });
   }
-  return { state: st, pdfs: [...pdfs.values()], missing, counts: { sheets: st.sheets?.length ?? 0, folders: st.binders?.length ?? 0, books: books.filter(b => b.file?.id != null).length }, saved: typeof doc.saved === 'string' ? doc.saved : '' };
+  return { state: st, pdfs: [...pdfs.values()], missing, counts: { sheets: st.sheets?.length ?? 0, folders: st.binders?.length ?? 0, books: books.filter(b => b.file?.id != null).length, binned: st.trash?.length ?? 0 }, saved: typeof doc.saved === 'string' ? doc.saved : '' };
 }
 
 // Книги стола, у которых в OPFS лежит целый файл: [{ id, file }] (File из хранилища, не копия).

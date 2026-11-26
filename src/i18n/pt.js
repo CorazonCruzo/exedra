@@ -382,6 +382,7 @@ export default {
   "n.sheets": { one: "{n} folha", many: "{n} folhas", other: "{n} folhas" },
   "n.folders": { one: "{n} pasta", many: "{n} pastas", other: "{n} pastas" },
   "n.books": { one: "{n} livro", many: "{n} livros", other: "{n} livros" },
+  "n.binned": "{n} no cesto",
   // pdf
   "pdf.defaultName": "anotações",
   // desk

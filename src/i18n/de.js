@@ -382,6 +382,7 @@ export default {
   "n.sheets": { one: "{n} Blatt", other: "{n} Blätter" },
   "n.folders": { one: "{n} Mappe", other: "{n} Mappen" },
   "n.books": { one: "{n} Buch", other: "{n} Bücher" },
+  "n.binned": "{n} im Papierkorb",
   // pdf
   "pdf.defaultName": "notizen",
   // desk

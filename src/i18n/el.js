@@ -382,6 +382,7 @@ export default {
   "n.sheets": { one: "{n} φύλλο", other: "{n} φύλλα" },
   "n.folders": { one: "{n} φάκελος", other: "{n} φάκελοι" },
   "n.books": { one: "{n} βιβλίο", other: "{n} βιβλία" },
+  "n.binned": "{n} στο καλάθι",
   // pdf
   "pdf.defaultName": "σημειώσεις",
   // desk

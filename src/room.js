@@ -4056,7 +4056,7 @@ async function sweepFiles() {
 // state — в localStorage), лишние книги прежнего стола убираем, страница перезагружается. Пока идёт запись, `stale` не даёт saveNow() затереть новый стол прежним, а `putting` не пускает чужую книгу в хранилище.
 const isZip = f => !!f && (/zip/.test(f.type || '') || /\.zip$/i.test(f.name || ''));
 const deskDate = () => { const d = new Date(), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`; };
-const deskWords = ({ sheets: s, folders: f, books: b }) => [s && tn('n.sheets', s), f && tn('n.folders', f), b && tn('n.books', b)].filter(Boolean).join(', ') || t('desk.nothing');
+const deskWords = ({ sheets: s, folders: f, books: b, binned: k }) => [s && tn('n.sheets', s), f && tn('n.folders', f), b && tn('n.books', b), k && tn('n.binned', k)].filter(Boolean).join(', ') || t('desk.nothing');
 let deskBusy = false;
 const progressSay = () => { let last = -1; return (text, f) => { const p = Math.round(f * 100); if (p !== last) { last = p; hintNow(t('hint.progress', { text, p })); } }; };
 async function deskBlobNow(onProgress) {
@@ -4083,7 +4083,7 @@ const deskAskOpen = () => !$('deskAsk').hidden;
 function deskAnswer(yes) { const r = deskAskRes; deskAskRes = null; $('deskAsk').hidden = true; r?.(yes); }
 function askDesk(plan) {
   closeSliders(); deskAskRes?.(false);
-  const now = { sheets: sheets.length, folders: folders.filter(f => !f.gone).length, books: books.filter(b => b.file).length };
+  const now = { sheets: sheets.length, folders: folders.filter(f => !f.gone).length, books: books.filter(b => b.file).length, binned: trash.length };
   $('deskAskNow').textContent = t('deskAsk.now', { words: deskWords(now) });
   const when = plan.saved && !isNaN(Date.parse(plan.saved)) ? t('deskAsk.saved', { date: new Date(plan.saved).toLocaleDateString(lang) }) : '';
   $('deskAskGoS').textContent = t('deskAsk.goSub', { words: deskWords(plan.counts), when, missing: plan.missing ? tn('deskAsk.missing', plan.missing) : '' });

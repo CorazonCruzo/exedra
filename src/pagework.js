@@ -4,14 +4,14 @@
 // или { id, err }. Лицо — тот же лист, что `drawPage`; оборот — бледный зеркальный отпечаток того же оттиска на чистой бумаге, как `drawBack`.
 import { lineInks, paintPaperWith, CTX } from './typeink.js';
 
-// Шрифты страницы здесь недоступны (у потока свой набор): те же гарнитуры с того же адреса, что и в index.html.
-const FONTS = 'https://fonts.googleapis.com/css2?family=Old+Standard+TT&family=PT+Mono&display=swap';
+// Шрифты страницы здесь недоступны (у потока свой набор): те же гарнитуры из того же файла, что и в index.html (обычное начертание).
+const FONTS = new URL('../assets/fonts/fonts.css', import.meta.url), FAMILIES = ['Old Standard TT', 'PT Mono'];
 let env = { paper: null, stamps: [], stampScale: 1 }, ready = null;
 async function loadFonts() {
   const css = await (await fetch(FONTS)).text();
   for (const [, face] of css.matchAll(/@font-face\s*{([^}]*)}/g)) {
     const family = face.match(/font-family:\s*['"]?([^;'"]+)/)?.[1], src = face.match(/url\(([^)]+)\)/)?.[1], range = face.match(/unicode-range:\s*([^;]+)/)?.[1];
-    if (family && src) self.fonts.add(new FontFace(family, `url(${src})`, { style: 'normal', weight: '400', ...(range ? { unicodeRange: range } : {}) }));
+    if (FAMILIES.includes(family) && src && !/font-style:\s*italic/.test(face)) self.fonts.add(new FontFace(family, `url(${new URL(src, FONTS)})`, { style: 'normal', weight: '400', ...(range ? { unicodeRange: range } : {}) }));
   }
 }
 const W = 1024, H = 1448, WB = 512, HB = 724;

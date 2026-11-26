@@ -1458,7 +1458,7 @@ function renderChoreographedHall(ctx, w, h, t, choreo) {
 // ---- Запуск и публичный API ----------------------------------------------------------
 
 const CAPTION_FONT = 'italic 500 21px "Cormorant Garamond", Georgia, serif';
-const CAPTION_CSS = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500&display=swap';
+const CAPTION_CSS = new URL('../assets/fonts/fonts.css', import.meta.url);   // свои шрифты зала; подписи нужен Cormorant Garamond курсивом
 const SETTLE_AT = 1.35; // лампа на столе догорела (lampRange[1])
 
 // Тексты заставки на всех языках зала. Заставка стартует раньше словарей (src/i18n/) и их не ждёт, поэтому таблица своя, крошечная; язык —
@@ -1540,7 +1540,7 @@ if (typeof document === 'undefined') {
     const css = await (await fetch(CAPTION_CSS)).text();
     for (const [, face] of css.matchAll(/@font-face\s*{([^}]*)}/g)) {
       const src = face.match(/url\(([^)]+)\)/)?.[1], range = face.match(/unicode-range:\s*([^;]+)/)?.[1];
-      if (src) self.fonts.add(new FontFace('Cormorant Garamond', `url(${src})`, { style: 'italic', weight: '500', ...(range ? { unicodeRange: range } : {}) }));
+      if (src && /Cormorant Garamond/.test(face) && /font-style:\s*italic/.test(face)) self.fonts.add(new FontFace('Cormorant Garamond', `url(${new URL(src, CAPTION_CSS)})`, { style: 'italic', weight: '500', ...(range ? { unicodeRange: range } : {}) }));
     }
     await self.fonts.load(CAPTION_FONT, CAPTION);
   };

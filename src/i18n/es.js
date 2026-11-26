@@ -382,6 +382,7 @@ export default {
   "n.sheets": { one: "{n} hoja", many: "{n} hojas", other: "{n} hojas" },
   "n.folders": { one: "{n} carpeta", many: "{n} carpetas", other: "{n} carpetas" },
   "n.books": { one: "{n} libro", many: "{n} libros", other: "{n} libros" },
+  "n.binned": "{n} en la papelera",
   // pdf
   "pdf.defaultName": "notas",
   // desk
