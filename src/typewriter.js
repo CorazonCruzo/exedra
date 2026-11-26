@@ -164,11 +164,25 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
   }
   const codeOf = new Map([...keyOf].map(([c, k]) => [k, c]));
   // Днище: у модели под клавишами пусто, и между ними виден стол. У настоящей там рычаги и тёмное нутро — кладём тёмную пластину под штоки клавиш.
-  // По ширине — только буквенные ряды и пробел: RETURN и левый SHIFT вынесены за рамку, по ним пластина вылезала слева.
+  // По ширине — только буквенные ряды и пробел: RETURN и левый SHIFT вынесены за рамку, по ним пластина вылезала слева. Дальше она подрезается по самой рамке
+  // (её «обложка заезжает за края машинки», 2026-11-26): лучами изнутри — до боковых стенок и до переднего бортика, а высотой — чуть ниже его верха, чтобы край прятался за ним.
   const keyBox = new THREE.Box3(); for (const g of [...bigRows.flat(), space]) keyBox.union(g.b);
-  const floorGeo = new THREE.PlaneGeometry(keyBox.max.x - keyBox.min.x + keySpacing * .3, space.c.z - rowZ0 + keySpacing * 2.2).rotateX(-Math.PI / 2);
-  const floor = new THREE.Mesh(floorGeo, new THREE.MeshStandardMaterial({ color: 0x0b0908, roughness: .85, metalness: .2 }));
-  floor.position.set((keyBox.min.x + keyBox.max.x) / 2, keyBox.min.y - width * .004, (rowZ0 + space.c.z) / 2 - keySpacing * .5); floor.receiveShadow = true; group.add(floor);
+  let fx0 = keyBox.min.x - keySpacing * .15, fx1 = keyBox.max.x + keySpacing * .15, fz0 = rowZ0 - keySpacing * 2.6, fz1 = space.c.z + keySpacing * .6, fy = keyBox.min.y - width * .004;
+  {
+    const frame = byMat('Base_maquina'), rc = new THREE.Raycaster(), cx = (fx0 + fx1) / 2, cz = (fz0 + fz1) / 2;
+    const hit = (o, d) => { rc.set(o, d); return rc.intersectObjects(frame, false)[0]?.point ?? null; };
+    for (let k = 1; k < 10; k++) for (const dy of [.004, .017]) {
+      const o = new THREE.Vector3(cx, fy + width * dy, fz0 + (fz1 - fz0) * k / 10), l = hit(o, new THREE.Vector3(-1, 0, 0)), r = hit(o, new THREE.Vector3(1, 0, 0));
+      if (l && l.x > fx0) fx0 = l.x + width * .002; if (r && r.x < fx1) fx1 = r.x - width * .002;
+    }
+    const f = hit(new THREE.Vector3(cx, fy - width * .0065, cz), new THREE.Vector3(0, 0, 1));
+    if (f && f.z < fz1) {
+      fz1 = f.z - width * .002;
+      const top = hit(new THREE.Vector3(cx, fy + width, f.z + width * .007), new THREE.Vector3(0, -1, 0)); if (top && top.y < fy + width * .002) fy = Math.min(fy, top.y - width * .002);
+    }
+  }
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(fx1 - fx0, fz1 - fz0).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x0b0908, roughness: .85, metalness: .2 }));
+  floor.position.set((fx0 + fx1) / 2, fy, (fz0 + fz1) / 2); floor.receiveShadow = true; group.add(floor);
   geo.setAttribute('aKey', new THREE.BufferAttribute(aKey, 1));
   // Направление «вниз» в координатах сетки и ход клавиши.
   const invRot = new THREE.Matrix3().setFromMatrix4(wm).invert();
