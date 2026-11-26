@@ -103,7 +103,20 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
 
   // Каретка: валик, линейки и боковины едут вместе.
   const carriage = new THREE.Group(); group.add(carriage);
-  for (const m of [...byMat('Rodillo'), ...byMat('Reglas'), ...byMat('Tuercas')]) carriage.attach(m);
+  // В модели к деталям каретки слиты и неподвижные: задняя стенка с надписью «Typewriter» (в сетке валика) и катушки ленты с шестернями (в «гайках»).
+  // Они уезжали с кареткой, и в корпусе открывалась дыра. Куски, что спускаются ниже 42 % высоты машинки, отделяем — они остаются на корпусе.
+  const lowY = size0.y * S * .42;
+  for (const m of [...byMat('Rodillo'), ...byMat('Reglas'), ...byMat('Tuercas')]) {
+    const g = m.geometry, idx = g.index, low = new Uint8Array(g.attributes.position.count), v = new THREE.Vector3();
+    if (idx) for (const ix of components(g)) if (ix.some(i => v.fromBufferAttribute(g.attributes.position, i).applyMatrix4(m.matrixWorld).y < lowY)) for (const i of ix) low[i] = 1;
+    const keep = [], stay = [];
+    if (idx) for (let t = 0; t < idx.count; t += 3) (low[idx.getX(t)] ? stay : keep).push(idx.getX(t), idx.getX(t + 1), idx.getX(t + 2));
+    if (stay.length) {
+      const body = new THREE.Mesh(g.clone().setIndex(stay), m.material); body.castShadow = body.receiveShadow = true;
+      m.parent.add(body); body.position.copy(m.position); body.quaternion.copy(m.quaternion); body.scale.copy(m.scale); g.setIndex(keep);
+    }
+    carriage.attach(m);
+  }
   const platenBox = new THREE.Box3(); byMat('Rodillo').forEach(m => platenBox.expandByObject(m));
 
   // Клавиши: находим каждую, раскладываем по рядам и даём нажиматься по отдельности.
