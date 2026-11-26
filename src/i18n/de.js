@@ -167,6 +167,7 @@ export default {
   "decor.bin": "Papierkorb",
   "decor.bin.wicker": "Weide mit Leder",
   "decor.bin.twisted": "gedreht",
+  "decor.bin.desk": "an der Tischwange",
   "decor.paper": "Buchpapier",
   "decor.chairs": "Stühle im Raum",
   "decor.chairsBack": "zurückstellen",

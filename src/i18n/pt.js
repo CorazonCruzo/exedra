@@ -167,6 +167,7 @@ export default {
   "decor.bin": "Cesto de papéis",
   "decor.bin.wicker": "vime com couro",
   "decor.bin.twisted": "torcido",
+  "decor.bin.desk": "na lateral da escrivaninha",
   "decor.paper": "Papel dos livros",
   "decor.chairs": "Cadeiras da sala",
   "decor.chairsBack": "pôr de volta no lugar",

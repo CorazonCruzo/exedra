@@ -167,6 +167,7 @@ export default {
   "decor.bin": "Καλάθι αχρήστων",
   "decor.bin.wicker": "ψάθινο με δέρμα",
   "decor.bin.twisted": "στριφτό",
+  "decor.bin.desk": "στο πλάι του γραφείου",
   "decor.paper": "Χαρτί του βιβλίου",
   "decor.chairs": "Καρέκλες στην αίθουσα",
   "decor.chairsBack": "βάλε τις πίσω",

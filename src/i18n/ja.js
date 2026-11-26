@@ -167,6 +167,7 @@ export default {
   "decor.bin": "くずかご",
   "decor.bin.wicker": "革巻きの籐",
   "decor.bin.twisted": "ねじれ編み",
+  "decor.bin.desk": "机の側面に",
   "decor.paper": "本の紙",
   "decor.chairs": "部屋の椅子",
   "decor.chairsBack": "元に戻す",

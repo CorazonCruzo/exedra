@@ -167,6 +167,7 @@ export default {
   "decor.bin": "Corbeille à papier",
   "decor.bin.wicker": "osier et cuir",
   "decor.bin.twisted": "torsadée",
+  "decor.bin.desk": "au flanc du bureau",
   "decor.paper": "Papier des livres",
   "decor.chairs": "Chaises de la salle",
   "decor.chairsBack": "les remettre à leur place",

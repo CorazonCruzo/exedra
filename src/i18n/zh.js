@@ -167,6 +167,7 @@ export default {
   "decor.bin": "废纸篓",
   "decor.bin.wicker": "皮革包边藤编",
   "decor.bin.twisted": "扭转编织",
+  "decor.bin.desk": "挂在桌侧",
   "decor.paper": "书页纸张",
   "decor.chairs": "房间里的椅子",
   "decor.chairsBack": "放回原位",

@@ -167,6 +167,7 @@ export default {
   "decor.bin": "Wastebasket",
   "decor.bin.wicker": "wicker in leather",
   "decor.bin.twisted": "twisted",
+  "decor.bin.desk": "on the desk side",
   "decor.paper": "Book paper",
   "decor.chairs": "Chairs in the room",
   "decor.chairsBack": "put them back",

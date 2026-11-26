@@ -2376,7 +2376,8 @@ let savedWeight = choice(FIGURES, stored.decor?.weight, 'mouse');
 const BOOK_PAPER = { old: { title: t('decor.paper.old') }, file: { title: t('decor.paper.file') } };
 // Корзина для бумаг у стола (пользователь 2026-11-25: «интерактивную корзину… стильную»; две на выбор — «хочу глазами сверить»). Пока она только стоит; выбрасывать в неё — следующим шагом.
 // Wicker Basket — Dudzy, CC BY 4.0; News Paper Basket — eeelabvisual, CC BY 4.0 (оригиналы — originals/bin, подготовка — tools/models/basket.py). rot — поворот, чтобы к читателю смотрела лучшая сторона; x — своё расстояние от стола; tone — тонировка: витая — в цвет стола (средний цвет его дерева 53,38,30 с поправкой на baseColorFactor .79 модели; её решение 2026-11-26).
-const BINS = { wicker: { title: t('decor.bin.wicker'), url: 'assets/models/bin/wicker.glb', rot: .5 }, twisted: { title: t('decor.bin.twisted'), url: 'assets/models/bin/twisted.glb', rot: 0, x: .4, tone: [70, 50, 40] } };
+// desk — короб на стенке тумбы (её просьба 2026-11-26: «прибитую к столу мусорку. обитую зелёным бархатом внутри… аккуратную, под бумаги»), строится здесь же (`makeDeskBin`).
+const BINS = { wicker: { title: t('decor.bin.wicker'), url: 'assets/models/bin/wicker.glb', rot: .5 }, twisted: { title: t('decor.bin.twisted'), url: 'assets/models/bin/twisted.glb', rot: 0, x: .4, tone: [70, 50, 40] }, desk: { title: t('decor.bin.desk'), make: () => makeDeskBin() } };
 const decor = { bookPaper: choice(BOOK_PAPER, stored.decor?.bookPaper, 'old'), bin: choice(BINS, Q.get('bin') ?? stored.decor?.bin, 'wicker'), sculpt: choice(SCULPTS, Q.get('sculpt'), savedSculpt), weight: choice(FIGURES, Q.get('weight'), savedWeight), art: choice(ART_SETS, Q.get('art'), savedArt) };
 // Свет зала — 0…1,6: выше единицы — «ещё светлее» (её просьба 2026-11-22: «возможность ещё больше света добавить»).
 const LIGHT_MAX = 1.6;
@@ -2843,14 +2844,49 @@ function toneMap(tex, rgb) {
   for (let i = 0; i < p.length; i += 4) { const k = (.3 * p[i] + .59 * p[i + 1] + .11 * p[i + 2]) / mean; p[i] = rgb[0] * k; p[i + 1] = rgb[1] * k; p[i + 2] = rgb[2] * k; }
   g.putImageData(d, 0, 0); tex.image = c; tex.needsUpdate = true;
 }
+// Короб на правой стенке правой тумбы: задней стенкой к тумбе, верх — под пояском (0,76 м), середина чуть ближе к читателю. Передняя стенка наклонена наружу —
+// кверху короб шире; на ней филёнка, как на ящиках стола. Дерево — красное, в тон стола; внутри — зелёный бархат (сукно зала с блеском ворса — sheen) с кантом
+// по верхнему краю; по верху — тяга, по низу — цоколь, на боках у тумбы — латунные шурупы, которыми он «прибит».
+const DESK_BIN = { w: .32, d: .16, db: .115, h: .24, t: .012, top: .74, z: .02, side: .036 };   // ширина вдоль стенки, вынос поверху и понизу, высота, толщина стенок; верх, середина по z; на сколько стенка тумбы внутри края столешницы, м
+function makeDeskBin() {
+  const { w, d, db, h, t } = DESK_BIN, g = new THREE.Group();
+  const wd = wood('mahogany', [2.6, 2.6], 0x76605a, .5), brass = new THREE.MeshStandardMaterial({ color: 0xb48c4c, metalness: 1, roughness: .32 });
+  const velvet = new THREE.MeshPhysicalMaterial({ map: texShared('assets/textures/baize-color.jpg', true, [1 / BAIZE.mottle, 1 / BAIZE.mottle]), normalMap: texShared('assets/textures/baize-normal.jpg', false, [1 / BAIZE.nap, 1 / BAIZE.nap]),
+    color: 0x2f6a3c, roughness: .9, sheen: 1, sheenColor: new THREE.Color(0x7fb47f), sheenRoughness: .35, side: THREE.DoubleSide });
+  const add = (geo, m, x = 0, y = 0, z = 0, parent = g) => { const o = new THREE.Mesh(metricUV(geo), m); o.position.set(x, y, z); parent.add(o); return o; };
+  const box = (sx, sy, sz, x, y, z, m = wd, parent) => add(new THREE.BoxGeometry(sx, sy, sz), m, x, y, z, parent);
+  // Бок — трапеция в плоскости x-y (понизу вынос db, поверху d), толщиной вдоль z; бархат — такая же, чуть меньше, по внутренней грани.
+  const side = (inset, depth, m, z) => { const s = new THREE.Shape([new THREE.Vector2(inset, inset), new THREE.Vector2(db - inset, inset), new THREE.Vector2(d - inset, h), new THREE.Vector2(inset, h)]);
+    return add(new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false }), m, 0, 0, z); };
+  for (const sg of [-1, 1]) { side(0, t, wd, sg > 0 ? w / 2 - t : -w / 2); side(t, .002, velvet, sg > 0 ? w / 2 - t - .0025 : -w / 2 + t + .0005); }
+  box(t, h, w - 2 * t, t / 2, h / 2, 0); box(.002, h - t, w - 2 * t, t + .001, t + (h - t) / 2, 0, velvet);         // стенка к тумбе и её бархат
+  box(db - t, t, w - 2 * t, t + (db - t) / 2 - .002, t / 2, 0); box(db - 2 * t, .002, w - 2 * t, t + (db - 2 * t) / 2, t + .001, 0, velvet);   // дно
+  // Передняя стенка — своя группа, повёрнутая по наклону: x — наружу по нормали, y — вверх вдоль стенки.
+  const a = Math.atan2(d - db, h), L = Math.hypot(h, d - db), fr = new THREE.Group(); fr.position.set((db + d) / 2, h / 2, 0); fr.rotation.z = -a; g.add(fr);
+  box(t, L, w, -t / 2, 0, 0, wd, fr); box(.002, L - t * 1.5, w - 2 * t, -t - .001, t * .25, 0, velvet, fr);
+  const pw = w - .07, ph = L - .07, bar = .009;                                                                    // филёнка: рамка из тонких брусков, чуть выступает
+  for (const sg of [-1, 1]) { box(.004, ph, bar, .002, 0, sg * (pw / 2 - bar / 2), wd, fr); box(.004, bar, pw, .002, sg * (ph / 2 - bar / 2), 0, wd, fr); }
+  // Тяга по верху (чуть шире короба) и цоколь по низу.
+  const rim = .02, rh = .014;
+  box(rim, rh, w + .012, d - rim / 2 + .006, h + rh / 2, 0); box(t + .004, rh, w, (t + .004) / 2, h + rh / 2, 0);
+  for (const sg of [-1, 1]) box(d + .006, rh, rim, (d + .006) / 2, h + rh / 2, sg * (w / 2 + .006 - rim / 2));
+  box(db + .01, .016, w + .014, (db + .01) / 2, .008, 0);
+  // Кант: бархатный валик по внутреннему краю под тягой.
+  const pipe = (len, x, z, along) => { const c = add(new THREE.CylinderGeometry(.0035, .0035, len, 10), velvet, x, h - .003, z); c.rotation[along === 'z' ? 'x' : 'z'] = Math.PI / 2; };
+  pipe(w - 2 * t, t + .003, 0, 'z'); pipe(w - 2 * t, d - t - .003, 0, 'z'); for (const sg of [-1, 1]) pipe(d - 2 * t, d / 2, sg * (w / 2 - t - .003), 'x');
+  // Латунные шурупы: по два на каждом боку у стенки тумбы.
+  for (const sg of [-1, 1]) for (const y of [.045, h - .05]) { const sc = new THREE.Mesh(new THREE.SphereGeometry(.0055, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), brass); sc.rotation.x = sg * Math.PI / 2; sc.scale.y = .45; sc.position.set(.028, y, sg * w / 2); g.add(sc); }
+  return g;
+}
 let bin = null; const binModels = {};
 async function chooseBin(k) {
   decor.bin = k; markDecor(); save();
-  const B = BINS[k]; binModels[k] ??= loadModel(B.url).then(m => { if (B.tone) m.traverse(o => o.material?.map && toneMap(o.material.map, B.tone)); return m; }).catch(e => { console.warn('bin', e); return null; });
+  const B = BINS[k]; binModels[k] ??= (B.make ? Promise.resolve(B.make()) : loadModel(B.url)).then(m => { if (B.tone) m.traverse(o => o.material?.map && toneMap(o.material.map, B.tone)); return m; }).catch(e => { console.warn('bin', e); return null; });
   const m = await binModels[k]; if (!m || decor.bin !== k) return;
   if (bin) station.remove(bin);
   m.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.userData.bin = true; } });
-  m.position.set(DESK.hw + (B.x ?? BIN_AT.x), 0, BIN_AT.z); m.rotation.y = B.rot; station.add(m); bin = m; lightMasks(); shadowDirty = true;
+  if (B.make) m.position.set(DESK.hw - DESK_BIN.side, DESK_BIN.top - DESK_BIN.h - .016, DESK_BIN.z); else { m.position.set(DESK.hw + (B.x ?? BIN_AT.x), 0, BIN_AT.z); m.rotation.y = B.rot; }
+  station.add(m); bin = m; lightMasks(); shadowDirty = true;
 }
 // Бумага книги: «старая» — страница печатается на нашей бумаге, «как в файле» — цвета файла как есть (белое остаётся белым).
 const chooseBookPaper = k => { decor.bookPaper = k; markDecor(); for (const b of books) b.book.setPaperMode(k === 'file'); shadowDirty = true; save(); };

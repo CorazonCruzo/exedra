@@ -167,6 +167,7 @@ export default {
   "decor.bin": "Корзина для бумаг",
   "decor.bin.wicker": "плетёная в коже",
   "decor.bin.twisted": "витая",
+  "decor.bin.desk": "на стенке стола",
   "decor.paper": "Бумага книги",
   "decor.chairs": "Стулья в зале",
   "decor.chairsBack": "вернуть как было",

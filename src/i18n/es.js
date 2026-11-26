@@ -167,6 +167,7 @@ export default {
   "decor.bin": "Papelera",
   "decor.bin.wicker": "de mimbre con cuero",
   "decor.bin.twisted": "retorcida",
+  "decor.bin.desk": "en el costado del escritorio",
   "decor.paper": "Papel de los libros",
   "decor.chairs": "Sillas de la sala",
   "decor.chairsBack": "devolverlas a su sitio",
