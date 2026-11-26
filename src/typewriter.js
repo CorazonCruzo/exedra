@@ -150,6 +150,11 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
     keyOf.set(g.c.z < rowZ1 ? 'Enter' : g.c.x < 0 ? 'ShiftLeft' : 'ShiftRight', g.id);
   }
   const codeOf = new Map([...keyOf].map(([c, k]) => [k, c]));
+  // Днище: у модели под клавишами пусто, и между ними виден стол. У настоящей там рычаги и тёмное нутро — кладём тёмную пластину под штоки клавиш.
+  const keyBox = new THREE.Box3(); for (const g of groups) if (g.id !== undefined) keyBox.union(g.b);
+  const floorGeo = new THREE.PlaneGeometry(keyBox.max.x - keyBox.min.x + keySpacing * .6, space.c.z - rowZ0 + keySpacing * 2.2).rotateX(-Math.PI / 2);
+  const floor = new THREE.Mesh(floorGeo, new THREE.MeshStandardMaterial({ color: 0x0b0908, roughness: .85, metalness: .2 }));
+  floor.position.set((keyBox.min.x + keyBox.max.x) / 2, keyBox.min.y - width * .004, (rowZ0 + space.c.z) / 2 - keySpacing * .5); floor.receiveShadow = true; group.add(floor);
   geo.setAttribute('aKey', new THREE.BufferAttribute(aKey, 1));
   // Направление «вниз» в координатах сетки и ход клавиши.
   const invRot = new THREE.Matrix3().setFromMatrix4(wm).invert();
