@@ -217,6 +217,7 @@ export default {
   "hint.bin.folderEmpty": "Le dossier vide est dans la corbeille.",
   "hint.bin.blank": "La feuille vierge est sortie de la machine.",
   "hint.bin.none": "La corbeille est vide.",
+  "hint.bin.drop": "Lâchez : à la corbeille.",
   "hint.bin.emptied": "Corbeille vidée : ce qui a été jeté est effacé pour de bon.",
   "help.bin.t": "Corbeille",
   "help.bin.d": "une feuille, un dossier ou la feuille de la machine vont à la corbeille avec la touche de la corbeille : pour une feuille ou un dossier fermé, elle apparaît quand on s’en est approché (touchez l’objet), pour un dossier ouvert elle est dans sa barre (« cette feuille » et « le dossier »), à la machine — à côté de la coche. La corbeille est accrochée au flanc droit du bureau : touchez-la ou la touche du haut — ce qui a été jeté est étalé sur le tapis, et un toucher remet chaque chose en place. Pour de bon : « vider la corbeille »",

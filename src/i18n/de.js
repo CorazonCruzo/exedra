@@ -217,6 +217,7 @@ export default {
   "hint.bin.folderEmpty": "Die leere Mappe liegt im Papierkorb.",
   "hint.bin.blank": "Das leere Blatt ist aus der Maschine.",
   "hint.bin.none": "Der Papierkorb ist leer.",
+  "hint.bin.drop": "Loslassen — in den Papierkorb.",
   "hint.bin.emptied": "Papierkorb geleert: Das Weggeworfene ist endgültig gelöscht.",
   "help.bin.t": "Papierkorb",
   "help.bin.d": "ein Blatt, eine Mappe oder das Blatt in der Maschine kommt mit der Papierkorb-Taste in den Papierkorb: bei einem Blatt oder einer geschlossenen Mappe erscheint sie, wenn du herangetreten bist (tippe auf das Ding), bei einer offenen Mappe steht sie in ihrer Leiste („dieses Blatt“ und „die Mappe“), an der Maschine neben dem Häkchen. Der Papierkorb hängt an der rechten Tischwange: tippe darauf oder auf die Taste oben — das Weggeworfene liegt auf dem Filz, ein Tipp bringt ein Ding zurück. Endgültig: „Papierkorb leeren“",

@@ -2987,6 +2987,13 @@ function openBinScreen() {
 }
 $('binBtn').onclick = e => { e.currentTarget.blur(); if (state === 'idle' && !reading) openBinScreen(); };
 $('twBin').onclick = e => { e.currentTarget.blur(); throwTyped(); };
+// Перетаскиванием в корзину бросают лист или папку, не из ящика и не на пути в него (её просьба 2026-11-26: «рукой не переносится»).
+const binnable = it => !!bin && (it instanceof Sheet || it instanceof Folder) && !it.dd && it.drawer === null;
+// Указатель над корзиной или за правым краем стола напротив неё.
+function overBin(e) {
+  setRay(e); if (ray.intersectObject(bin, true).length) return true;
+  const q = onDesk(e, deskTop); return !!q && q.x > DESK.hw + .005 && Math.abs(q.z - DESK_BIN.z) < .4;
+}
 // Клавиша «в корзину» у листа или закрытой папки, к которым подошёл взгляд (нажали на них).
 let binBarOn = false;
 function syncBinBar() {
@@ -4416,6 +4423,7 @@ addEventListener('pointermove', e => {
   } else if (drag.kind === 'item') {
     const it = drag.item, isSheet = it instanceof Sheet;
     drag.hand = { clientX: e.clientX, clientY: e.clientY };
+    const ob = binnable(it) && overBin(e); if (ob !== !!drag.overBin) { drag.overBin = ob; hintNow(ob ? t('hint.bin.drop') : ''); }
     if (isSheet && !drag.lifted) {
       // Лист идёт за рукой, как только указатель с нажатой кнопкой сдвинулся на 3–4 точки (на пальце — чуть больше); взгляд при этом не трогается.
       if (Math.hypot(e.clientX - drag.from.x, e.clientY - drag.from.y) < (drag.touch ? CARRY.gripTouch : CARRY.grip)) return;
@@ -5057,6 +5065,9 @@ function endDrag(e) {
     const it = d.item, isSheet = it instanceof Sheet, Y0 = car && it instanceof Folder ? it.floor + Math.max(0, it.lift.v) : null;   // Y0 — где висел низ папки в руке
     it.lift.t = 0; it.held = false; delete it.floorGoal;
     if (isSheet) { it.carry = null; it.low = false; it.tilt.t = 0; calmSheet(it); }
+    // Отпустили над корзиной (или за правым краем стола — она прямо под ним): лист или папка — в корзину.
+    if (d.overBin) hintNow('');
+    if (!tap && e && binnable(it) && overBin(e)) { overDrawer = null; if (isSheet) throwSheet(it); else removeFolder(it, 'bin'); return; }
     if (tap) { if (car) dropHeight(it, car); it.px.t = d.start.x; it.pz.t = d.start.z; it.floor = d.y; if (d.w0) setWeight(d.w0); if (isSheet) lookAtSheet(it); else if (it instanceof BookThing) { if (putting) busyNote(); else unfoldBook(it); } else if (it.pose === 'open') { if (!nearF(it)) lookAtFolder(it); } else if (d.label && it.pose === 'face' && it.drawer === null) { if (nearF(it)) openLabelEdit(it); else lookAtCover(it); } else if (!squeezed(it)) unfold(it); return; }
     const dr = e && overDrawer, dd = it.dd || (dr ? (startDD(it, dr), it.dd) : null);
     // Вещь в ящике или на пути в него довершает путь сама (`drawerStep`): отпущенную над ящиком — туда, где указатель, брошенную на выходе — обратно в тот же ящик.

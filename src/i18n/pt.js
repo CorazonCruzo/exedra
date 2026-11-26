@@ -217,6 +217,7 @@ export default {
   "hint.bin.folderEmpty": "A pasta vazia está no cesto.",
   "hint.bin.blank": "A folha em branco saiu da máquina.",
   "hint.bin.none": "O cesto está vazio.",
+  "hint.bin.drop": "Solte — para o cesto.",
   "hint.bin.emptied": "Cesto esvaziado: o que foi jogado fora foi apagado para sempre.",
   "help.bin.t": "Cesto de papéis",
   "help.bin.d": "uma folha, uma pasta ou a folha da máquina vão para o cesto com a tecla do cesto: numa folha ou pasta fechada ela aparece quando você se aproxima (toque no objeto), numa pasta aberta fica na sua barra («esta folha» e «a pasta»), na máquina — ao lado da marca de visto. O cesto fica pendurado na lateral direita da mesa: toque nele ou na tecla do alto — o que foi jogado fora fica sobre o feltro, e um toque devolve cada coisa ao lugar. Para sempre: «esvaziar o cesto»",

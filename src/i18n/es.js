@@ -217,6 +217,7 @@ export default {
   "hint.bin.folderEmpty": "La carpeta vacía está en la papelera.",
   "hint.bin.blank": "La hoja en blanco ha salido de la máquina.",
   "hint.bin.none": "La papelera está vacía.",
+  "hint.bin.drop": "Suelta: a la papelera.",
   "hint.bin.emptied": "Papelera vaciada: lo tirado se ha borrado para siempre.",
   "help.bin.t": "Papelera",
   "help.bin.d": "una hoja, una carpeta o la hoja de la máquina van a la papelera con la tecla de la papelera: en una hoja o una carpeta cerrada aparece al acercarte (toca el objeto), en una carpeta abierta está en su fila («esta hoja» y «la carpeta»), en la máquina, junto a la marca de visto. La papelera cuelga del lado derecho de la mesa: tócala o toca la tecla de arriba — lo tirado está sobre el tapete, y un toque devuelve cada cosa a su sitio. Para siempre: «vaciar la papelera»",

@@ -217,6 +217,7 @@ export default {
   "hint.bin.folderEmpty": "The empty folder is in the wastebasket.",
   "hint.bin.blank": "The blank sheet is out of the typewriter.",
   "hint.bin.none": "The wastebasket is empty.",
+  "hint.bin.drop": "Let go — into the wastebasket.",
   "hint.bin.emptied": "The wastebasket is emptied: what was thrown away is gone for good.",
   "help.bin.t": "Wastebasket",
   "help.bin.d": "a sheet, a folder or the sheet in the typewriter goes into the wastebasket with the wastebasket key: for a sheet or a closed folder it appears once you’ve come up to it (tap the thing), for an open folder it is in its row (“this sheet” and “the folder”), at the typewriter — next to the check mark. The wastebasket hangs on the right side of the desk: tap it or the wastebasket key at the top — what was thrown away lies on the baize, and a tap puts a thing back. For good — “empty the wastebasket”",
