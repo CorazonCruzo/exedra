@@ -297,6 +297,21 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
     keyOf.set(g.c.z < rowZ1 ? 'Enter' : g.c.x < 0 ? 'ShiftLeft' : 'ShiftRight', g.id);
   }
   const codeOf = new Map([...keyOf].map(([c, k]) => [k, c]));
+  // Левый SHIFT в модели вынесен вперёд и за рамку, ниже правого. У настоящего Underwood № 5 оба SHIFT — в концах нижнего ряда, вровень с буквами
+  // (пользователь 2026-11-27: «странно, что они с правым на разных уровнях»). Ставим его в ряд: колпачок — по глубине и высоте как у Z,
+  // и вместе с ним его шток с рычагом (одна деталь) — на ту же глубину. Шток по ширине остаётся на месте, иначе упрётся в боковину; колпачок
+  // отодвигаем от Z до обычного зазора между клавишами ряда.
+  {
+    const sl = groups.find(g => g.id !== undefined && g.id === keyOf.get('ShiftLeft')), row = bigRows[bigRows.length - 1], z = row[0];
+    const lever = sl && parts.find(p => p.s.z > keySpacing * 2 && p.b.max.z > sl.b.min.z && p.b.max.z < sl.b.max.z && p.c.x > sl.b.min.x - keySpacing && p.b.max.x < sl.b.max.x);
+    if (sl && lever) {
+      const d = new THREE.Vector3(0, z.b.max.y - sl.b.max.y, z.c.z - sl.c.z), gap = row[1].b.min.x - z.b.max.x, dx = Math.min(0, z.b.min.x - gap - sl.b.max.x);
+      const wi = wm.clone().invert(), pa = geo.attributes.position, capIx = new Set(sl.ix);
+      for (const i of new Set([...sl.ix, ...lever.ix])) { tmp.fromBufferAttribute(pa, i).applyMatrix4(wm).add(d); if (capIx.has(i)) tmp.x += dx; tmp.applyMatrix4(wi); pa.setXYZ(i, tmp.x, tmp.y, tmp.z); }
+      pa.needsUpdate = true; geo.computeBoundingBox(); geo.computeBoundingSphere();
+      d.x = dx; sl.b.translate(d); sl.c.add(d);
+    }
+  }
   // Днище: у модели под клавишами пусто, и между ними виден стол. У настоящей там рычаги и тёмное нутро — кладём тёмную пластину под штоки клавиш.
   // По ширине — только буквенные ряды и пробел: RETURN и левый SHIFT вынесены за рамку, по ним пластина вылезала слева. Дальше она подрезается по самой рамке
   // (её «обложка заезжает за края машинки», 2026-11-26): лучами изнутри — до боковых стенок и до переднего бортика, а высотой — чуть ниже его верха, чтобы край прятался за ним.
