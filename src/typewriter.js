@@ -299,21 +299,43 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
   const codeOf = new Map([...keyOf].map(([c, k]) => [k, c]));
   // Левый SHIFT в модели вынесен вперёд и за рамку, ниже правого. У настоящего Underwood № 5 оба SHIFT — в концах нижнего ряда, вровень с буквами
   // (пользователь 2026-11-27: «странно, что они с правым на разных уровнях»). Ставим его в ряд: колпачок — по глубине и высоте как у Z,
-  // и вместе с ним его шток с рычагом (одна деталь) — на ту же глубину. Шток по ширине остаётся на месте, иначе упрётся в боковину; колпачок
-  // отодвигаем от Z до обычного зазора между клавишами ряда.
+  // и вместе с ним его шток с рычагом (одна деталь) — на ту же глубину. По ширине остаётся над своим штоком (левее — шток упрётся в боковину),
+  // а колпачок — размером с буквенный, как правый SHIFT: шире он упирался в Z, а сдвинутый влево «слишком выехал» за рамку.
   {
-    const sl = groups.find(g => g.id !== undefined && g.id === keyOf.get('ShiftLeft')), row = bigRows[bigRows.length - 1], z = row[0];
+    const sl = groups.find(g => g.id !== undefined && g.id === keyOf.get('ShiftLeft')), z = bigRows[bigRows.length - 1][0];
     const lever = sl && parts.find(p => p.s.z > keySpacing * 2 && p.b.max.z > sl.b.min.z && p.b.max.z < sl.b.max.z && p.c.x > sl.b.min.x - keySpacing && p.b.max.x < sl.b.max.x);
     if (sl && lever) {
-      const d = new THREE.Vector3(0, z.b.max.y - sl.b.max.y, z.c.z - sl.c.z), gap = row[1].b.min.x - z.b.max.x, dx = Math.min(0, z.b.min.x - gap - sl.b.max.x);
+      const d = new THREE.Vector3(0, z.b.max.y - sl.b.max.y, z.c.z - sl.c.z), k = Math.min(1, z.s.x / sl.s.x), c = sl.c.clone().add(d);
       const wi = wm.clone().invert(), pa = geo.attributes.position, capIx = new Set(sl.ix);
-      for (const i of new Set([...sl.ix, ...lever.ix])) { tmp.fromBufferAttribute(pa, i).applyMatrix4(wm).add(d); if (capIx.has(i)) tmp.x += dx; tmp.applyMatrix4(wi); pa.setXYZ(i, tmp.x, tmp.y, tmp.z); }
+      for (const i of new Set([...sl.ix, ...lever.ix])) {
+        tmp.fromBufferAttribute(pa, i).applyMatrix4(wm).add(d);
+        if (capIx.has(i)) { tmp.x = c.x + (tmp.x - c.x) * k; tmp.z = c.z + (tmp.z - c.z) * k; }
+        tmp.applyMatrix4(wi); pa.setXYZ(i, tmp.x, tmp.y, tmp.z);
+      }
       pa.needsUpdate = true; geo.computeBoundingBox(); geo.computeBoundingSphere();
-      d.x = dx; sl.b.translate(d); sl.c.add(d);
+      sl.s.set(sl.s.x * k, sl.s.y, sl.s.z * k); sl.c.copy(c); sl.b.setFromCenterAndSize(c, sl.s); lever.b.translate(d); lever.c.add(d);
+    }
+  }
+  // Шток клавиши с её рычагом — одна деталь сетки: рычаг тянется назад по дну, шток поднимается к колпачку. Чтобы при нажатии двигались не только
+  // колпачки, но и штоки (пользователь 2026-11-27), рычаг привязываем к его клавише и поворачиваем вокруг заднего конца: каждая точка опускается
+  // на долю хода — у заднего конца ноль, у штока — как колпачок (aW). Клавиша рычага — та, под колпачком которой его передний конец.
+  const aW = new Float32Array(geo.attributes.position.count).fill(1);
+  {
+    const keyed = groups.filter(g => g.id !== undefined && g !== space);
+    for (const p of parts) {
+      if (p.s.z < keySpacing * 2 || p.b.min.z > rowZ0 - keySpacing * 4 || p.ix.some(i => aKey[i] !== 63)) continue;   // рычаги идут от самой задней оси
+      let best = null, bd = keySpacing * .6;
+      for (const g of keyed) {
+        if (p.c.x < g.b.min.x || p.c.x > g.b.max.x || p.b.min.y > g.b.min.y) continue;
+        const dz = Math.max(0, g.b.min.z - p.b.max.z, p.b.max.z - g.b.max.z); if (dz < bd) { bd = dz; best = g; }
+      }
+      if (!best) continue;
+      const z0 = p.b.min.z, span = best.c.z - z0;
+      for (const i of p.ix) { aKey[i] = best.id; aW[i] = (tmp.fromBufferAttribute(geo.attributes.position, i).applyMatrix4(wm).z - z0) / span; }
     }
   }
   // Днище: у модели под клавишами пусто, и между ними виден стол. У настоящей там рычаги и тёмное нутро — кладём тёмную пластину под штоки клавиш.
-  // По ширине — только буквенные ряды и пробел: RETURN и левый SHIFT вынесены за рамку, по ним пластина вылезала слева. Дальше она подрезается по самой рамке
+  // По ширине — только буквенные ряды и пробел: RETURN вынесен за рамку (и левый SHIFT был, пока его не поставили в ряд), по ним пластина вылезала слева. Дальше она подрезается по самой рамке
   // (её «обложка заезжает за края машинки», 2026-11-26): лучами изнутри — до боковых стенок и до переднего бортика, а высотой — чуть ниже его верха, чтобы край прятался за ним.
   const keyBox = new THREE.Box3(); for (const g of [...bigRows.flat(), space]) keyBox.union(g.b);
   let fx0 = keyBox.min.x - keySpacing * .15, fx1 = keyBox.max.x + keySpacing * .15, fz0 = rowZ0 - keySpacing * 2.6, fz1 = space.c.z + keySpacing * .6, fy = keyBox.min.y - width * .004;
@@ -335,7 +357,7 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
   }
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(fx1 - fx0, fz1 - fz0).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x0b0908, roughness: .85, metalness: .2 }));
   floor.position.set((fx0 + fx1) / 2, fy, (fz0 + fz1) / 2); floor.receiveShadow = true; group.add(floor);
-  geo.setAttribute('aKey', new THREE.BufferAttribute(aKey, 1));
+  geo.setAttribute('aKey', new THREE.BufferAttribute(aKey, 1)); geo.setAttribute('aW', new THREE.BufferAttribute(aW, 1));
   // Направление «вниз» в координатах сетки и ход клавиши.
   const invRot = new THREE.Matrix3().setFromMatrix4(wm).invert();
   const down = new THREE.Vector3(0, -1, 0).applyMatrix3(invRot);
@@ -344,7 +366,7 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
   keysMesh.material = keysMesh.material.clone();
   keysMesh.material.onBeforeCompile = sh => {
     Object.assign(sh.uniforms, keyU);
-    sh.vertexShader = 'attribute float aKey; uniform float uPress[64]; uniform vec3 uDown;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed += uDown * uPress[int(aKey + .5)];');
+    sh.vertexShader = 'attribute float aKey; attribute float aW; uniform float uPress[64]; uniform vec3 uDown;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed += uDown * uPress[int(aKey + .5)] * aW;');
   };
   const keySprings = Array.from({ length: 64 }, () => new Spring(0, 900, 30));
 
