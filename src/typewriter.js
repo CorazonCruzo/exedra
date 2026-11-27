@@ -123,6 +123,35 @@ async function sharpLogo(mesh) {
   const plate = new THREE.Mesh(g2, mat); plate.castShadow = plate.receiveShadow = true; plate.position.copy(mesh.position); plate.quaternion.copy(mesh.quaternion); plate.scale.copy(mesh.scale); mesh.parent.add(plate);
 }
 
+// Передние стойки каретки сверху казались полыми трубами (пользователь 2026-11-27: «верхушки боковых ножек… будто полые»): на их верхние грани
+// натянут тот же кусок текстуры, что и на лицевую, — золотой овал-обводка, и сверху он читается как край отверстия. Верхним граням стоек
+// (box — где они, в мерках машинки; M — сетка → машинка) даём одну точку текстуры — самую тёмную рядом, ровный лак. Вершины этих граней — свои копии,
+// чтобы не сдвинуть рисунок на соседних.
+function plainTops(mesh, M, boxes) {
+  const g = mesh.geometry, pos = g.attributes.position, uv = g.attributes.uv, idx = g.index, img = mesh.material.map?.image; if (!idx || !uv || !img?.width) return 0;
+  const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0, 256, 256); const px = x.getImageData(0, 0, 256, 256).data;
+  const lum = i => { const p = (Math.min(255, Math.floor(uv.getY(i) * 256)) * 256 + Math.min(255, Math.floor(uv.getX(i) * 256))) * 4; return px[p] + px[p + 1] + px[p + 2]; };
+  const P = i => new THREE.Vector3().fromBufferAttribute(pos, i).applyMatrix4(M);
+  const attrs = Object.entries(g.attributes), add = Object.fromEntries(attrs.map(([k]) => [k, []])), ix = Array.from(idx.array); let n = pos.count, done = 0;
+  for (const box of boxes) {
+    let best = -1, bl = Infinity; for (let i = 0; i < pos.count; i++) if (box.containsPoint(P(i))) { const l = lum(i); if (l < bl) { bl = l; best = i; } }
+    if (best < 0) continue;
+    for (let t = 0; t < ix.length; t += 3) {
+      const v = [0, 1, 2].map(k => P(ix[t + k])); if (!v.every(p => box.containsPoint(p))) continue;
+      const nrm = new THREE.Vector3().subVectors(v[1], v[0]).cross(new THREE.Vector3().subVectors(v[2], v[0])).normalize(); if (Math.abs(nrm.y) < .5) continue;   // только верх
+      for (let k = 0; k < 3; k++) {
+        for (const [key, a] of attrs) for (let j = 0; j < a.itemSize; j++) add[key].push(key === 'uv' ? (j ? uv.getY(best) : uv.getX(best)) : a.array[ix[t + k] * a.itemSize + j]);
+        ix[t + k] = n++;
+      }
+      done++;
+    }
+  }
+  if (!done) return 0;
+  for (const [key, a] of attrs) { const arr = new a.array.constructor(a.array.length + add[key].length); arr.set(a.array); arr.set(add[key], a.array.length); g.setAttribute(key, new THREE.BufferAttribute(arr, a.itemSize, a.normalized)); }
+  g.setIndex(ix);
+  return done;
+}
+
 function components(geo) {
   const pos = geo.attributes.position, n = pos.count, parent = new Int32Array(n);
   for (let i = 0; i < n; i++) parent[i] = i;
@@ -157,8 +186,9 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
   // Каретка: валик, линейки и боковины едут вместе.
   const carriage = new THREE.Group(); group.add(carriage);
   // В модели к деталям каретки слиты и неподвижные: задняя стенка с надписью «Typewriter» (в сетке валика) и катушки ленты с шестернями (в «гайках»).
-  // Они уезжали с кареткой, и в корпусе открывалась дыра. Куски, что спускаются ниже 42 % высоты машинки, отделяем — они остаются на корпусе.
-  const lowY = size0.y * S * .42;
+  // Они уезжали с кареткой, и в корпусе открывалась дыра. Туда же слиты механизм звонка, кронштейны внутри боковин и барабан сзади слева —
+  // с кареткой они повисали в воздухе. Рама каретки начинается на 63 % высоты машинки; куски, что спускаются ниже 62 %, отделяем — они остаются на корпусе.
+  const lowY = size0.y * S * .62;
   for (const m of [...byMat('Rodillo'), ...byMat('Reglas'), ...byMat('Tuercas')]) {
     const g = m.geometry, idx = g.index, low = new Uint8Array(g.attributes.position.count), v = new THREE.Vector3();
     if (idx) for (const ix of components(g)) if (ix.some(i => v.fromBufferAttribute(g.attributes.position, i).applyMatrix4(m.matrixWorld).y < lowY)) for (const i of ix) low[i] = 1;
@@ -172,6 +202,10 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
     carriage.attach(m);
   }
   const platenBox = new THREE.Box3(); byMat('Rodillo').forEach(m => platenBox.expandByObject(m));
+  const toTw = m => new THREE.Matrix4().copy(group.matrixWorld).invert().multiply(m.matrixWorld);
+  // Верх передних стоек каретки (обе стороны): около x ±1.8, чуть выше линейки.
+  const tops = [1, -1].map(sx => new THREE.Box3(new THREE.Vector3(sx > 0 ? 1.7 : -1.95, 2.74, .05), new THREE.Vector3(sx > 0 ? 1.95 : -1.7, 2.95, .34)));
+  for (const m of byMat('Tuercas')) plainTops(m, toTw(m), tops);
 
   // Клавиши: находим каждую, раскладываем по рядам и даём нажиматься по отдельности.
   const keysMesh = byMat('Teclas')[0];
