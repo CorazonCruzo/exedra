@@ -123,6 +123,51 @@ async function sharpLogo(mesh) {
   const plate = new THREE.Mesh(g2, mat); plate.castShadow = plate.receiveShadow = true; plate.position.copy(mesh.position); plate.quaternion.copy(mesh.quaternion); plate.scale.copy(mesh.scale); mesh.parent.add(plate);
 }
 
+// В корпусе модели есть дыры, хоть и не на виду: не закрыт верх стоек (под верхней плитой), верх и подошвы ножек, торцы нижних перекладин (пользователь 2026-11-27:
+// «давай все же заделаем, раз заметили»). Ищем дыры — петли рёбер, у которых один треугольник, — и каждую плоскую (кроме подошвы) закрываем заплаткой
+// лицом наружу, прочь от стенок у края (и подошвы ножек — машинку можно поднять). Край плоского листа (стенки в той же плоскости) не трогаем — там закрывать нечего. Заплатка в той же развёртке:
+// всем её вершинам — одна точка текстуры, самая тёмная рядом с дырой (лак, а не золотая кромка). M — сетка → машинка; возвращает, сколько дыр закрыто.
+function capHoles(mesh, M, height) {
+  const g = mesh.geometry, pos = g.attributes.position, uv = g.attributes.uv, idx = g.index, img = mesh.material.map?.image; if (!idx || !uv) return 0;
+  const id = new Map(), rep = [], vid = i => { const k = `${pos.getX(i).toFixed(5)},${pos.getY(i).toFixed(5)},${pos.getZ(i).toFixed(5)}`; if (!id.has(k)) { id.set(k, rep.length); rep.push(i); } return id.get(k); };
+  // Рёбра: сколько у ребра треугольников и третья вершина его треугольника — по ней видно, с какой стороны дыры стенки.
+  const edges = new Map();
+  for (let t = 0; t < idx.count; t += 3) { const v = [vid(idx.getX(t)), vid(idx.getX(t + 1)), vid(idx.getX(t + 2))]; for (let j = 0; j < 3; j++) { const a = v[j], b = v[(j + 1) % 3], k = a < b ? `${a}_${b}` : `${b}_${a}`, e = edges.get(k); if (e) e.n++; else edges.set(k, { n: 1, o: v[(j + 2) % 3] }); } }
+  const adj = new Map(), opp = new Map();
+  for (const [k, e] of edges) if (e.n === 1) { const [a, b] = k.split('_').map(Number); opp.set(k, e.o); for (const [p, q] of [[a, b], [b, a]]) { if (!adj.has(p)) adj.set(p, []); adj.get(p).push(q); } }
+  const at = x => new THREE.Vector3().fromBufferAttribute(pos, rep[x]).applyMatrix4(M);
+  let px = null; if (img?.width) { const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0, 256, 256); px = x.getImageData(0, 0, 256, 256).data; }
+  const lum = i => { if (!px) return 0; const p = (Math.min(255, Math.floor(uv.getY(i) * 256)) * 256 + Math.min(255, Math.floor(uv.getX(i) * 256))) * 4; return px[p] + px[p + 1] + px[p + 2]; };
+  const verts = [], uvs = [], seen = new Set(), Mi = M.clone().invert(), AX = ['x', 'y', 'z']; let holes = 0;
+  // Петли — замкнутые цепочки рёбер; цепочка с двумя концами (край дыры, где одно ребро моделью поделено иначе) замыкается сама.
+  const chains = [], walk = s => { const ch = [s]; seen.add(s); let prev = -1, cur = s; for (;;) { const nx = adj.get(cur).find(q => q !== prev && !seen.has(q)); if (nx === undefined) return { ch, closed: adj.get(cur).includes(s) && ch.length > 2 }; ch.push(nx); seen.add(nx); prev = cur; cur = nx; if (adj.get(cur).length !== 2) return { ch, closed: false, end: adj.get(cur).length === 1 }; } };
+  for (const s of adj.keys()) if (!seen.has(s) && adj.get(s).length === 1) { const r = walk(s); if (r.end) chains.push(r.ch); }
+  for (const s of adj.keys()) if (!seen.has(s) && adj.get(s).length === 2) { const r = walk(s); if (r.closed) chains.push(r.ch); }
+  const oppOf = (a, b) => opp.get(a < b ? `${a}_${b}` : `${b}_${a}`);
+  for (const loop of chains) {
+    if (loop.length < 3) continue;
+    const p = loop.map(at), box = new THREE.Box3().setFromPoints(p), size = box.getSize(new THREE.Vector3());
+    const ax = AX.find(a => size[a] < height * 1e-3); if (!ax) continue;   // только плоские (кривой проём под клавиши закрыт дном)
+    const [u, w] = AX.filter(a => a !== ax), plane = box.max[ax];
+    // Стенки у края: в какую сторону от плоскости дыры они уходят. Все в самой плоскости — это край плоского листа, не дыра.
+    let inner = 0, far = 0; for (let j = 0; j + 1 < loop.length || (j + 1 === loop.length && adj.get(loop[j]).includes(loop[0])); j++) { const o = oppOf(loop[j], loop[(j + 1) % loop.length]); if (o === undefined) continue; const d = at(o)[ax] - plane; inner += d; far = Math.max(far, Math.abs(d)); }
+    if (far < height * 1e-3) continue;
+    const out = inner > 0 ? -1 : 1;
+    box.expandByScalar(height * .05);
+    let best = -1, bl = Infinity; for (let i = 0; i < pos.count; i++) { if (!box.containsPoint(new THREE.Vector3().fromBufferAttribute(pos, i).applyMatrix4(M))) continue; const l = lum(i); if (l < bl) { bl = l; best = i; } }
+    if (best < 0) continue;
+    for (const t of THREE.ShapeUtils.triangulateShape(p.map(v => new THREE.Vector2(v[u], v[w])), [])) {
+      const [a, b, c] = t.map(k => p[k]); if (new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a))[ax] * out < 0) t.reverse();
+      for (const k of t) { verts.push(...p[k].clone().applyMatrix4(Mi).toArray()); uvs.push(uv.getX(best), uv.getY(best)); }
+    }
+    holes++;
+  }
+  if (!verts.length) return 0;
+  const cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3)); cg.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); cg.computeVertexNormals();
+  const cap = new THREE.Mesh(cg, mesh.material); cap.castShadow = cap.receiveShadow = true; cap.position.copy(mesh.position); cap.quaternion.copy(mesh.quaternion); cap.scale.copy(mesh.scale); mesh.parent.add(cap);
+  return holes;
+}
+
 // Передние стойки каретки сверху казались полыми трубами (пользователь 2026-11-27: «верхушки боковых ножек… будто полые»): на их верхние грани
 // натянут тот же кусок текстуры, что и на лицевую, — золотой овал-обводка, и сверху он читается как край отверстия. Верхним граням стоек
 // (box — где они, в мерках машинки; M — сетка → машинка) даём одну точку текстуры — самую тёмную рядом, ровный лак. Вершины этих граней — свои копии,
@@ -206,6 +251,7 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
   // Верх передних стоек каретки (обе стороны): около x ±1.8, чуть выше линейки.
   const tops = [1, -1].map(sx => new THREE.Box3(new THREE.Vector3(sx > 0 ? 1.7 : -1.95, 2.74, .05), new THREE.Vector3(sx > 0 ? 1.95 : -1.7, 2.95, .34)));
   for (const m of byMat('Tuercas')) plainTops(m, toTw(m), tops);
+  for (const m of byMat('Base_maquina')) capHoles(m, toTw(m), size0.y * S);
 
   // Клавиши: находим каждую, раскладываем по рядам и даём нажиматься по отдельности.
   const keysMesh = byMat('Teclas')[0];
