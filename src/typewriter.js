@@ -272,7 +272,7 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
     if (g) { g.ix.push(...p.ix); g.b.union(p.b); } else groups.push({ ix: [...p.ix], b: p.b.clone(), c: p.c.clone(), s: p.s.clone() });
   }
   groups.forEach(g => { g.c = g.b.getCenter(new THREE.Vector3()); g.s = g.b.getSize(new THREE.Vector3()); });
-  const aKey = new Float32Array(geo.attributes.position.count).fill(63);
+  let aKey = new Float32Array(geo.attributes.position.count).fill(63);
   const press = new Float32Array(64);
   const keyOf = new Map();
   // Пробел — самый широкий кусок; остальные — по рядам.
@@ -299,27 +299,22 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
   const codeOf = new Map([...keyOf].map(([c, k]) => [k, c]));
   // Левый SHIFT в модели вынесен вперёд и за рамку, ниже правого. У настоящего Underwood № 5 оба SHIFT — в концах нижнего ряда, вровень с буквами
   // (пользователь 2026-11-27: «странно, что они с правым на разных уровнях»). Ставим его в ряд: колпачок — по глубине и высоте как у Z,
-  // и вместе с ним его шток с рычагом (одна деталь) — на ту же глубину; колпачок — размером с правый SHIFT (в модели он шире). По ширине ряд
-  // расставляется ниже, когда рычаги уже привязаны к клавишам.
+  // и вместе с ним его шток с рычагом (одна деталь) — на ту же глубину. По ширине ряд расставляется ниже, когда рычаги уже привязаны к клавишам,
+  // а сам колпачок там же заменяется копией правого.
   {
-    const row = bigRows[bigRows.length - 1], z = row[0], rs = row[row.length - 1], sl = groups.find(g => g.id !== undefined && g.id === keyOf.get('ShiftLeft'));
+    const row = bigRows[bigRows.length - 1], z = row[0], sl = groups.find(g => g.id !== undefined && g.id === keyOf.get('ShiftLeft'));
     const lever = sl && parts.find(p => p.s.z > keySpacing * 2 && p.b.max.z > sl.b.min.z && p.b.max.z < sl.b.max.z && p.c.x > sl.b.min.x - keySpacing && p.b.max.x < sl.b.max.x);
     if (sl && lever) {
-      const d = new THREE.Vector3(0, z.b.max.y - sl.b.max.y, z.c.z - sl.c.z), kx = rs.s.x / sl.s.x, kz = rs.s.z / sl.s.z, c = sl.c.clone().add(d);
-      const wi = wm.clone().invert(), pa = geo.attributes.position, capIx = new Set(sl.ix);
-      for (const i of new Set([...sl.ix, ...lever.ix])) {
-        tmp.fromBufferAttribute(pa, i).applyMatrix4(wm).add(d);
-        if (capIx.has(i)) { tmp.x = c.x + (tmp.x - c.x) * kx; tmp.z = c.z + (tmp.z - c.z) * kz; }
-        tmp.applyMatrix4(wi); pa.setXYZ(i, tmp.x, tmp.y, tmp.z);
-      }
+      const d = new THREE.Vector3(0, z.b.max.y - sl.b.max.y, z.c.z - sl.c.z), wi = wm.clone().invert(), pa = geo.attributes.position;
+      for (const i of new Set([...sl.ix, ...lever.ix])) { tmp.fromBufferAttribute(pa, i).applyMatrix4(wm).add(d).applyMatrix4(wi); pa.setXYZ(i, tmp.x, tmp.y, tmp.z); }
       pa.needsUpdate = true; geo.computeBoundingBox(); geo.computeBoundingSphere();
-      sl.s.set(sl.s.x * kx, sl.s.y, sl.s.z * kz); sl.c.copy(c); sl.b.setFromCenterAndSize(c, sl.s); lever.b.translate(d); lever.c.add(d);
+      sl.b.translate(d); sl.c.add(d); lever.b.translate(d); lever.c.add(d);
     }
   }
   // Шток клавиши с её рычагом — одна деталь сетки: рычаг тянется назад по дну, шток поднимается к колпачку. Чтобы при нажатии двигались не только
   // колпачки, но и штоки (пользователь 2026-11-27), рычаг привязываем к его клавише и поворачиваем вокруг заднего конца: каждая точка опускается
   // на долю хода — у заднего конца ноль, у штока — как колпачок (aW). Клавиша рычага — та, под колпачком которой его передний конец.
-  const aW = new Float32Array(geo.attributes.position.count).fill(1);
+  let aW = new Float32Array(geo.attributes.position.count).fill(1);
   {
     const keyed = groups.filter(g => g.id !== undefined && g !== space);
     for (const p of parts) {
@@ -348,6 +343,25 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
       for (let i = 0; i < pa.count; i++) { const d = dx.get(aKey[i]); if (!d) continue; tmp.fromBufferAttribute(pa, i).applyMatrix4(wm); tmp.x += d * aW[i]; tmp.applyMatrix4(wi); pa.setXYZ(i, tmp.x, tmp.y, tmp.z); }
       pa.needsUpdate = true; geo.computeBoundingBox(); geo.computeBoundingSphere();
       for (const g of keysRow) { const d = dx.get(g.id); g.c.x += d; g.b.translate(new THREE.Vector3(d, 0, 0)); }
+      // Колпачок левого SHIFT в модели другой — грубее (59 точек против 123 у правого и у букв), с иным профилем, и рядом с остальными казался меньше
+      // (пользователь 2026-11-27: «им бы одинаковыми быть»; у настоящего Underwood оба SHIFT — такие же круглые клавиши). Ставим на его место
+      // копию колпачка правого SHIFT — с той же надписью из текстуры; прежние треугольники убираем из индекса.
+      const rs = keysRow[keysRow.length - 1], own = new Set(sl.ix), src = new Set(rs.ix), ix = Array.from(geo.index.array), keep = [], add = [];
+      for (let t = 0; t < ix.length; t += 3) {
+        const tri = ix.slice(t, t + 3);
+        if (tri.every(i => own.has(i))) continue;
+        keep.push(...tri); if (tri.every(i => src.has(i))) add.push(...tri);
+      }
+      const verts = [...new Set(add)], at = new Map(verts.map((v, k) => [v, pa.count + k])), shift = sl.c.x - rs.c.x, attrs = Object.entries(geo.attributes);
+      for (const [key, a] of attrs) {
+        const arr = new a.array.constructor((pa.count + verts.length) * a.itemSize); arr.set(a.array);
+        verts.forEach((v, k) => { for (let j = 0; j < a.itemSize; j++) arr[(pa.count + k) * a.itemSize + j] = a.array[v * a.itemSize + j]; });
+        if (key === 'position') verts.forEach((v, k) => { tmp.fromBufferAttribute(a, v).applyMatrix4(wm); tmp.x += shift; tmp.applyMatrix4(wi); arr.set(tmp.toArray(), (pa.count + k) * 3); });
+        geo.setAttribute(key, new THREE.BufferAttribute(arr, a.itemSize, a.normalized));
+      }
+      const n0 = aKey.length, grow = a => { const b = new Float32Array(n0 + verts.length); b.set(a); return b; };
+      aKey = grow(aKey); aW = grow(aW); for (let k = 0; k < verts.length; k++) { aKey[n0 + k] = sl.id; aW[n0 + k] = 1; }
+      geo.setIndex([...keep, ...add.map(i => at.get(i))]); geo.computeBoundingBox(); geo.computeBoundingSphere();
     }
   }
   // Днище: у модели под клавишами пусто, и между ними виден стол. У настоящей там рычаги и тёмное нутро — кладём тёмную пластину под штоки клавиш.
