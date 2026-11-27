@@ -299,21 +299,21 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
   const codeOf = new Map([...keyOf].map(([c, k]) => [k, c]));
   // Левый SHIFT в модели вынесен вперёд и за рамку, ниже правого. У настоящего Underwood № 5 оба SHIFT — в концах нижнего ряда, вровень с буквами
   // (пользователь 2026-11-27: «странно, что они с правым на разных уровнях»). Ставим его в ряд: колпачок — по глубине и высоте как у Z,
-  // и вместе с ним его шток с рычагом (одна деталь) — на ту же глубину. По ширине остаётся над своим штоком (левее — шток упрётся в боковину),
-  // а колпачок — размером с буквенный, как правый SHIFT: шире он упирался в Z, а сдвинутый влево «слишком выехал» за рамку.
+  // и вместе с ним его шток с рычагом (одна деталь) — на ту же глубину; колпачок — размером с правый SHIFT (в модели он шире). По ширине ряд
+  // расставляется ниже, когда рычаги уже привязаны к клавишам.
   {
-    const sl = groups.find(g => g.id !== undefined && g.id === keyOf.get('ShiftLeft')), z = bigRows[bigRows.length - 1][0];
+    const row = bigRows[bigRows.length - 1], z = row[0], rs = row[row.length - 1], sl = groups.find(g => g.id !== undefined && g.id === keyOf.get('ShiftLeft'));
     const lever = sl && parts.find(p => p.s.z > keySpacing * 2 && p.b.max.z > sl.b.min.z && p.b.max.z < sl.b.max.z && p.c.x > sl.b.min.x - keySpacing && p.b.max.x < sl.b.max.x);
     if (sl && lever) {
-      const d = new THREE.Vector3(0, z.b.max.y - sl.b.max.y, z.c.z - sl.c.z), k = Math.min(1, z.s.x / sl.s.x), c = sl.c.clone().add(d);
+      const d = new THREE.Vector3(0, z.b.max.y - sl.b.max.y, z.c.z - sl.c.z), kx = rs.s.x / sl.s.x, kz = rs.s.z / sl.s.z, c = sl.c.clone().add(d);
       const wi = wm.clone().invert(), pa = geo.attributes.position, capIx = new Set(sl.ix);
       for (const i of new Set([...sl.ix, ...lever.ix])) {
         tmp.fromBufferAttribute(pa, i).applyMatrix4(wm).add(d);
-        if (capIx.has(i)) { tmp.x = c.x + (tmp.x - c.x) * k; tmp.z = c.z + (tmp.z - c.z) * k; }
+        if (capIx.has(i)) { tmp.x = c.x + (tmp.x - c.x) * kx; tmp.z = c.z + (tmp.z - c.z) * kz; }
         tmp.applyMatrix4(wi); pa.setXYZ(i, tmp.x, tmp.y, tmp.z);
       }
       pa.needsUpdate = true; geo.computeBoundingBox(); geo.computeBoundingSphere();
-      sl.s.set(sl.s.x * k, sl.s.y, sl.s.z * k); sl.c.copy(c); sl.b.setFromCenterAndSize(c, sl.s); lever.b.translate(d); lever.c.add(d);
+      sl.s.set(sl.s.x * kx, sl.s.y, sl.s.z * kz); sl.c.copy(c); sl.b.setFromCenterAndSize(c, sl.s); lever.b.translate(d); lever.c.add(d);
     }
   }
   // Шток клавиши с её рычагом — одна деталь сетки: рычаг тянется назад по дну, шток поднимается к колпачку. Чтобы при нажатии двигались не только
@@ -332,6 +332,22 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
       if (!best) continue;
       const z0 = p.b.min.z, span = best.c.z - z0;
       for (const i of p.ix) { aKey[i] = best.id; aW[i] = (tmp.fromBufferAttribute(geo.attributes.position, i).applyMatrix4(wm).z - z0) / span; }
+    }
+  }
+  // Нижний ряд с левым SHIFT — двенадцать клавиш — расставляем заново ровно: шаг как у букв, середина ряда — посередине между боковинами
+  // (пользователь 2026-11-27: «кнопка отличается от остальных, и находится она на меньшем расстоянии. справа куча места»). Колпачки едут целиком,
+  // штоки — с ними, а рычаги наклоняются вбок вокруг заднего конца (та же доля aW, что и при нажатии).
+  {
+    const sl = groups.find(g => g.id !== undefined && g.id === keyOf.get('ShiftLeft')), row = bigRows[bigRows.length - 1];
+    if (sl && row.length > 2 && !row.includes(sl)) {
+      const keysRow = [sl, ...row].sort((a, b) => a.c.x - b.c.x), P = (row[row.length - 1].c.x - row[0].c.x) / (row.length - 1);
+      const rc = new THREE.Raycaster(), frame = byMat('Base_maquina'), wallAt = dir => { rc.set(new THREE.Vector3(0, row[0].b.min.y - width * .03, row[0].c.z), new THREE.Vector3(dir, 0, 0)); return rc.intersectObjects(frame, false)[0]?.point.x; };
+      const l = wallAt(-1), r = wallAt(1), mid = l !== undefined && r !== undefined ? (l + r) / 2 : (keysRow[0].c.x + keysRow[keysRow.length - 1].c.x) / 2;
+      const dx = new Map(keysRow.map((g, i) => [g.id, mid + (i - (keysRow.length - 1) / 2) * P - g.c.x]));
+      const wi = wm.clone().invert(), pa = geo.attributes.position;
+      for (let i = 0; i < pa.count; i++) { const d = dx.get(aKey[i]); if (!d) continue; tmp.fromBufferAttribute(pa, i).applyMatrix4(wm); tmp.x += d * aW[i]; tmp.applyMatrix4(wi); pa.setXYZ(i, tmp.x, tmp.y, tmp.z); }
+      pa.needsUpdate = true; geo.computeBoundingBox(); geo.computeBoundingSphere();
+      for (const g of keysRow) { const d = dx.get(g.id); g.c.x += d; g.b.translate(new THREE.Vector3(d, 0, 0)); }
     }
   }
   // Днище: у модели под клавишами пусто, и между ними виден стол. У настоящей там рычаги и тёмное нутро — кладём тёмную пластину под штоки клавиш.
