@@ -302,6 +302,9 @@ export async function createTypewriter({ renderer, url = 'assets/typewriter-vict
   // (её «обложка заезжает за края машинки», 2026-11-26): лучами изнутри — до боковых стенок и до переднего бортика, а высотой — чуть ниже его верха, чтобы край прятался за ним.
   const keyBox = new THREE.Box3(); for (const g of [...bigRows.flat(), space]) keyBox.union(g.b);
   let fx0 = keyBox.min.x - keySpacing * .15, fx1 = keyBox.max.x + keySpacing * .15, fz0 = rowZ0 - keySpacing * 2.6, fz1 = space.c.z + keySpacing * .6, fy = keyBox.min.y - width * .004;
+  // Рычаги нижнего ряда спереди спускаются ниже колпачков: пластина шла поверх их концов, и штоки уходили в неё («у левого шифта утонула ножка», 2026-11-27).
+  // Кладём её чуть ниже самой низкой точки клавиш над ней.
+  for (let i = 0; i < geo.attributes.position.count; i++) { tmp.fromBufferAttribute(geo.attributes.position, i).applyMatrix4(wm); if (tmp.x > fx0 && tmp.x < fx1 && tmp.z > fz0 && tmp.z < fz1) fy = Math.min(fy, tmp.y - width * .004); }
   {
     const frame = byMat('Base_maquina'), rc = new THREE.Raycaster(), cx = (fx0 + fx1) / 2, cz = (fz0 + fz1) / 2;
     const hit = (o, d) => { rc.set(o, d); return rc.intersectObjects(frame, false)[0]?.point ?? null; };
